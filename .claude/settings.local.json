@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(python:*)",
+      "Bash(django-admin startproject:*)",
+      "Bash(venvScripts:*)",
+      "Bash(pip install:*)",
+      "Bash(npx create-react-app:*)",
+      "Bash(npm init:*)",
+      "Bash(docker:*)",
+      "Bash(.venvScriptsactivate)",
+      "Bash(grep:*)",
+      "Bash(timeout 10 curl -s http://localhost:8000/admin/)",
+      "Bash(node:*)",
+      "Bash(npm --version)",
+      "Bash(npm install)",
+      "Bash(npm start)",
+      "Bash(SET PORT=3001)",
+      "Bash(PORT=3001 npm start)",
+      "Bash(PORT=3002 npm start)",
+      "Bash(PORT=4000 npm start)",
+      "Bash(curl:*)",
+      "Bash(npm run build:*)",
+      "Bash(PORT=5000 npm start)",
+      "Bash(npm install:*)",
+      "Bash(npx react-scripts:*)",
+      "Bash(PORT=8080 npm start)",
+      "Bash(PORT=3000 npm start)",
+      "Bash(taskkill:*)",
+      "Bash(set PORT=3001)",
+      "Bash(set PORT=3003)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,327 @@
+name: Security Scanning
+
+on:
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/requirements.txt'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+
+jobs:
+  dependency-scan:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        cache-dependency-path: backend/requirements.txt
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Run npm audit
+      run: |
+        cd frontend
+        npm audit --audit-level moderate --json > npm-audit-report.json || true
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        pip install -r requirements.txt
+    
+    - name: Run Python security scan
+      uses: pypa/gh-action-pip-audit@v1.0.8
+      with:
+        inputs: backend/requirements.txt
+        format: json
+        output: backend/pip-audit-report.json
+    
+    - name: Run Snyk security scan
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --file=frontend/package.json --json > frontend/snyk-report.json || true
+      continue-on-error: true
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          frontend/npm-audit-report.json
+          frontend/snyk-report.json
+          backend/pip-audit-report.json
+
+  docker-security-scan:
+    name: Docker Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build Docker images
+      run: |
+        docker build -t nova-finance-frontend ./frontend
+        docker build -t nova-finance-backend ./backend
+    
+    - name: Run Trivy vulnerability scanner - Frontend
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'nova-finance-frontend'
+        format: 'sarif'
+        output: 'frontend-trivy-results.sarif'
+    
+    - name: Run Trivy vulnerability scanner - Backend
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'nova-finance-backend'
+        format: 'sarif'
+        output: 'backend-trivy-results.sarif'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'frontend-trivy-results.sarif'
+        category: 'frontend-docker'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'backend-trivy-results.sarif'
+        category: 'backend-docker'
+
+  code-security-scan:
+    name: Code Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: python, javascript
+        queries: security-extended,security-and-quality
+    
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:python,javascript"
+    
+    - name: Run Semgrep security scan
+      uses: semgrep/semgrep-action@v1
+      with:
+        publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
+        publishDeployment: 1
+        generateSarif: "1"
+    
+    - name: Upload Semgrep results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: semgrep.sarif
+
+  infrastructure-security-scan:
+    name: Infrastructure Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Checkov infrastructure scan
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: .
+        framework: terraform,dockerfile,kubernetes
+        output_format: sarif
+        output_file_path: checkov-report.sarif
+    
+    - name: Upload Checkov results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: checkov-report.sarif
+        category: 'infrastructure'
+    
+    - name: Run TruffleHog secrets scan
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+  web-security-scan:
+    name: Web Application Security Testing
+    runs-on: ubuntu-latest
+    needs: []
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nova_finance_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup test environment
+      run: |
+        cd backend
+        pip install -r requirements.txt
+        python manage.py migrate --settings=nova_backend.settings
+        python manage.py runserver 8000 --settings=nova_backend.settings &
+        sleep 10
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nova_finance_test
+        SECRET_KEY: test-secret-key
+        DEBUG: true
+    
+    - name: Run OWASP ZAP Full Scan
+      uses: zaproxy/action-full-scan@v0.10.0
+      with:
+        target: 'http://localhost:8000'
+        rules_file_name: '.zap/rules.tsv'
+        cmd_options: '-a -j -m 10 -T 60'
+        allow_issue_writing: false
+    
+    - name: Upload ZAP scan results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: zap-reports
+        path: report_html.html
+
+  security-notification:
+    name: Security Notification
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, docker-security-scan, code-security-scan, infrastructure-security-scan]
+    if: always()
+    
+    steps:
+    - name: Download security reports
+      uses: actions/download-artifact@v3
+      with:
+        name: security-reports
+        path: ./reports/
+      continue-on-error: true
+    
+    - name: Process security results
+      run: |
+        echo "Processing security scan results..."
+        
+        # Count vulnerabilities (simplified)
+        HIGH_VULNS=0
+        CRITICAL_VULNS=0
+        
+        if [ -f "./reports/npm-audit-report.json" ]; then
+          HIGH_VULNS=$(jq '.vulnerabilities | to_entries | map(select(.value.severity == "high")) | length' ./reports/npm-audit-report.json || echo 0)
+          CRITICAL_VULNS=$(jq '.vulnerabilities | to_entries | map(select(.value.severity == "critical")) | length' ./reports/npm-audit-report.json || echo 0)
+        fi
+        
+        echo "HIGH_VULNS=$HIGH_VULNS" >> $GITHUB_ENV
+        echo "CRITICAL_VULNS=$CRITICAL_VULNS" >> $GITHUB_ENV
+    
+    - name: Create security summary
+      run: |
+        echo "# Security Scan Summary" >> security_summary.md
+        echo "" >> security_summary.md
+        echo "## Vulnerability Count" >> security_summary.md
+        echo "- Critical: $CRITICAL_VULNS" >> security_summary.md
+        echo "- High: $HIGH_VULNS" >> security_summary.md
+        echo "" >> security_summary.md
+        echo "## Scan Results" >> security_summary.md
+        echo "- Dependency Scan: ${{ needs.dependency-scan.result }}" >> security_summary.md
+        echo "- Docker Security Scan: ${{ needs.docker-security-scan.result }}" >> security_summary.md
+        echo "- Code Security Scan: ${{ needs.code-security-scan.result }}" >> security_summary.md
+        echo "- Infrastructure Security Scan: ${{ needs.infrastructure-security-scan.result }}" >> security_summary.md
+    
+    - name: Comment on PR (if applicable)
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const fs = require('fs');
+          const summary = fs.readFileSync('security_summary.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: summary
+          });
+    
+    - name: Notify security team on high/critical vulnerabilities
+      if: env.CRITICAL_VULNS > 0 || env.HIGH_VULNS > 5
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        custom_payload: |
+          {
+            text: "🚨 Critical Security Alert - Nova Finance",
+            attachments: [{
+              color: 'danger',
+              fields: [{
+                title: 'Critical Vulnerabilities',
+                value: '${{ env.CRITICAL_VULNS }}',
+                short: true
+              }, {
+                title: 'High Vulnerabilities', 
+                value: '${{ env.HIGH_VULNS }}',
+                short: true
+              }, {
+                title: 'Repository',
+                value: '${{ github.repository }}',
+                short: true
+              }, {
+                title: 'Workflow',
+                value: '${{ github.workflow }}',
+                short: true
+              }]
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SECURITY_SLACK_WEBHOOK_URL }}

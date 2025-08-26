@@ -1,0 +1,1 @@
+# Security module for Nova Finance platform
