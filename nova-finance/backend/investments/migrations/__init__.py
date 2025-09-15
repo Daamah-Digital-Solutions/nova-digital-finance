@@ -1,1 +1,0 @@
-# Investments app migrations

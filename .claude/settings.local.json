@@ -29,9 +29,22 @@
       "Bash(PORT=3000 npm start)",
       "Bash(taskkill:*)",
       "Bash(set PORT=3001)",
-      "Bash(set PORT=3003)"
+      "Bash(set PORT=3003)",
+      "WebSearch",
+      "WebFetch(domain:www.behance.net)",
+      "Bash(timeout:*)",
+      "Bash(start http://localhost:3000)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npx tsc:*)",
+      "Bash(cmd //c taskkill:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(find:*)",
+      "Bash(start http://localhost:8000)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\c\\Users\\Da3m\\Downloads\\Nova-Claude-Code\\nova-finance"
+    ]
   }
 }

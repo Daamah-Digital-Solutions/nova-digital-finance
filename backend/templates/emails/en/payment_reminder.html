@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Reminder - Nova Finance</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+        .button { display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; }
+        .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+        .payment-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+        .detail-row:last-child { border-bottom: none; }
+        .urgent { background: #fef2f2; border: 1px solid #fecaca; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .payment-methods { background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏰ Payment Reminder</h1>
+            <p>Your payment is due in {{ days_until_due }} day{{ days_until_due|pluralize }}</p>
+        </div>
+        
+        <div class="content">
+            <h2>Dear {{ user.username }},</h2>
+            
+            {% if days_until_due <= 3 %}
+            <div class="urgent">
+                <h3 style="color: #dc2626; margin-top: 0;">⚠️ Urgent: Payment Due Soon!</h3>
+                <p>Your payment is due in just {{ days_until_due }} day{{ days_until_due|pluralize }}. Please make your payment as soon as possible to avoid any late fees.</p>
+            </div>
+            {% endif %}
+            
+            <p>This is a friendly reminder that your Nova Finance loan payment is due soon.</p>
+            
+            <div class="payment-details">
+                <h3>💰 Payment Details</h3>
+                <div class="detail-row">
+                    <span><strong>Payment Amount:</strong></span>
+                    <span>${{ payment_amount }}</span>
+                </div>
+                <div class="detail-row">
+                    <span><strong>Due Date:</strong></span>
+                    <span>{{ due_date|date:"F d, Y" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span><strong>Days Until Due:</strong></span>
+                    <span>{{ days_until_due }} day{{ days_until_due|pluralize }}</span>
+                </div>
+                <div class="detail-row">
+                    <span><strong>Loan Number:</strong></span>
+                    <span>{{ loan.loan_number }}</span>
+                </div>
+                <div class="detail-row">
+                    <span><strong>Remaining Balance:</strong></span>
+                    <span>${{ loan.remaining_balance_usd }}</span>
+                </div>
+            </div>
+            
+            <div class="payment-methods">
+                <h3>💳 Payment Methods</h3>
+                <ul>
+                    <li><strong>Credit/Debit Card:</strong> Instant payment via Stripe (Visa, MasterCard)</li>
+                    <li><strong>Bank Transfer:</strong> Direct bank transfer (2-3 business days)</li>
+                    <li><strong>Cryptocurrency:</strong> Pay with supported cryptocurrencies</li>
+                </ul>
+            </div>
+            
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="https://nova-finance.com/loans/{{ loan.id }}/payment" class="button">Make Payment Now</a>
+            </p>
+            
+            <h3>📋 Payment Instructions:</h3>
+            <ol>
+                <li>Click the "Make Payment Now" button above</li>
+                <li>Choose your preferred payment method</li>
+                <li>Complete the secure payment process</li>
+                <li>You'll receive a confirmation email immediately</li>
+            </ol>
+            
+            <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; border: 1px solid #10b981;">
+                <p><strong>✅ Benefits of On-Time Payments:</strong></p>
+                <ul style="margin: 10px 0;">
+                    <li>Maintain your excellent credit score</li>
+                    <li>Avoid late payment fees</li>
+                    <li>Build trust for future financing needs</li>
+                    <li>Keep your account in good standing</li>
+                </ul>
+            </div>
+            
+            <h3>🤝 Need Help?</h3>
+            <p>If you're experiencing financial difficulties or need to discuss payment options, please contact us immediately:</p>
+            <ul>
+                <li>Email: <a href="mailto:{{ support_email }}">{{ support_email }}</a></li>
+                <li>Phone: Available through your dashboard</li>
+                <li>Chat: 24/7 live chat support</li>
+            </ul>
+            
+            <p>We're here to help and can work with you to find a solution that works for both parties.</p>
+            
+            <p>Thank you for choosing Nova Finance!</p>
+            
+            <p>Best regards,<br>
+            The Nova Finance Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>© {{ current_year }} Nova Finance. All rights reserved.</p>
+            <p>This email was sent to {{ user.email }}. If you have questions, contact us at {{ support_email }}</p>
+        </div>
+    </div>
+</body>
+</html>
