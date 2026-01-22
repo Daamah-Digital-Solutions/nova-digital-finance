@@ -28,9 +28,9 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir gunicorn==21.2.0 psycopg2-binary==2.9.9 django-redis==5.4.0
 
 # Cache buster - change this to force rebuild
-ARG CACHE_BUST=2026012217
+ARG CACHE_BUST=2026012218
 
-# Copy project
+# Copy project - force fresh copy
 COPY . .
 
 # Create necessary directories
@@ -44,14 +44,25 @@ RUN adduser --disabled-password --gecos '' appuser \
 RUN echo '#!/bin/bash\n\
 set -e\n\
 echo "Starting Nova Finance Backend..."\n\
+echo "Build: 2026012218"\n\
 \n\
-echo "Waiting for PostgreSQL..."\n\
+echo "=== Environment Debug ==="\n\
+echo "DJANGO_ENV: ${DJANGO_ENV}"\n\
+echo "REDIS_HOST: ${REDIS_HOST}"\n\
+echo "REDIS_PORT: ${REDIS_PORT}"\n\
+echo "DB_HOST: ${DB_HOST}"\n\
+echo "========================="\n\
+\n\
+echo "Waiting for PostgreSQL at ${DB_HOST:-postgres}:${DB_PORT:-5432}..."\n\
 while ! nc -z ${DB_HOST:-postgres} ${DB_PORT:-5432}; do sleep 1; done\n\
 echo "PostgreSQL is available"\n\
 \n\
-echo "Waiting for Redis..."\n\
+echo "Waiting for Redis at ${REDIS_HOST:-redis}:6379..."\n\
 while ! nc -z ${REDIS_HOST:-redis} 6379; do sleep 1; done\n\
 echo "Redis is available"\n\
+\n\
+echo "Checking Django settings..."\n\
+python -c "from django.conf import settings; print(f'"'"'CACHES Location: {settings.CACHES[\"default\"][\"LOCATION\"]}'"'"')"\n\
 \n\
 echo "Running migrations..."\n\
 python manage.py migrate --no-input\n\
