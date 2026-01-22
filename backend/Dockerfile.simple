@@ -1,0 +1,85 @@
+# Simplified Production Dockerfile for Nova Finance Backend
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DEBIAN_FRONTEND=noninteractive
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libpq-dev \
+        curl \
+        netcat-openbsd \
+        libmagic1 \
+        libffi-dev \
+        libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir gunicorn==21.2.0 psycopg2-binary==2.9.9
+
+# Copy project
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/media /app/static
+
+# Set permissions
+RUN adduser --disabled-password --gecos '' appuser \
+    && chown -R appuser:appuser /app
+
+# Create simple entrypoint
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Starting Nova Finance Backend..."\n\
+\n\
+echo "Waiting for PostgreSQL..."\n\
+while ! nc -z ${DB_HOST:-postgres} ${DB_PORT:-5432}; do sleep 1; done\n\
+echo "PostgreSQL is available"\n\
+\n\
+echo "Waiting for Redis..."\n\
+while ! nc -z ${REDIS_HOST:-redis} 6379; do sleep 1; done\n\
+echo "Redis is available"\n\
+\n\
+echo "Running migrations..."\n\
+python manage.py migrate --no-input\n\
+\n\
+echo "Collecting static files..."\n\
+python manage.py collectstatic --no-input\n\
+\n\
+if [ "$CREATE_SUPERUSER" = "true" ]; then\n\
+    echo "Creating superuser..."\n\
+    python manage.py shell -c "\n\
+from django.contrib.auth import get_user_model\n\
+User = get_user_model()\n\
+if not User.objects.filter(username='"'"'${DJANGO_SUPERUSER_USERNAME}'"'"').exists():\n\
+    User.objects.create_superuser('"'"'${DJANGO_SUPERUSER_USERNAME}'"'"', '"'"'${DJANGO_SUPERUSER_EMAIL}'"'"', '"'"'${DJANGO_SUPERUSER_PASSWORD}'"'"')\n\
+    print('"'"'Superuser created'"'"')\n\
+else:\n\
+    print('"'"'Superuser exists'"'"')\n\
+" || true\n\
+fi\n\
+\n\
+echo "Starting Gunicorn..."\n\
+exec gunicorn nova_backend.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 60 --access-logfile - --error-logfile -\n\
+' > /app/start.sh && chmod +x /app/start.sh
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/api/health/ || exit 1
+
+# Expose port
+EXPOSE 8000
+
+USER appuser
+
+CMD ["/app/start.sh"]
