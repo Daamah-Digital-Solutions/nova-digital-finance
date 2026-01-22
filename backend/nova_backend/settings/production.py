@@ -24,7 +24,8 @@ DEBUG = False
 DEPLOYMENT_ENVIRONMENT = 'production'
 
 # Allowed hosts - configure for your domain
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
+_allowed_hosts = config('ALLOWED_HOSTS', default='novadf.com,www.novadf.com,localhost')
+ALLOWED_HOSTS = [host.strip() for host in _allowed_hosts.split(',') if host.strip()]
 
 
 # Database - PostgreSQL for production
@@ -88,7 +89,8 @@ SESSION_CACHE_ALIAS = 'default'
 
 
 # CORS - Production domains only
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='').split(',')
+_cors_origins = config('CORS_ALLOWED_ORIGINS', default='https://novadf.com,https://www.novadf.com')
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in _cors_origins.split(',') if origin.strip()]
 CORS_ALLOW_CREDENTIALS = True
 
 
@@ -106,7 +108,8 @@ CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Strict'
 CSRF_USE_SESSIONS = True
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='').split(',')
+_csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='https://novadf.com,https://www.novadf.com')
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in _csrf_origins.split(',') if origin.strip()]
 
 # HSTS Settings
 SECURE_HSTS_SECONDS = 31536000  # 1 year

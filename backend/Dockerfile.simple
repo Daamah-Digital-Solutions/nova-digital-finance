@@ -29,7 +29,7 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir gunicorn==21.2.0 psycopg2-binary==2.9.9 django-redis==5.4.0 sentry-sdk==1.40.0
 
 # Cache buster - change this to force rebuild
-ARG CACHE_BUST=2026012222
+ARG CACHE_BUST=2026012223
 
 # Copy project - force fresh copy
 COPY . .
