@@ -46,20 +46,22 @@ DATABASES = {
 
 
 # Cache - Redis for production
-# Build Redis URL from individual components if REDIS_URL not provided
+# Build Redis URL directly from components - no override allowed
 REDIS_HOST = config('REDIS_HOST', default='redis')
 REDIS_PORT = config('REDIS_PORT', default='6379')
 REDIS_PASSWORD = config('REDIS_PASSWORD', default='')
 REDIS_DB = config('REDIS_DB', default='1')
 
 # Construct Redis URL - format: redis://:password@host:port/db
+# Note: REDIS_HOST defaults to 'redis' which is the Docker service name
 if REDIS_PASSWORD:
     REDIS_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 else:
     REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 
-# Allow override with explicit REDIS_URL env var
-REDIS_URL = config('REDIS_URL', default=REDIS_URL)
+# Debug output during startup
+import sys
+print(f"[SETTINGS DEBUG] Redis URL: {REDIS_URL}", file=sys.stderr)
 
 CACHES = {
     'default': {
