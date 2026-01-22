@@ -5,7 +5,7 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive \
-    DJANGO_SETTINGS_MODULE=nova_backend.settings
+    DJANGO_SETTINGS_MODULE=nova_backend.settings.production
 
 # Set work directory
 WORKDIR /app
@@ -29,7 +29,7 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir gunicorn==21.2.0 psycopg2-binary==2.9.9 django-redis==5.4.0
 
 # Cache buster - change this to force rebuild
-ARG CACHE_BUST=2026012220
+ARG CACHE_BUST=2026012221
 
 # Copy project - force fresh copy
 COPY . .
