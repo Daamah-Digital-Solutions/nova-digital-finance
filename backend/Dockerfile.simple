@@ -27,6 +27,9 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir gunicorn==21.2.0 psycopg2-binary==2.9.9 django-redis==5.4.0
 
+# Cache buster - change this to force rebuild
+ARG CACHE_BUST=2026012217
+
 # Copy project
 COPY . .
 
