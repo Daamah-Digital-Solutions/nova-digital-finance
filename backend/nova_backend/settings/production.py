@@ -97,6 +97,8 @@ CORS_ALLOW_CREDENTIALS = True
 # Security Settings - Full hardening
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Exempt health check endpoints from SSL redirect (for internal container health checks)
+SECURE_REDIRECT_EXEMPT = [r'^api/health/?$', r'^api/ready/?$']
 
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
