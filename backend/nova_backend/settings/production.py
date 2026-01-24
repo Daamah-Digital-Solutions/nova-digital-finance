@@ -24,8 +24,12 @@ DEBUG = False
 DEPLOYMENT_ENVIRONMENT = 'production'
 
 # Allowed hosts - configure for your domain
-_allowed_hosts = config('ALLOWED_HOSTS', default='novadf.com,www.novadf.com,localhost')
+_allowed_hosts = config('ALLOWED_HOSTS', default='novadf.com,www.novadf.com')
 ALLOWED_HOSTS = [host.strip() for host in _allowed_hosts.split(',') if host.strip()]
+# Always include localhost and 127.0.0.1 for Docker internal health checks
+for internal_host in ['localhost', '127.0.0.1']:
+    if internal_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(internal_host)
 
 
 # Database - PostgreSQL for production
