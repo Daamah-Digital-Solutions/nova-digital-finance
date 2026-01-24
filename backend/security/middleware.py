@@ -53,7 +53,7 @@ class RateLimitMiddleware:
     """
     Implement rate limiting to prevent abuse
     """
-    
+
     def __init__(self, get_response):
         self.get_response = get_response
         self.rate_limits = {
@@ -63,14 +63,23 @@ class RateLimitMiddleware:
             '/api/payments/': {'requests': 50, 'window': 3600},  # 50 payment requests per hour
             'default': {'requests': 100, 'window': 3600}  # Default: 100 requests per hour
         }
+        # Endpoints exempt from rate limiting (health checks, etc.)
+        self.exempt_paths = [
+            '/api/health/',
+            '/api/ready/',
+        ]
 
     def __call__(self, request):
+        # Skip rate limiting for exempt paths (health checks)
+        if any(request.path.startswith(path) for path in self.exempt_paths):
+            return self.get_response(request)
+
         if self._is_rate_limited(request):
             return JsonResponse(
                 {'error': 'Rate limit exceeded. Please try again later.'},
                 status=429
             )
-        
+
         return self.get_response(request)
 
     def _is_rate_limited(self, request: HttpRequest) -> bool:
