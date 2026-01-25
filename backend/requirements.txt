@@ -1,22 +1,53 @@
+# Django Core
 Django==4.2.7
 djangorestframework==3.14.0
 django-cors-headers==4.3.1
-psycopg2-binary==2.9.9
-django-environ==0.11.2
-PyJWT==2.8.0
-djangorestframework-simplejwt==5.3.0
-Pillow==10.3.0
-reportlab==4.2.2
-celery==5.3.4
-redis==5.0.1
-stripe==7.5.0
-requests==2.31.0
-django-storages==1.14.2
-boto3==1.29.7
-gunicorn==21.2.0
-whitenoise==6.6.0
-python-decouple==3.8
-cryptography==41.0.7
-django-ratelimit==4.1.0
 django-filter==23.3
 django-extensions==3.2.3
+
+# Authentication & Security
+djangorestframework-simplejwt==5.3.0
+PyJWT==2.8.0
+cryptography==41.0.7
+django-ratelimit==4.1.0
+
+# Database
+psycopg2-binary==2.9.9  # PostgreSQL adapter
+
+# Cache & Task Queue
+redis==5.0.1
+django-redis==5.4.0
+celery==5.3.4
+django-celery-beat==2.5.0
+gevent==23.9.1
+
+# Configuration
+python-decouple==3.8
+django-environ==0.11.2
+
+# Storage & Files
+Pillow==10.3.0
+reportlab==4.2.2  # PDF generation
+django-storages==1.14.2
+boto3==1.29.7  # AWS S3
+
+# Payment Processing
+stripe==7.5.0
+
+# HTTP Client
+requests==2.31.0
+
+# Production Server
+gunicorn==21.2.0
+whitenoise==6.6.0
+
+# Monitoring & Error Tracking
+sentry-sdk==1.38.0
+
+# Development & Testing (optional - install with pip install -r requirements-dev.txt)
+# django-debug-toolbar==4.2.0
+# pytest==7.4.3
+# pytest-django==4.7.0
+# pytest-cov==4.1.0
+# factory-boy==3.3.0
+# faker==21.0.0

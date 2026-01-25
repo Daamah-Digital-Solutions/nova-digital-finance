@@ -6,7 +6,7 @@ from django.db import models
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from .models import (
     PRNWallet, PRNTransaction, ElectronicCertificate,
@@ -141,11 +141,9 @@ class CapimaxInvestmentListView(generics.ListAPIView):
         return CapimaxInvestment.objects.filter(user=self.request.user)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def process_loan_approval(request, loan_id):
     """Process PRN issuance after loan approval (Admin only)"""
-    # TODO: Add admin permission check
-    
     try:
         loan_application = get_object_or_404(LoanApplication, id=loan_id)
         
@@ -176,11 +174,9 @@ def process_loan_approval(request, loan_id):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def prn_system_stats(request):
     """Get PRN system statistics (Admin only)"""
-    # TODO: Add admin permission check
-    
     try:
         # Get latest system reserve data
         latest_reserve = PRNSystemReserve.objects.first()

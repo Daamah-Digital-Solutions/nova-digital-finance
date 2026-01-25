@@ -101,6 +101,36 @@ class LoanApplicationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Loan duration must be between 6 and 60 months")
         return value
 
+    def validate_fee_percentage(self, value):
+        if value < Decimal('0') or value > Decimal('10'):
+            raise serializers.ValidationError("Fee percentage must be between 0% and 10%")
+        return value
+
+    def validate(self, data):
+        """Cross-field validation"""
+        user = self.context['request'].user
+
+        # Ensure KYC is completed
+        if not user.is_kyc_verified:
+            raise serializers.ValidationError({
+                'kyc': 'KYC verification must be completed before applying for a loan'
+            })
+
+        # Check for existing pending applications
+        from .models import LoanApplication
+        pending_applications = LoanApplication.objects.filter(
+            user=user,
+            status__in=['submitted', 'under_review']
+        ).count()
+
+        if pending_applications >= 3:
+            raise serializers.ValidationError({
+                'application': 'You have too many pending loan applications. Please wait for them to be processed.'
+            })
+
+        return data
+
+
 class LoanSerializer(serializers.ModelSerializer):
     currency_name = serializers.CharField(source='currency.name', read_only=True)
     currency_symbol = serializers.CharField(source='currency.symbol', read_only=True)

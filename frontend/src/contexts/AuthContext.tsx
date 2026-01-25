@@ -1,34 +1,20 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
-  isKYCCompleted: boolean;
-  role: 'user' | 'admin';
-  createdAt: string;
-  lastLogin?: string;
-}
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import authService, { User, LoginRequest, RegisterRequest, KYCSubmission, KYCStatus } from '../services/authService';
+import { tokenManager } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: RegisterData) => Promise<void>;
+  register: (userData: RegisterRequest) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
   refreshUser: () => Promise<void>;
-}
-
-interface RegisterData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
+  submitKYC: (kycData: KYCSubmission) => Promise<void>;
+  getKYCStatus: () => Promise<KYCStatus>;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,27 +26,37 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const isAuthenticated = user !== null;
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from stored data
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = localStorage.getItem('nova-auth-token');
-        const savedUser = localStorage.getItem('nova-user');
+        // Check if we have tokens
+        if (tokenManager.isAuthenticated()) {
+          // Try to get stored user first
+          const storedUser = authService.getStoredUser();
+          if (storedUser) {
+            setUser(storedUser);
+          }
 
-        if (token && savedUser) {
-          const userData = JSON.parse(savedUser);
-          setUser(userData);
-          
-          // Validate token with backend (in a real app)
-          // await validateToken(token);
+          // Refresh user data from server
+          try {
+            const freshUser = await authService.getProfile();
+            setUser(freshUser);
+          } catch (err) {
+            // Token might be expired, clear and redirect
+            console.error('Failed to fetch user profile:', err);
+            tokenManager.clearTokens();
+            setUser(null);
+          }
         }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        localStorage.removeItem('nova-auth-token');
-        localStorage.removeItem('nova-user');
+      } catch (err) {
+        console.error('Error initializing auth:', err);
+        tokenManager.clearTokens();
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -69,86 +65,107 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initializeAuth();
   }, []);
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = useCallback(async (email: string, password: string): Promise<void> => {
     try {
       setIsLoading(true);
-      
-      // Mock API call - replace with actual API endpoint
-      const response = await mockLogin(email, password);
-      
-      const { user: userData, token } = response;
-      
-      // Store auth data
-      localStorage.setItem('nova-auth-token', token);
-      localStorage.setItem('nova-user', JSON.stringify(userData));
-      
-      setUser(userData);
-    } catch (error) {
-      console.error('Login error:', error);
-      throw new Error('Invalid credentials');
+      setError(null);
+
+      const response = await authService.login({ email, password });
+      setUser(response.user);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
+      throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const register = async (userData: RegisterData): Promise<void> => {
+  const register = useCallback(async (userData: RegisterRequest): Promise<void> => {
     try {
       setIsLoading(true);
-      
-      // Mock API call - replace with actual API endpoint
-      const response = await mockRegister(userData);
-      
-      const { user: newUser, token } = response;
-      
-      // Store auth data
-      localStorage.setItem('nova-auth-token', token);
-      localStorage.setItem('nova-user', JSON.stringify(newUser));
-      
-      setUser(newUser);
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw new Error('Registration failed');
+      setError(null);
+
+      const response = await authService.register(userData);
+      setUser(response.user);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      setError(errorMessage);
+      throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const logout = () => {
-    localStorage.removeItem('nova-auth-token');
-    localStorage.removeItem('nova-user');
+  const logout = useCallback(() => {
+    authService.logout();
     setUser(null);
-  };
+    setError(null);
+  }, []);
 
-  const updateUser = (userData: Partial<User>) => {
+  const updateUser = useCallback((userData: Partial<User>) => {
     if (!user) return;
-    
+
     const updatedUser = { ...user, ...userData };
     setUser(updatedUser);
     localStorage.setItem('nova-user', JSON.stringify(updatedUser));
-  };
+  }, [user]);
 
-  const refreshUser = async (): Promise<void> => {
+  const refreshUser = useCallback(async (): Promise<void> => {
+    if (!tokenManager.isAuthenticated()) return;
+
     try {
-      if (!user) return;
-      
-      // Mock API call to refresh user data
-      const refreshedUser = await mockRefreshUser(user.id);
-      setUser(refreshedUser);
-      localStorage.setItem('nova-user', JSON.stringify(refreshedUser));
-    } catch (error) {
-      console.error('Error refreshing user:', error);
+      const freshUser = await authService.getProfile();
+      setUser(freshUser);
+    } catch (err) {
+      console.error('Error refreshing user:', err);
     }
-  };
+  }, []);
+
+  const submitKYC = useCallback(async (kycData: KYCSubmission): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      await authService.submitKYC(kycData);
+
+      // Refresh user to get updated KYC status
+      await refreshUser();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'KYC submission failed';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [refreshUser]);
+
+  const getKYCStatus = useCallback(async (): Promise<KYCStatus> => {
+    try {
+      return await authService.getKYCStatus();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to get KYC status';
+      throw new Error(errorMessage);
+    }
+  }, []);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   const value: AuthContextType = {
     user,
     isAuthenticated,
     isLoading,
+    error,
     login,
     register,
     logout,
     updateUser,
     refreshUser,
+    submitKYC,
+    getKYCStatus,
+    clearError,
   };
 
   return (
@@ -166,81 +183,5 @@ export function useAuth(): AuthContextType {
   return context;
 }
 
-// Mock API functions (replace with actual API calls)
-async function mockLogin(email: string, password: string) {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  if (email === 'admin@nova.com' && password === 'admin123') {
-    return {
-      user: {
-        id: '1',
-        email: 'admin@nova.com',
-        firstName: 'Admin',
-        lastName: 'User',
-        phoneNumber: '+1234567890',
-        isKYCCompleted: true,
-        role: 'admin' as const,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      },
-      token: 'mock-admin-token',
-    };
-  }
-  
-  if (email === 'user@nova.com' && password === 'user123') {
-    return {
-      user: {
-        id: '2',
-        email: 'user@nova.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        phoneNumber: '+1234567890',
-        isKYCCompleted: false,
-        role: 'user' as const,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      },
-      token: 'mock-user-token',
-    };
-  }
-  
-  throw new Error('Invalid credentials');
-}
-
-async function mockRegister(userData: RegisterData) {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  return {
-    user: {
-      id: Date.now().toString(),
-      email: userData.email,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      phoneNumber: userData.phoneNumber,
-      isKYCCompleted: false,
-      role: 'user' as const,
-      createdAt: new Date().toISOString(),
-    },
-    token: `mock-token-${Date.now()}`,
-  };
-}
-
-async function mockRefreshUser(userId: string) {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Return updated user data
-  return {
-    id: userId,
-    email: 'user@nova.com',
-    firstName: 'John',
-    lastName: 'Doe',
-    phoneNumber: '+1234567890',
-    isKYCCompleted: true, // KYC might have been completed
-    role: 'user' as const,
-    createdAt: '2024-01-01T00:00:00.000Z',
-    lastLogin: new Date().toISOString(),
-  };
-}
+// Re-export User type for convenience
+export type { User } from '../services/authService';

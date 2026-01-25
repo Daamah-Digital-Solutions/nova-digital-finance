@@ -2,6 +2,7 @@ from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 import stripe
 from django.conf import settings
 from decimal import Decimal
@@ -358,15 +359,11 @@ def upcoming_payments_view(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.IsAdminUser])
 def send_payment_reminders(request):
     """
     Admin endpoint to send payment reminders
     """
-    if not request.user.is_staff:
-        return Response({
-            'error': 'Admin access required'
-        }, status=status.HTTP_403_FORBIDDEN)
     
     try:
         from .services import PaymentScheduleService
@@ -385,6 +382,7 @@ def send_payment_reminders(request):
             'error': f'Failed to send payment reminders: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@csrf_exempt
 @api_view(['POST'])
 def stripe_webhook(request):
     """

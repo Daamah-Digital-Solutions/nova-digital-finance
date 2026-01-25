@@ -63,7 +63,8 @@ const Register: React.FC = () => {
       });
       navigate('/kyc');
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -72,7 +72,7 @@ class SignDocumentSerializer(serializers.Serializer):
         choices=['canvas', 'typed', 'uploaded'],
         default='canvas'
     )
-    ip_address = serializers.IPAddressField(required=False)
+    ip_address = serializers.CharField(required=False, allow_blank=True)
     user_agent = serializers.CharField(required=False, allow_blank=True)
 
 

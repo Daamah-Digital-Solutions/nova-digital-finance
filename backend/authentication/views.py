@@ -6,7 +6,8 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
-from .models import User, UserProfile, KYCDocument
+from django.contrib.auth.hashers import make_password
+from .models import User, UserProfile, KYCDocument, PasswordResetToken
 from .serializers import (
     UserRegistrationSerializer, UserLoginSerializer, UserSerializer,
     UserProfileSerializer, KYCDocumentSerializer, KYCSubmissionSerializer
@@ -134,24 +135,127 @@ def kyc_status(request):
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def password_reset_request(request):
+    """
+    Request a password reset. Sends email with reset link.
+    """
     email = request.data.get('email')
     if not email:
         return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     try:
         user = User.objects.get(email=email)
-        # Generate password reset token (implement token generation logic)
+        # Generate password reset token
+        reset_token = PasswordResetToken.create_for_user(user)
+
+        # Build reset URL (frontend URL)
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
+        reset_url = f"{frontend_url}/reset-password?token={reset_token.token}"
+
         # Send password reset email
+        email_message = f"""
+Hello {user.username},
+
+You have requested to reset your password for your Nova Finance account.
+
+Click the link below to reset your password:
+{reset_url}
+
+This link will expire in 24 hours.
+
+If you did not request this password reset, please ignore this email.
+
+Best regards,
+Nova Finance Team
+        """
+
         send_mail(
-            subject='Password Reset - Nova Finance',
-            message=f'Hello {user.username}, click the link to reset your password.',
+            subject='Password Reset Request - Nova Finance',
+            message=email_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
             fail_silently=True,
         )
-        return Response({'message': 'Password reset email sent'})
     except User.DoesNotExist:
-        return Response({'message': 'Password reset email sent'})  # Don't reveal if user exists
+        pass  # Don't reveal if user exists
+
+    # Always return success to prevent email enumeration
+    return Response({'message': 'If an account with this email exists, a password reset link has been sent.'})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def password_reset_verify(request):
+    """
+    Verify if a password reset token is valid.
+    """
+    token = request.data.get('token')
+    if not token:
+        return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    reset_token = PasswordResetToken.get_valid_token(token)
+    if reset_token:
+        return Response({
+            'valid': True,
+            'email': reset_token.user.email,
+            'message': 'Token is valid'
+        })
+
+    return Response({
+        'valid': False,
+        'message': 'Token is invalid or expired'
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def password_reset_confirm(request):
+    """
+    Confirm password reset with new password.
+    """
+    token = request.data.get('token')
+    new_password = request.data.get('new_password')
+    confirm_password = request.data.get('confirm_password')
+
+    if not all([token, new_password, confirm_password]):
+        return Response({
+            'error': 'Token, new_password, and confirm_password are required'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if new_password != confirm_password:
+        return Response({
+            'error': 'Passwords do not match'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if len(new_password) < 8:
+        return Response({
+            'error': 'Password must be at least 8 characters long'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    reset_token = PasswordResetToken.get_valid_token(token)
+    if not reset_token:
+        return Response({
+            'error': 'Token is invalid or expired'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Update user password
+    user = reset_token.user
+    user.password = make_password(new_password)
+    user.save()
+
+    # Mark token as used
+    reset_token.is_used = True
+    reset_token.save()
+
+    # Send confirmation email
+    send_mail(
+        subject='Password Changed Successfully - Nova Finance',
+        message=f'Hello {user.username}, your password has been successfully changed. If you did not make this change, please contact support immediately.',
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=True,
+    )
+
+    return Response({'message': 'Password has been reset successfully'})
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])

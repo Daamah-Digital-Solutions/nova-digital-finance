@@ -3,7 +3,10 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
+from datetime import timedelta
 import uuid
+import secrets
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -65,6 +68,49 @@ class KYCDocument(models.Model):
     is_verified = models.BooleanField(default=False)
     verification_notes = models.TextField(blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+class PasswordResetToken(models.Model):
+    """
+    Model for storing password reset tokens with expiry
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')
+    token = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(48)
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(hours=24)
+        super().save(*args, **kwargs)
+
+    @property
+    def is_valid(self):
+        return not self.is_used and self.expires_at > timezone.now()
+
+    @classmethod
+    def create_for_user(cls, user):
+        # Invalidate any existing tokens
+        cls.objects.filter(user=user, is_used=False).update(is_used=True)
+        # Create new token
+        return cls.objects.create(user=user)
+
+    @classmethod
+    def get_valid_token(cls, token):
+        try:
+            reset_token = cls.objects.get(token=token, is_used=False)
+            if reset_token.is_valid:
+                return reset_token
+        except cls.DoesNotExist:
+            pass
+        return None
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')

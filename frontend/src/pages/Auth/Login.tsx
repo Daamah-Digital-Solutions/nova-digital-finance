@@ -23,7 +23,8 @@ const Login: React.FC = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Invalid email or password. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -131,12 +132,12 @@ const Login: React.FC = () => {
                   Remember me
                 </label>
               </div>
-              <button
-                type="button"
+              <Link
+                to="/forgot-password"
                 className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
               >
                 {t('auth.forgotPassword')}
-              </button>
+              </Link>
             </div>
 
             {/* Submit Button */}

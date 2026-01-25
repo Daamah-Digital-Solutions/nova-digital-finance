@@ -9,12 +9,16 @@ urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', views.LoginView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # Password reset endpoints
     path('password-reset/', views.password_reset_request, name='password_reset'),
-    
+    path('password-reset/verify/', views.password_reset_verify, name='password_reset_verify'),
+    path('password-reset/confirm/', views.password_reset_confirm, name='password_reset_confirm'),
+
     # User profile endpoints
     path('profile/', views.UserProfileView.as_view(), name='profile'),
     path('dashboard/', views.user_dashboard_data, name='dashboard_data'),
-    
+
     # KYC endpoints
     path('kyc/submit/', views.KYCSubmissionView.as_view(), name='kyc_submit'),
     path('kyc/status/', views.kyc_status, name='kyc_status'),

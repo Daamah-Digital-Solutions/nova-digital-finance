@@ -7,7 +7,7 @@ import { ShieldCheckIcon } from '@heroicons/react/24/outline';
 
 const Footer: React.FC = () => {
   const { t } = useLanguage();
-  const { state: themeState } = useTheme();
+  const { effectiveTheme } = useTheme();
 
   // Simplified footer links organized by category
   const footerLinks = {
@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
   return (
     <footer className={cn(
       "border-t transition-colors duration-200",
-      themeState.actualTheme === 'dark' 
+      effectiveTheme === 'dark' 
         ? "bg-gray-900 border-gray-800" 
         : "bg-gray-50 border-gray-200"
     )}>
@@ -48,13 +48,13 @@ const Footer: React.FC = () => {
                 <div className="ml-3">
                   <div className={cn(
                     "text-lg font-semibold",
-                    themeState.actualTheme === 'dark' ? "text-white" : "text-gray-900"
+                    effectiveTheme === 'dark' ? "text-white" : "text-gray-900"
                   )}>
                     Nova Finance
                   </div>
                   <div className={cn(
                     "text-xs font-medium uppercase tracking-wider",
-                    themeState.actualTheme === 'dark' ? "text-indigo-400" : "text-indigo-600"
+                    effectiveTheme === 'dark' ? "text-indigo-400" : "text-indigo-600"
                   )}>
                     Islamic Banking
                   </div>
@@ -63,7 +63,7 @@ const Footer: React.FC = () => {
               
               <p className={cn(
                 "text-sm leading-relaxed mb-6 max-w-md",
-                themeState.actualTheme === 'dark' ? "text-gray-300" : "text-gray-600"
+                effectiveTheme === 'dark' ? "text-gray-300" : "text-gray-600"
               )}>
                 Sharia-compliant financial services provider offering ethical digital banking solutions 
                 with transparency and trust at our core.
@@ -72,7 +72,7 @@ const Footer: React.FC = () => {
               {/* Certification Badge */}
               <div className={cn(
                 "inline-flex items-center px-3 py-2 rounded-lg text-xs font-medium",
-                themeState.actualTheme === 'dark' 
+                effectiveTheme === 'dark' 
                   ? "bg-indigo-900/20 text-indigo-400 border border-indigo-800/30"
                   : "bg-indigo-50 text-indigo-700 border border-indigo-200"
               )}>
@@ -86,7 +86,7 @@ const Footer: React.FC = () => {
               <div>
                 <h3 className={cn(
                   "text-sm font-semibold uppercase tracking-wider mb-4",
-                  themeState.actualTheme === 'dark' ? "text-gray-200" : "text-gray-900"
+                  effectiveTheme === 'dark' ? "text-gray-200" : "text-gray-900"
                 )}>
                   Company
                 </h3>
@@ -97,7 +97,7 @@ const Footer: React.FC = () => {
                         to={link.path} 
                         className={cn(
                           "text-sm transition-colors duration-200",
-                          themeState.actualTheme === 'dark' 
+                          effectiveTheme === 'dark' 
                             ? "text-gray-400 hover:text-indigo-400" 
                             : "text-gray-600 hover:text-indigo-600"
                         )}
@@ -112,7 +112,7 @@ const Footer: React.FC = () => {
               <div>
                 <h3 className={cn(
                   "text-sm font-semibold uppercase tracking-wider mb-4",
-                  themeState.actualTheme === 'dark' ? "text-gray-200" : "text-gray-900"
+                  effectiveTheme === 'dark' ? "text-gray-200" : "text-gray-900"
                 )}>
                   Support
                 </h3>
@@ -123,7 +123,7 @@ const Footer: React.FC = () => {
                         to={link.path} 
                         className={cn(
                           "text-sm transition-colors duration-200",
-                          themeState.actualTheme === 'dark' 
+                          effectiveTheme === 'dark' 
                             ? "text-gray-400 hover:text-indigo-400" 
                             : "text-gray-600 hover:text-indigo-600"
                         )}
@@ -141,13 +141,13 @@ const Footer: React.FC = () => {
         {/* Bottom Section */}
         <div className={cn(
           "border-t py-6",
-          themeState.actualTheme === 'dark' ? "border-gray-800" : "border-gray-200"
+          effectiveTheme === 'dark' ? "border-gray-800" : "border-gray-200"
         )}>
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             {/* Copyright */}
             <div className={cn(
               "text-sm",
-              themeState.actualTheme === 'dark' ? "text-gray-400" : "text-gray-500"
+              effectiveTheme === 'dark' ? "text-gray-400" : "text-gray-500"
             )}>
               © 2024 Nova Finance. All rights reserved.
             </div>
@@ -160,7 +160,7 @@ const Footer: React.FC = () => {
                   to={link.path} 
                   className={cn(
                     "text-sm transition-colors duration-200",
-                    themeState.actualTheme === 'dark' 
+                    effectiveTheme === 'dark' 
                       ? "text-gray-400 hover:text-indigo-400" 
                       : "text-gray-500 hover:text-indigo-600"
                   )}
@@ -175,11 +175,11 @@ const Footer: React.FC = () => {
         {/* Risk Disclaimer */}
         <div className={cn(
           "border-t py-4",
-          themeState.actualTheme === 'dark' ? "border-gray-800" : "border-gray-200"
+          effectiveTheme === 'dark' ? "border-gray-800" : "border-gray-200"
         )}>
           <div className={cn(
             "rounded-lg p-4 border",
-            themeState.actualTheme === 'dark' 
+            effectiveTheme === 'dark' 
               ? "bg-yellow-900/10 border-yellow-800/30 text-yellow-200" 
               : "bg-yellow-50 border-yellow-200 text-yellow-800"
           )}>

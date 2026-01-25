@@ -23,8 +23,8 @@ import {
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { state: authState, logout } = useAuth();
-  const { state: themeState, toggleTheme } = useTheme();
+  const { user, isAuthenticated, logout } = useAuth();
+  const { theme, effectiveTheme, toggleTheme } = useTheme();
   const { t } = useLanguage();
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -57,7 +57,7 @@ const Header: React.FC = () => {
   ];
 
   // User menu items for authenticated users
-  const userMenuItems = authState.isAuthenticated ? [
+  const userMenuItems = isAuthenticated ? [
     { path: '/dashboard', label: t('dashboard'), icon: Squares2X2Icon },
     { path: '/profile', label: t('profile'), icon: UserCircleIcon },
     { path: '/settings', label: 'Settings', icon: CogIcon },
@@ -68,7 +68,7 @@ const Header: React.FC = () => {
   return (
     <header className={cn(
       "fixed top-0 left-0 right-0 z-50 transition-all duration-200 border-b",
-      themeState.actualTheme === 'dark' 
+      effectiveTheme === 'dark' 
         ? scrolled 
           ? "bg-gray-900/95 backdrop-blur-md border-gray-700 shadow-lg" 
           : "bg-gray-900/90 backdrop-blur-sm border-gray-700/50"
@@ -91,13 +91,13 @@ const Header: React.FC = () => {
             <div className="ml-3">
               <div className={cn(
                 "text-lg font-semibold transition-colors duration-200",
-                themeState.actualTheme === 'dark' ? "text-white" : "text-gray-900"
+                effectiveTheme === 'dark' ? "text-white" : "text-gray-900"
               )}>
                 Nova Finance
               </div>
               <div className={cn(
                 "text-xs font-medium uppercase tracking-wider",
-                themeState.actualTheme === 'dark' ? "text-indigo-400" : "text-indigo-600"
+                effectiveTheme === 'dark' ? "text-indigo-400" : "text-indigo-600"
               )}>
                 Islamic Banking
               </div>
@@ -117,10 +117,10 @@ const Header: React.FC = () => {
                   className={cn(
                     "flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium",
                     isActive
-                      ? themeState.actualTheme === 'dark'
+                      ? effectiveTheme === 'dark'
                         ? "text-indigo-400 bg-gray-800" 
                         : "text-indigo-600 bg-indigo-50"
-                      : themeState.actualTheme === 'dark'
+                      : effectiveTheme === 'dark'
                         ? "text-gray-300 hover:text-indigo-400 hover:bg-gray-800/50"
                         : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                   )}
@@ -139,13 +139,13 @@ const Header: React.FC = () => {
               onClick={toggleTheme}
               className={cn(
                 "p-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500",
-                themeState.actualTheme === 'dark'
+                effectiveTheme === 'dark'
                   ? "text-gray-300 hover:text-indigo-400 hover:bg-gray-800"
                   : "text-gray-600 hover:text-indigo-600 hover:bg-gray-100"
               )}
               aria-label="Toggle theme"
             >
-              {themeState.actualTheme === 'light' ? (
+              {effectiveTheme === 'light' ? (
                 <MoonIcon className="h-5 w-5" />
               ) : (
                 <SunIcon className="h-5 w-5" />
@@ -153,13 +153,13 @@ const Header: React.FC = () => {
             </button>
 
             {/* Authentication */}
-            {authState.isAuthenticated ? (
+            {isAuthenticated ? (
               <div className="relative">
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                   className={cn(
                     "flex items-center space-x-2 px-3 py-2 rounded-md border transition-all duration-200 text-sm",
-                    themeState.actualTheme === 'dark'
+                    effectiveTheme === 'dark'
                       ? "bg-gray-800 border-gray-700 text-gray-200 hover:bg-gray-700"
                       : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
                   )}
@@ -167,7 +167,7 @@ const Header: React.FC = () => {
                   <div className="w-8 h-8 rounded-md bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
                     <UserCircleIcon className="h-5 w-5 text-white" />
                   </div>
-                  <span className="font-medium">{authState.user?.username}</span>
+                  <span className="font-medium">{user?.firstName}</span>
                   <ChevronDownIcon className={cn(
                     "h-4 w-4 transition-transform duration-200",
                     profileMenuOpen && "rotate-180"
@@ -178,7 +178,7 @@ const Header: React.FC = () => {
                 {profileMenuOpen && (
                   <div className={cn(
                     "absolute right-0 mt-2 w-56 rounded-lg shadow-lg border z-50",
-                    themeState.actualTheme === 'dark'
+                    effectiveTheme === 'dark'
                       ? "bg-gray-800 border-gray-700"
                       : "bg-white border-gray-200"
                   )}>
@@ -195,10 +195,10 @@ const Header: React.FC = () => {
                             className={cn(
                               "flex items-center px-3 py-2 text-sm rounded-md transition-colors duration-200",
                               isActive
-                                ? themeState.actualTheme === 'dark'
+                                ? effectiveTheme === 'dark'
                                   ? "bg-gray-700 text-indigo-400"
                                   : "bg-indigo-50 text-indigo-600"
-                                : themeState.actualTheme === 'dark'
+                                : effectiveTheme === 'dark'
                                   ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                                   : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                             )}
@@ -211,13 +211,13 @@ const Header: React.FC = () => {
                       
                       <div className={cn(
                         "border-t mt-2 pt-2",
-                        themeState.actualTheme === 'dark' ? "border-gray-700" : "border-gray-200"
+                        effectiveTheme === 'dark' ? "border-gray-700" : "border-gray-200"
                       )}>
                         <button
                           onClick={handleLogout}
                           className={cn(
                             "w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors duration-200",
-                            themeState.actualTheme === 'dark'
+                            effectiveTheme === 'dark'
                               ? "text-red-400 hover:bg-red-900/20"
                               : "text-red-600 hover:bg-red-50"
                           )}
@@ -236,7 +236,7 @@ const Header: React.FC = () => {
                   to="/login"
                   className={cn(
                     "px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200",
-                    themeState.actualTheme === 'dark'
+                    effectiveTheme === 'dark'
                       ? "text-gray-300 hover:text-white"
                       : "text-gray-700 hover:text-gray-900"
                   )}
@@ -257,7 +257,7 @@ const Header: React.FC = () => {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={cn(
                 "md:hidden p-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500",
-                themeState.actualTheme === 'dark'
+                effectiveTheme === 'dark'
                   ? "text-gray-300 hover:text-white hover:bg-gray-800"
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               )}
@@ -276,7 +276,7 @@ const Header: React.FC = () => {
         {mobileMenuOpen && (
           <div className={cn(
             "md:hidden border-t mt-2 pt-4 pb-4",
-            themeState.actualTheme === 'dark' ? "border-gray-700" : "border-gray-200"
+            effectiveTheme === 'dark' ? "border-gray-700" : "border-gray-200"
           )}>
             <div className="space-y-2">
               {navItems.map((item) => {
@@ -291,10 +291,10 @@ const Header: React.FC = () => {
                     className={cn(
                       "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
                       isActive
-                        ? themeState.actualTheme === 'dark'
+                        ? effectiveTheme === 'dark'
                           ? "text-indigo-400 bg-gray-800"
                           : "text-indigo-600 bg-indigo-50"
-                        : themeState.actualTheme === 'dark'
+                        : effectiveTheme === 'dark'
                           ? "text-gray-300 hover:text-indigo-400 hover:bg-gray-800/50"
                           : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                     )}
@@ -306,17 +306,17 @@ const Header: React.FC = () => {
               })}
             </div>
             
-            {!authState.isAuthenticated && (
+            {!isAuthenticated && (
               <div className={cn(
                 "border-t mt-4 pt-4 space-y-3",
-                themeState.actualTheme === 'dark' ? "border-gray-700" : "border-gray-200"
+                effectiveTheme === 'dark' ? "border-gray-700" : "border-gray-200"
               )}>
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     "block px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200",
-                    themeState.actualTheme === 'dark'
+                    effectiveTheme === 'dark'
                       ? "text-gray-300 hover:text-white hover:bg-gray-800"
                       : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                   )}
