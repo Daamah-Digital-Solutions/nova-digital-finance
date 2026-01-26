@@ -8,7 +8,7 @@ import {
   PlusIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
-import { prnovaService, CapimaxAccount, CapimaxInvestment } from '../../services/prnovaService';
+import { pronovaService, CapimaxAccount, CapimaxInvestment } from '../../services/pronovaService';
 
 interface CapimaxSummaryCardProps {
   className?: string;
@@ -29,8 +29,8 @@ const CapimaxSummaryCard: React.FC<CapimaxSummaryCardProps> = ({ className = '' 
     try {
       setLoading(true);
       const [accountData, investmentsData] = await Promise.all([
-        prnovaService.getCapimaxAccountStatus(),
-        prnovaService.getUserInvestments(1).catch(() => ({ investments: [], total: 0, page: 1, pages: 0 }))
+        pronovaService.getCapimaxAccountStatus(),
+        pronovaService.getUserInvestments(1).catch(() => ({ investments: [], total: 0, page: 1, pages: 0 }))
       ]);
       
       setAccount(accountData);
@@ -46,7 +46,7 @@ const CapimaxSummaryCard: React.FC<CapimaxSummaryCardProps> = ({ className = '' 
   const handleActivateAccount = async () => {
     try {
       setActivating(true);
-      const result = await prnovaService.activateCapimaxAccount();
+      const result = await pronovaService.activateCapimaxAccount();
       
       if (result.success) {
         await loadCapimaxData(); // Reload data after activation
