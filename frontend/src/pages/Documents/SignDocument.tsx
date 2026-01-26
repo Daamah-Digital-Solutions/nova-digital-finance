@@ -193,7 +193,7 @@ const SignDocument: React.FC = () => {
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Name:</span>
                 <div className="font-medium text-gray-900 dark:text-white">
-                  {user?.firstName} {user?.lastName}
+                  {user?.first_name} {user?.last_name}
                 </div>
               </div>
               <div>

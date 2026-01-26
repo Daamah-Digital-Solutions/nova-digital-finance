@@ -167,7 +167,7 @@ const Header: React.FC = () => {
                   <div className="w-8 h-8 rounded-md bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
                     <UserCircleIcon className="h-5 w-5 text-white" />
                   </div>
-                  <span className="font-medium">{user?.firstName}</span>
+                  <span className="font-medium">{user?.first_name}</span>
                   <ChevronDownIcon className={cn(
                     "h-4 w-4 transition-transform duration-200",
                     profileMenuOpen && "rotate-180"
