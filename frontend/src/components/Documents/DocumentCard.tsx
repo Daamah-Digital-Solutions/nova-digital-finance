@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import documentService, { Document } from '../../services/documentService';
+import { Document } from '../../services/documentService';
 import { 
   DocumentTextIcon,
   ArrowDownTrayIcon,
@@ -19,6 +19,35 @@ interface DocumentCardProps {
 
 const DocumentCard: React.FC<DocumentCardProps> = ({ document, onAction }) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const getDocumentTypeIcon = (docType: string): string => {
+    switch (docType) {
+      case 'loan_certificate':
+        return '📜';
+      case 'financing_contract':
+        return '📝';
+      case 'kyc_report':
+        return '👤';
+      case 'payment_receipt':
+        return '🧾';
+      case 'investment_certificate':
+        return '📈';
+      default:
+        return '📄';
+    }
+  };
+
+  const canDownload = (doc: Document): boolean => {
+    return doc.pdf_file !== null && ['generated', 'signed', 'delivered'].includes(doc.status);
+  };
+
+  const canSign = (doc: Document): boolean => {
+    return doc.status === 'generated' && !doc.signature_timestamp;
+  };
+
+  const canShare = (doc: Document): boolean => {
+    return ['signed', 'delivered'].includes(doc.status);
+  };
 
   const handleAction = async (action: string) => {
     setActionLoading(action);
@@ -78,7 +107,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onAction }) => {
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 <span className="text-lg">
-                  {documentService.getDocumentTypeIcon(document.document_type)}
+                  {getDocumentTypeIcon(document.document_type)}
                 </span>
               </div>
             </div>
@@ -149,7 +178,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onAction }) => {
             </button>
 
             {/* Download Action */}
-            {documentService.canDownload(document) && (
+            {canDownload(document) && (
               <button
                 onClick={() => handleAction('download')}
                 disabled={actionLoading === 'download'}
@@ -161,7 +190,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onAction }) => {
             )}
 
             {/* Sign Action */}
-            {documentService.canSign(document) && (
+            {canSign(document) && (
               <button
                 onClick={() => handleAction('sign')}
                 disabled={actionLoading === 'sign'}
@@ -174,7 +203,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onAction }) => {
           </div>
 
           {/* Share Action */}
-          {documentService.canShare(document) && (
+          {canShare(document) && (
             <button
               onClick={() => handleAction('share')}
               disabled={actionLoading === 'share'}
