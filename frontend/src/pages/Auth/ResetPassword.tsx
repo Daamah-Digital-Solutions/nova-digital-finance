@@ -67,7 +67,11 @@ const ResetPassword: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await authService.confirmPasswordReset(token, password);
+      await authService.confirmPasswordReset({
+        token: token,
+        new_password: password,
+        confirm_password: confirmPassword
+      });
       setSuccess(true);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to reset password. Please try again.';
