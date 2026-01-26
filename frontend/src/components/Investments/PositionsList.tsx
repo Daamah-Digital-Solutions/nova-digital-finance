@@ -1,5 +1,5 @@
 import React from 'react';
-import { InvestmentPosition, investmentService } from '../../services/investmentService';
+import investmentService, { InvestmentPosition } from '../../services/investmentService';
 import { 
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,

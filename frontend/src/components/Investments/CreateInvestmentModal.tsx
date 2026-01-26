@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { InvestmentOpportunity, investmentService } from '../../services/investmentService';
+import investmentService, { InvestmentOpportunity } from '../../services/investmentService';
 import { 
   XMarkIcon,
   CurrencyDollarIcon,

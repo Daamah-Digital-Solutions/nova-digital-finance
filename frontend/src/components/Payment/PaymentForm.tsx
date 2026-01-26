@@ -7,7 +7,7 @@ import {
   useElements
 } from '@stripe/react-stripe-js';
 // import { useLanguage } from '../../contexts/LanguageContext';
-import { paymentService } from '../../services/paymentService';
+import paymentService from '../../services/paymentService';
 import { 
   CreditCardIcon,
   CheckCircleIcon,

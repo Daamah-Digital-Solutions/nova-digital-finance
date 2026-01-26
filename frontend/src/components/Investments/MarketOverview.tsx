@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { investmentService } from '../../services/investmentService';
+import investmentService from '../../services/investmentService';
 import { 
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,

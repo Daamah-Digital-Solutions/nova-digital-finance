@@ -1,5 +1,5 @@
 import React from 'react';
-import { PortfolioSummary, investmentService } from '../../services/investmentService';
+import investmentService, { PortfolioSummary } from '../../services/investmentService';
 import { 
   ChartBarIcon,
   ArrowTrendingUpIcon,

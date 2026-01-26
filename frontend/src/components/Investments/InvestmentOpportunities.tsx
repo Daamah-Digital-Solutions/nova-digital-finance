@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { investmentService, InvestmentOpportunity } from '../../services/investmentService';
+import investmentService, { InvestmentOpportunity } from '../../services/investmentService';
 import CreateInvestmentModal from './CreateInvestmentModal';
 import { 
   PlusIcon,

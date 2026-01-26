@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Document, documentService } from '../../services/documentService';
+import documentService, { Document } from '../../services/documentService';
 import { 
   DocumentTextIcon,
   ArrowDownTrayIcon,
