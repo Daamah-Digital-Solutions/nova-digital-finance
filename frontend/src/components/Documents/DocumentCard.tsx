@@ -49,6 +49,16 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onAction }) => {
     return ['signed', 'delivered'].includes(doc.status);
   };
 
+  const getStatusDisplay = (status: string): string => {
+    const displays: Record<string, string> = {
+      draft: 'Draft',
+      generated: 'Generated',
+      signed: 'Signed',
+      delivered: 'Delivered',
+    };
+    return displays[status] || status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
   const handleAction = async (action: string) => {
     setActionLoading(action);
     try {
@@ -123,7 +133,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onAction }) => {
           
           <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 ${getStatusColor(document.status)}`}>
             {getStatusIcon(document.status)}
-            <span className="ml-1">{document.status_display}</span>
+            <span className="ml-1">{getStatusDisplay(document.status)}</span>
           </div>
         </div>
       </div>
