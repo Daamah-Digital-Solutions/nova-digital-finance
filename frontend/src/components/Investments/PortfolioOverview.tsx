@@ -75,23 +75,23 @@ const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({ portfolio, onRefr
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900 dark:text-white">
-                      {platform.name}
+                      {platform.platform_name}
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {platform.positions_count} position{platform.positions_count !== 1 ? 's' : ''}
+                      {platform.invested_usd !== '0' ? 'Active' : 'No investments'}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="text-right">
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {investmentService.formatCurrency(platform.balance)}
+                    {investmentService.formatCurrency(platform.current_value_usd)}
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Invested: {investmentService.formatCurrency(platform.invested)}
+                    Invested: {investmentService.formatCurrency(platform.invested_usd)}
                   </p>
-                  <p className={`text-sm font-medium ${investmentService.getProfitLossColor(platform.pnl)}`}>
-                    {parseFloat(platform.pnl) >= 0 ? '+' : ''}{investmentService.formatCurrency(platform.pnl)}
+                  <p className={`text-sm font-medium ${investmentService.getProfitLossColor(platform.pnl_usd)}`}>
+                    {parseFloat(platform.pnl_usd) >= 0 ? '+' : ''}{investmentService.formatCurrency(platform.pnl_usd)}
                   </p>
                 </div>
               </div>
