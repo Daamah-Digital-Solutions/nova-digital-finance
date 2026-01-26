@@ -75,7 +75,10 @@ export interface PortfolioSummary {
   total_current_value_usd: string;
   total_unrealized_pnl_usd: string;
   total_realized_pnl_usd: string;
+  total_pnl_usd: string;
   total_pnl_percentage: number;
+  total_balance_usd: string;
+  total_available_usd: string;
   positions_count: number;
   active_positions_count: number;
   platforms: Array<{
@@ -83,6 +86,13 @@ export interface PortfolioSummary {
     invested_usd: string;
     current_value_usd: string;
     pnl_usd: string;
+  }>;
+  positions: Array<{
+    asset_symbol: string;
+    asset_name: string;
+    investment_amount: string;
+    current_value: string;
+    allocation_percentage: number;
   }>;
   asset_allocation: Array<{
     asset_symbol: string;
