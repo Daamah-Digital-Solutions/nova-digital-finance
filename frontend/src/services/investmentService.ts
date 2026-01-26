@@ -147,6 +147,21 @@ export interface CreatePositionRequest {
 
 // Investment Service
 const investmentService = {
+  // Utility functions
+  formatCurrency: (amount: string | number): string => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num || 0);
+  },
+
+  formatPercentage: (value: number): string => {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+  },
+
   // Get investment platforms
   getPlatforms: async (type?: string): Promise<InvestmentPlatform[]> => {
     try {
