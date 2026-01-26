@@ -55,11 +55,12 @@ const Register: React.FC = () => {
 
     try {
       await register({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         email: formData.email,
+        username: formData.email,
         password: formData.password,
-        phoneNumber: formData.phoneNumber || undefined,
+        phone_number: formData.phoneNumber || undefined,
       });
       navigate('/kyc');
     } catch (err) {
