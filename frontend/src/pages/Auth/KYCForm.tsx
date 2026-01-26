@@ -59,13 +59,15 @@ const KYCForm: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
+
     if (name.includes('.')) {
       const [section, field] = name.split('.');
+      type NestedKey = 'address' | 'employment' | 'identification';
+      const sectionKey = section as NestedKey;
       setFormData(prev => ({
         ...prev,
-        [section]: {
-          ...prev[section as keyof KYCFormData],
+        [sectionKey]: {
+          ...prev[sectionKey],
           [field]: value
         }
       }));
