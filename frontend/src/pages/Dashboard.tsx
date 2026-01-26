@@ -229,7 +229,7 @@ const Dashboard: React.FC = () => {
         {/* Header */}
         <div className="px-4 py-6 sm:px-0">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            {t('dashboard.welcome', { name: user?.first_name })}
+            {t('dashboard.welcome', { name: user?.first_name || 'User' })}
           </h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
             Here's what's happening with your finances today.
