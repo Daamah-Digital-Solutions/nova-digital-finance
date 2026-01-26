@@ -86,7 +86,7 @@ const CreateInvestmentModal: React.FC<CreateInvestmentModalProps> = ({
       setLoading(true);
       setError('');
       
-      await investmentService.createInvestmentPosition({
+      await investmentService.createPosition({
         loan_id: opportunity.loan_id,
         asset_symbol: formData.asset_symbol,
         investment_amount_usd: formData.investment_amount_usd,
