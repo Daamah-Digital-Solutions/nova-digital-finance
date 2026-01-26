@@ -162,6 +162,46 @@ const investmentService = {
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
   },
 
+  getRiskLevelColor: (risk: string): string => {
+    const colors: Record<string, string> = {
+      low: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+      medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+      high: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    };
+    return colors[risk.toLowerCase()] || colors.medium;
+  },
+
+  getProfitLossColor: (value: string | number): string => {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return num >= 0
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-red-600 dark:text-red-400';
+  },
+
+  getAssetIcon: (symbol: string): string => {
+    const icons: Record<string, string> = {
+      BTC: '₿',
+      ETH: 'Ξ',
+      BNB: '◉',
+      ADA: '₳',
+      SOL: '◎',
+      DOT: '●',
+      USDT: '₮',
+      USDC: '$',
+    };
+    return icons[symbol.toUpperCase()] || '◆';
+  },
+
+  // Get investment opportunities
+  getInvestmentOpportunities: async (): Promise<InvestmentOpportunity[]> => {
+    try {
+      const response = await api.get<InvestmentOpportunity[]>('/investments/opportunities/');
+      return response.data;
+    } catch (error) {
+      throw new Error(handleApiError(error));
+    }
+  },
+
   // Get investment platforms
   getPlatforms: async (type?: string): Promise<InvestmentPlatform[]> => {
     try {
