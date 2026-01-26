@@ -22,18 +22,16 @@ const CreateInvestmentModal: React.FC<CreateInvestmentModalProps> = ({
   const [formData, setFormData] = useState({
     asset_symbol: opportunity.recommended_assets[0]?.symbol || 'BTC',
     investment_amount_usd: '',
-    strategy: 'balanced'
+    strategy: 'moderate' as 'conservative' | 'moderate' | 'aggressive'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'form' | 'confirm' | 'success'>('form');
 
-  const strategies = [
+  const strategies: { value: 'conservative' | 'moderate' | 'aggressive'; label: string; description: string }[] = [
     { value: 'conservative', label: 'Conservative Growth', description: 'Lower risk, steady returns' },
     { value: 'moderate', label: 'Moderate Growth', description: 'Balanced risk and return' },
-    { value: 'balanced', label: 'Balanced Portfolio', description: 'Diversified approach' },
-    { value: 'aggressive', label: 'Aggressive Growth', description: 'Higher risk, higher potential returns' },
-    { value: 'income', label: 'Income Focused', description: 'Focus on regular income generation' }
+    { value: 'aggressive', label: 'Aggressive Growth', description: 'Higher risk, higher potential returns' }
   ];
 
   const maxAmount = parseFloat(opportunity.available_for_investment_usd);
