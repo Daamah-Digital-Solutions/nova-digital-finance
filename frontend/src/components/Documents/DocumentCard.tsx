@@ -45,15 +45,14 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onAction }) => {
   };
 
   const getStatusColor = (status: string) => {
-    const colors = documentService.getStatusColor(status);
-    switch (colors) {
-      case 'gray':
+    switch (status) {
+      case 'draft':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-      case 'blue':
+      case 'generated':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-      case 'green':
+      case 'signed':
         return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-      case 'purple':
+      case 'delivered':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
