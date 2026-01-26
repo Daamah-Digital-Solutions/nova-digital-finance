@@ -119,8 +119,8 @@ const KYCForm: React.FC = () => {
       // Simulate API call to submit KYC data
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Update user KYC status
-      updateUser({ isKYCCompleted: true });
+      // Update user KYC status to under_review after submission
+      updateUser({ kyc_status: 'under_review' });
       
       // Navigate to dashboard
       navigate('/dashboard');
