@@ -2,6 +2,11 @@
  * Utility function to merge class names with conditional logic
  * Similar to clsx/classnames libraries
  */
-export function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(' ');
+type ClassValue = string | undefined | null | false | ClassValue[];
+
+export function cn(...classes: ClassValue[]): string {
+  return classes
+    .flat(Infinity)
+    .filter((c): c is string => typeof c === 'string' && c.length > 0)
+    .join(' ');
 }
