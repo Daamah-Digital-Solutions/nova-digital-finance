@@ -8,7 +8,7 @@ import {
   PlusIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
-import { pronovaService, CapimaxAccount, CapimaxInvestment } from '../../services/pronovaService';
+import pronovaService, { CapimaxAccount, CapimaxInvestment } from '../../services/pronovaService';
 
 interface CapimaxSummaryCardProps {
   className?: string;

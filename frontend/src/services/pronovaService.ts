@@ -54,14 +54,29 @@ export interface CapimaxInvestment {
   certificate: string;
   capimax_position_id: string;
   investment_amount_usd: string;
+  invested_amount_usd: number;
   current_value_usd: string;
-  profit_loss_usd: string;
-  profit_loss_percentage: string;
+  profit_loss_usd: number;
+  profit_loss_percentage: number;
   status: 'active' | 'closed' | 'pending';
   strategy: string;
   risk_level: string;
+  name: string;
   opened_at: string;
   closed_at: string | null;
+}
+
+export interface CapimaxAccount {
+  active: boolean;
+  account_id: string;
+  total_capacity_usd: number;
+  available_capacity_usd: number;
+  invested_amount_usd: number;
+  net_profit_usd: number;
+  total_profits_usd: number;
+  total_losses_usd: number;
+  active_investments: number;
+  completed_investments: number;
 }
 
 export interface PRNWalletBalance {
@@ -180,6 +195,53 @@ const pronovaService = {
       return response.data;
     } catch (error) {
       throw new Error(handleApiError(error));
+    }
+  },
+
+  // Get Capimax account status
+  getCapimaxAccountStatus: async (): Promise<CapimaxAccount> => {
+    try {
+      const response = await api.get<CapimaxAccount>('/capimax/account/status/');
+      return response.data;
+    } catch (error) {
+      // Return inactive account if API not available yet
+      return {
+        active: false,
+        account_id: '',
+        total_capacity_usd: 0,
+        available_capacity_usd: 0,
+        invested_amount_usd: 0,
+        net_profit_usd: 0,
+        total_profits_usd: 0,
+        total_losses_usd: 0,
+        active_investments: 0,
+        completed_investments: 0,
+      };
+    }
+  },
+
+  // Get user investments with pagination
+  getUserInvestments: async (page: number): Promise<{
+    investments: CapimaxInvestment[];
+    total: number;
+    page: number;
+    pages: number;
+  }> => {
+    try {
+      const response = await api.get(`/capimax/investments/?page=${page}`);
+      return response.data;
+    } catch (error) {
+      return { investments: [], total: 0, page: 1, pages: 0 };
+    }
+  },
+
+  // Activate Capimax account
+  activateCapimaxAccount: async (): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await api.post('/capimax/account/activate/');
+      return response.data;
+    } catch (error) {
+      return { success: false, message: handleApiError(error) };
     }
   },
 };
