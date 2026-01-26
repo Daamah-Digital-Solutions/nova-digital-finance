@@ -89,7 +89,7 @@ const CreateInvestmentModal: React.FC<CreateInvestmentModalProps> = ({
       await investmentService.createPosition({
         loan_id: opportunity.loan_id,
         asset_symbol: formData.asset_symbol,
-        investment_amount_usd: formData.investment_amount_usd,
+        investment_amount_usd: parseFloat(formData.investment_amount_usd),
         strategy: formData.strategy
       });
       
