@@ -89,7 +89,7 @@ const LoanApplication: React.FC = () => {
   }
 
   // Check KYC status
-  if (user && !user.isKycVerified) {
+  if (user && !user.is_kyc_verified) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center max-w-md">
