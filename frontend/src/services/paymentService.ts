@@ -133,16 +133,17 @@ const paymentService = {
   },
 
   // Confirm payment
-  confirmPayment: async (paymentIntentId: string): Promise<{
+  confirmPayment: async (data: {
+    payment_intent_id: string;
+    stripe_payment_method_id: string;
+  }): Promise<{
     status: string;
     requires_action: boolean;
     client_secret?: string;
     message: string;
   }> => {
     try {
-      const response = await api.post('/payments/confirm/', {
-        payment_intent_id: paymentIntentId,
-      });
+      const response = await api.post('/payments/confirm/', data);
       return response.data;
     } catch (error) {
       throw new Error(handleApiError(error));
