@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth-store";
 import { toast } from "sonner";
 import {
   Loader2,

@@ -1,9 +1,9 @@
-import type { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
-import FacebookProvider from "next-auth/providers/facebook";
+import Google from "next-auth/providers/google";
+import Facebook from "next-auth/providers/facebook";
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
   },
@@ -49,14 +49,7 @@ export const authOptions: NextAuthOptions = {
           return {
             id: data.user.id,
             email: data.user.email,
-            firstName: data.user.firstName,
-            lastName: data.user.lastName,
-            clientId: data.user.clientId,
-            accountNumber: data.user.accountNumber,
-            isEmailVerified: data.user.isEmailVerified,
-            mfaEnabled: data.user.mfaEnabled,
-            authProvider: data.user.authProvider,
-            kycStatus: data.user.kycStatus,
+            name: `${data.user.first_name} ${data.user.last_name}`,
             accessToken: data.tokens.access,
             refreshToken: data.tokens.refresh,
           };
@@ -68,34 +61,23 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
-    GoogleProvider({
+    Google({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
-    FacebookProvider({
+    Facebook({
       clientId: process.env.FACEBOOK_CLIENT_ID || "",
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "",
     }),
   ],
   callbacks: {
     async jwt({ token, user, account }) {
-      // Initial sign-in
       if (user) {
         token.id = user.id;
-        token.email = user.email;
-        token.firstName = (user as Record<string, unknown>).firstName as string;
-        token.lastName = (user as Record<string, unknown>).lastName as string;
-        token.clientId = (user as Record<string, unknown>).clientId as string;
-        token.accountNumber = (user as Record<string, unknown>).accountNumber as string;
-        token.isEmailVerified = (user as Record<string, unknown>).isEmailVerified as boolean;
-        token.mfaEnabled = (user as Record<string, unknown>).mfaEnabled as boolean;
-        token.authProvider = (user as Record<string, unknown>).authProvider as string;
-        token.kycStatus = (user as Record<string, unknown>).kycStatus as string;
         token.accessToken = (user as Record<string, unknown>).accessToken as string;
         token.refreshToken = (user as Record<string, unknown>).refreshToken as string;
       }
 
-      // Handle OAuth providers
       if (account && account.provider !== "credentials") {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
@@ -106,22 +88,11 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.firstName = token.firstName as string;
-        session.user.lastName = token.lastName as string;
-        session.user.clientId = token.clientId as string;
-        session.user.accountNumber = token.accountNumber as string;
-        session.user.isEmailVerified = token.isEmailVerified as boolean;
-        session.user.mfaEnabled = token.mfaEnabled as boolean;
-        session.user.authProvider = token.authProvider as string;
-        session.user.kycStatus = token.kycStatus as string;
+        (session.user as unknown as Record<string, unknown>).id = token.id as string;
       }
-
-      (session as Record<string, unknown>).accessToken = token.accessToken;
-      (session as Record<string, unknown>).refreshToken = token.refreshToken;
-
+      (session as unknown as Record<string, unknown>).accessToken = token.accessToken;
+      (session as unknown as Record<string, unknown>).refreshToken = token.refreshToken;
       return session;
     },
   },
-};
+});

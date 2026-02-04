@@ -57,7 +57,7 @@
     "sonner": "^1.7.1"
   },
   "devDependencies": {
-    "eslint": "^9.16.0",
+    "eslint": "^8.56.0",
     "eslint-config-next": "^14.2.21",
     "@tailwindcss/typography": "^0.5.15",
     "@tailwindcss/forms": "^0.5.9"

@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth-store";
+import type { User as UserType } from "@/types";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -105,7 +106,7 @@ export default function SettingsPage() {
       });
       setProfile(res.data);
       if (setUser) {
-        setUser({ ...user, first_name: firstName, last_name: lastName });
+        setUser({ ...user, first_name: firstName, last_name: lastName } as UserType);
       }
       toast.success("Profile updated successfully");
     } catch (error: any) {

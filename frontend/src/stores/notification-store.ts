@@ -41,11 +41,11 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   markAsRead: async (id: string) => {
     try {
-      await api.patch(`/notifications/${id}/`, { isRead: true });
+      await api.patch(`/notifications/${id}/`, { is_read: true });
       const { notifications, unreadCount } = get();
       set({
         notifications: notifications.map((n) =>
-          n.id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n
+          n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n
         ),
         unreadCount: Math.max(0, unreadCount - 1),
       });
@@ -61,8 +61,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       set({
         notifications: notifications.map((n) => ({
           ...n,
-          isRead: true,
-          readAt: n.readAt || new Date().toISOString(),
+          is_read: true,
+          read_at: n.read_at || new Date().toISOString(),
         })),
         unreadCount: 0,
       });
