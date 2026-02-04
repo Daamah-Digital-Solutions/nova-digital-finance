@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.6; font-size: 13px; }
+        .header { text-align: center; border-bottom: 2px solid #0f3460; padding-bottom: 15px; margin-bottom: 25px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #0f3460; }
+        h1 { text-align: center; color: #0f3460; font-size: 20px; }
+        h2 { color: #0f3460; font-size: 15px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        .info-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .info-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        .info-table td:first-child { font-weight: bold; color: #555; width: 35%; }
+        .status-badge { padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .doc-list { list-style: none; padding: 0; }
+        .doc-list li { padding: 8px; border-bottom: 1px solid #eee; }
+        .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-text">NOVA DIGITAL FINANCE</div>
+    </div>
+
+    <h1>KYC Application Summary</h1>
+
+    <h2>Personal Information</h2>
+    <table class="info-table">
+        <tr><td>Full Name</td><td>{{ user.get_full_name }}</td></tr>
+        <tr><td>Email</td><td>{{ user.email }}</td></tr>
+        <tr><td>Client ID</td><td>{{ user.client_id }}</td></tr>
+        {% if profile %}
+        <tr><td>Phone</td><td>{{ profile.phone }}</td></tr>
+        <tr><td>Date of Birth</td><td>{{ profile.date_of_birth|date:"F d, Y" }}</td></tr>
+        <tr><td>Nationality</td><td>{{ profile.nationality }}</td></tr>
+        <tr><td>Address</td><td>{{ profile.address_line_1 }}{% if profile.city %}, {{ profile.city }}{% endif %}{% if profile.country %}, {{ profile.country }}{% endif %}</td></tr>
+        {% endif %}
+    </table>
+
+    {% if profile %}
+    <h2>Employment & Income</h2>
+    <table class="info-table">
+        <tr><td>Occupation</td><td>{{ profile.occupation }}</td></tr>
+        <tr><td>Employer</td><td>{{ profile.employer }}</td></tr>
+        <tr><td>Income Source</td><td>{{ profile.get_income_source_display }}</td></tr>
+        <tr><td>Monthly Income</td><td>${{ profile.monthly_income }}</td></tr>
+        <tr><td>Investment Purpose</td><td>{{ profile.investment_purpose }}</td></tr>
+    </table>
+    {% endif %}
+
+    <h2>Submitted Documents</h2>
+    <ul class="doc-list">
+        {% for doc in documents %}
+        <li>{{ doc.get_document_type_display }} - {{ doc.file_name }} ({{ doc.file_size|filesizeformat }})</li>
+        {% empty %}
+        <li>No documents submitted</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Application Status</h2>
+    <table class="info-table">
+        <tr><td>Status</td><td><span class="status-badge {% if kyc.status == 'approved' %}status-approved{% else %}status-pending{% endif %}">{{ kyc.get_status_display }}</span></td></tr>
+        <tr><td>Submitted</td><td>{{ kyc.submitted_at|date:"F d, Y H:i" }}</td></tr>
+        {% if kyc.reviewed_at %}
+        <tr><td>Reviewed</td><td>{{ kyc.reviewed_at|date:"F d, Y H:i" }}</td></tr>
+        {% endif %}
+    </table>
+
+    <div class="footer">
+        <p>Generated: {{ date|date:"F d, Y H:i" }}</p>
+        <p>Nova Digital Finance | KYC Summary</p>
+    </div>
+</body>
+</html>

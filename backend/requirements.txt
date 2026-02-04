@@ -1,0 +1,48 @@
+# Django
+Django==5.1.4
+djangorestframework==3.15.2
+django-cors-headers==4.6.0
+django-filter==24.3
+
+# Database
+psycopg[binary]==3.2.4
+
+# Auth
+djangorestframework-simplejwt==5.4.0
+dj-rest-auth==7.0.0
+django-allauth==65.3.0
+
+# Celery
+celery==5.4.0
+django-celery-beat==2.7.0
+redis==5.2.1
+
+# PDF & Images
+WeasyPrint==63.1
+Pillow==11.1.0
+qrcode==8.0
+
+# Payments
+stripe==11.4.1
+requests==2.32.3
+
+# Security
+pyotp==2.9.0
+cryptography==44.0.0
+django-ratelimit==4.1.0
+
+# Email
+django-anymail[sendgrid]==12.0
+
+# API Docs
+drf-spectacular==0.28.0
+
+# Utils
+python-decouple==3.8
+django-storages==1.14.4
+
+# Testing
+pytest==8.3.4
+pytest-django==4.9.0
+factory-boy==3.3.1
+pytest-cov==6.0.0

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.8; font-size: 13px; }
+        .header { text-align: center; border-bottom: 2px solid #0f3460; padding-bottom: 15px; margin-bottom: 25px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #0f3460; }
+        h1 { text-align: center; color: #0f3460; font-size: 20px; margin: 20px 0; }
+        h2 { color: #0f3460; font-size: 15px; margin-top: 25px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        .parties { margin: 20px 0; }
+        .party { margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0f3460; }
+        .clause { margin: 10px 0; }
+        .schedule-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
+        .schedule-table th { background: #0f3460; color: white; padding: 8px; text-align: left; }
+        .schedule-table td { padding: 6px 8px; border-bottom: 1px solid #eee; }
+        .schedule-table tr:nth-child(even) { background: #f9f9f9; }
+        .signature-block { margin-top: 50px; display: flex; justify-content: space-between; }
+        .sig-line { width: 40%; border-top: 1px solid #333; padding-top: 5px; text-align: center; font-size: 12px; }
+        .footer { text-align: center; margin-top: 40px; font-size: 10px; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-text">NOVA DIGITAL FINANCE</div>
+    </div>
+
+    <h1>Trilateral Financing Contract</h1>
+    <p style="text-align: center; font-size: 12px; color: #666;">Document: {{ document_number }} | Date: {{ date|date:"F d, Y" }}</p>
+
+    <div class="parties">
+        <h2>Parties</h2>
+        <div class="party">
+            <strong>First Party (Financier):</strong> Nova Digital Finance<br>
+            Operating in BroNova (PRN) cryptocurrency financing services
+        </div>
+        <div class="party">
+            <strong>Second Party (Client):</strong> {{ user.get_full_name }}<br>
+            Client ID: {{ user.client_id }} | Email: {{ user.email }}
+            {% if profile %}
+            <br>Address: {{ profile.address_line_1 }}{% if profile.city %}, {{ profile.city }}{% endif %}{% if profile.country %}, {{ profile.country }}{% endif %}
+            {% endif %}
+        </div>
+        <div class="party">
+            <strong>Third Party (Investment Platform):</strong> CapiMax Investment<br>
+            Investment management platform (panel.capimaxinvestment.com)
+        </div>
+    </div>
+
+    <h2>Article 1: Financing Details</h2>
+    <div class="clause">
+        <p>The First Party agrees to provide the Second Party with BroNova (PRN) tokens as follows:</p>
+        <ul>
+            <li>Application Number: <strong>{{ financing.application_number }}</strong></li>
+            <li>BroNova Amount: <strong>{{ financing.bronova_amount }} PRN</strong></li>
+            <li>USD Equivalent: <strong>${{ financing.usd_equivalent }}</strong></li>
+            <li>Processing Fee: <strong>{{ financing.fee_percentage }}% (${{ financing.fee_amount }})</strong></li>
+            <li>Repayment Period: <strong>{{ financing.repayment_period_months }} months</strong></li>
+            <li>Monthly Installment: <strong>{{ financing.monthly_installment }} PRN</strong></li>
+        </ul>
+    </div>
+
+    <h2>Article 2: Terms and Conditions</h2>
+    <div class="clause">
+        <ol>
+            <li>This financing is interest-free. The only charge is the processing fee stated above.</li>
+            <li>The processing fee is non-refundable once paid.</li>
+            <li>The Second Party shall repay the total BroNova amount in equal monthly installments.</li>
+            <li>Late payments may incur additional review and may affect future financing eligibility.</li>
+            <li>The Second Party may invest their BroNova tokens through CapiMax Investment platform.</li>
+            <li>Investment returns are separate from repayment obligations.</li>
+        </ol>
+    </div>
+
+    <h2>Article 3: Repayment Schedule</h2>
+    {% if installments %}
+    <table class="schedule-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Due Date</th>
+                <th>Amount (PRN)</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inst in installments %}
+            <tr>
+                <td>{{ inst.installment_number }}</td>
+                <td>{{ inst.due_date|date:"M d, Y" }}</td>
+                <td>{{ inst.amount }}</td>
+                <td>{{ inst.get_status_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <h2>Article 4: Signatures</h2>
+    <p>By signing this contract, all parties agree to the terms and conditions stated herein.</p>
+
+    <div style="margin-top: 40px;">
+        <div style="margin-bottom: 30px;">
+            <div style="border-top: 1px solid #333; width: 250px; padding-top: 5px;">
+                Nova Digital Finance (First Party)<br>
+                <span style="font-size: 11px; color: #666;">Date: {{ date|date:"F d, Y" }}</span>
+            </div>
+        </div>
+        <div style="margin-bottom: 30px;">
+            <div style="border-top: 1px solid #333; width: 250px; padding-top: 5px;">
+                {{ user.get_full_name }} (Second Party)<br>
+                <span style="font-size: 11px; color: #666;">Date: _______________</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Nova Digital Finance | Trilateral Financing Contract</p>
+        <p>This document is electronically generated. Verification: {{ document_number }}</p>
+    </div>
+</body>
+</html>

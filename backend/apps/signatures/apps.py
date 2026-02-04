@@ -1,0 +1,8 @@
+from django.apps import AppConfig
+
+
+class SignaturesConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.signatures"
+    label = "signatures"
+    verbose_name = "Signatures"
