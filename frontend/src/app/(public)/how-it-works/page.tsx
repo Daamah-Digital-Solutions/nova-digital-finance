@@ -30,11 +30,11 @@ const steps = [
   {
     number: 2,
     icon: FileText,
-    title: "Apply for Financing",
+    title: "Choose Your PRN Amount",
     description:
-      "Once your KYC is approved, submit a financing application. Choose your desired amount and repayment period that best suits your needs.",
+      "Once your KYC is approved, decide how many BroNova (PRN) tokens you need. Each PRN is valued at exactly 1 USD, so if you need 10,000 PRN, you will pay 10,000 USD plus the processing fee.",
     details: [
-      "Financing amounts from 500 to 100,000 PRN",
+      "Choose from 500 to 100,000 PRN (1 PRN = 1 USD)",
       "Repayment periods from 6 to 36 months",
       "Equal monthly installments with zero interest",
     ],
@@ -66,24 +66,24 @@ const steps = [
   {
     number: 5,
     icon: Coins,
-    title: "Receive BroNova Tokens",
+    title: "Receive Certificate of PRN Ownership",
     description:
-      "After the contract is signed and the processing fee is confirmed, your BroNova (PRN) tokens are disbursed to your account at the current USD equivalent value.",
+      "After the contract is signed and the processing fee is paid, you receive an official Certificate of PRN Ownership. This document proves you own the specified number of BroNova tokens and can be used for investment with CapiMax Investments.",
     details: [
-      "Tokens disbursed at current USD equivalent rate",
-      "Tokens appear in your Nova Finance wallet",
-      "Ready for investment through CapiMax",
+      "Official certificate proving your PRN ownership",
+      "Each PRN backed at 1 USD value",
+      "Certificate used to invest through CapiMax Investments",
     ],
   },
   {
     number: 6,
     icon: TrendingUp,
-    title: "Invest through CapiMax & Repay Monthly",
+    title: "Invest via CapiMax & Repay Monthly",
     description:
-      "Deploy your BroNova tokens through the CapiMax Investment platform while making your monthly repayment installments through Nova Digital Finance.",
+      "Use your Certificate of PRN Ownership to invest through CapiMax Investments. Meanwhile, repay your monthly installments through Nova Digital Finance.",
     details: [
-      "Access CapiMax investment opportunities",
-      "Make equal monthly repayments",
+      "Present your PRN certificate to CapiMax Investments",
+      "Make equal monthly repayments in USD",
       "Track everything from your dashboard",
     ],
   },
@@ -191,7 +191,7 @@ export default function HowItWorksPage() {
                   <p className="mb-1 text-sm text-muted-foreground">
                     Processing Fee (5%)
                   </p>
-                  <p className="text-2xl font-bold">500 PRN</p>
+                  <p className="text-2xl font-bold">$500</p>
                 </CardContent>
               </Card>
               <Card>
@@ -199,7 +199,7 @@ export default function HowItWorksPage() {
                   <p className="mb-1 text-sm text-muted-foreground">
                     Monthly (12 months)
                   </p>
-                  <p className="text-2xl font-bold">833.33 PRN</p>
+                  <p className="text-2xl font-bold">$833.33</p>
                 </CardContent>
               </Card>
             </div>

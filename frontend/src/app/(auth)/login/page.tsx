@@ -41,23 +41,46 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const response = await api.post("/auth/login/", data);
-      const { access, refresh, user } = response.data;
+
+      // dj-rest-auth may return access/refresh or access_token/refresh_token
+      const access = response.data.access || response.data.access_token;
+      const refresh = response.data.refresh || response.data.refresh_token;
+
+      if (!access) {
+        toast.error("Login failed: no access token received.");
+        return;
+      }
 
       localStorage.setItem("access_token", access);
-      localStorage.setItem("refresh_token", refresh);
+      if (refresh) {
+        localStorage.setItem("refresh_token", refresh);
+      }
 
       // Fetch full user data
-      const userResponse = await api.get("/users/me/");
-      setUser(userResponse.data);
+      try {
+        const userResponse = await api.get("/users/me/");
+        setUser(userResponse.data);
+      } catch {
+        // User endpoint might not be ready yet, use login response user if available
+        if (response.data.user) {
+          setUser(response.data.user);
+        }
+      }
 
       toast.success("Welcome back!");
       router.push("/dashboard");
     } catch (error: any) {
-      const message =
-        error.response?.data?.non_field_errors?.[0] ||
-        error.response?.data?.detail ||
-        "Invalid credentials";
-      toast.error(message);
+      if (error.code === "ERR_NETWORK" || !error.response) {
+        toast.error("Cannot connect to server. Please make sure the backend is running.");
+      } else {
+        const message =
+          error.response?.data?.non_field_errors?.[0] ||
+          error.response?.data?.detail ||
+          error.response?.data?.email?.[0] ||
+          error.response?.data?.password?.[0] ||
+          "Invalid email or password.";
+        toast.error(message);
+      }
     } finally {
       setIsLoading(false);
     }

@@ -74,16 +74,26 @@ export default function SettingsPage() {
     try {
       setLoading(true);
       const res = await api.get("/users/me/");
-      const data = res.data as UserProfile;
-      setProfile(data);
+      const data = res.data;
+      const profile = data.profile || {};
+      setProfile({
+        ...data,
+        phone: profile.phone || "",
+        address_line_1: profile.address_line_1 || "",
+        address_line_2: profile.address_line_2 || "",
+        city: profile.city || "",
+        state: profile.state || "",
+        postal_code: profile.postal_code || "",
+        country: profile.country || "",
+      });
       setFirstName(data.first_name || "");
       setLastName(data.last_name || "");
-      setPhone(data.phone || "");
-      setAddressLine1(data.address_line_1 || "");
-      setAddressLine2(data.address_line_2 || "");
-      setCity(data.city || "");
-      setStateField(data.state || "");
-      setPostalCode(data.postal_code || "");
+      setPhone(profile.phone || "");
+      setAddressLine1(profile.address_line_1 || "");
+      setAddressLine2(profile.address_line_2 || "");
+      setCity(profile.city || "");
+      setStateField(profile.state || "");
+      setPostalCode(profile.postal_code || "");
     } catch (error: any) {
       toast.error("Failed to load profile");
     } finally {
@@ -97,12 +107,14 @@ export default function SettingsPage() {
       const res = await api.patch("/users/me/", {
         first_name: firstName,
         last_name: lastName,
-        phone,
-        address_line_1: addressLine1,
-        address_line_2: addressLine2,
-        city,
-        state: stateField,
-        postal_code: postalCode,
+        profile: {
+          phone,
+          address_line_1: addressLine1,
+          address_line_2: addressLine2,
+          city,
+          state: stateField,
+          postal_code: postalCode,
+        },
       });
       setProfile(res.data);
       if (setUser) {
@@ -136,8 +148,8 @@ export default function SettingsPage() {
 
     try {
       setChangingPassword(true);
-      await api.post("/users/me/change-password/", {
-        current_password: currentPassword,
+      await api.post("/auth/password/change/", {
+        old_password: currentPassword,
         new_password: newPassword,
       });
       toast.success("Password changed successfully");
@@ -157,11 +169,11 @@ export default function SettingsPage() {
     try {
       setTogglingMFA(true);
       if (profile.mfa_enabled) {
-        await api.post("/users/me/mfa/disable/");
+        await api.post("/auth/mfa/disable/");
         setProfile({ ...profile, mfa_enabled: false });
         toast.success("MFA has been disabled");
       } else {
-        await api.post("/users/me/mfa/enable/");
+        await api.post("/auth/mfa/enable/");
         setProfile({ ...profile, mfa_enabled: true });
         toast.success("MFA has been enabled. Please set up your authenticator app.");
       }

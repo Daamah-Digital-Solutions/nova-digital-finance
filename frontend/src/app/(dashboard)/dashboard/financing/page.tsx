@@ -71,13 +71,16 @@ interface Installment {
 
 const PERIOD_OPTIONS = [
   { value: "6", label: "6 months" },
+  { value: "9", label: "9 months" },
   { value: "12", label: "12 months" },
   { value: "18", label: "18 months" },
   { value: "24", label: "24 months" },
+  { value: "30", label: "30 months" },
   { value: "36", label: "36 months" },
 ];
 
-const FEE_RATE = 0.08; // 8% annual fee rate
+// Fee is a one-time processing fee of 3-5% (uses ~4% as default estimate)
+const DEFAULT_FEE_PERCENTAGE = 4;
 
 export default function FinancingPage() {
   const [loading, setLoading] = useState(true);
@@ -102,22 +105,21 @@ export default function FinancingPage() {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
-  // Calculator computations
+  // Calculator computations: 1 PRN = 1 USD, one-time 3-5% processing fee
   const calcResults = useMemo(() => {
-    const amount = calcAmount;
+    const prnAmount = calcAmount; // PRN amount = USD equivalent
     const months = parseInt(calcPeriod);
-    const annualRate = FEE_RATE;
-    const totalFee = amount * annualRate * (months / 12);
-    const totalAmount = amount + totalFee;
-    const monthlyPayment = totalAmount / months;
-    const feePercentage = (totalFee / amount) * 100;
+    const feePercentage = DEFAULT_FEE_PERCENTAGE;
+    const totalFee = (prnAmount * feePercentage) / 100;
+    const monthlyInstallment = prnAmount / months; // Interest-free: divide evenly
+    const totalCost = prnAmount + totalFee; // Total = PRN amount + processing fee
 
     return {
-      amount,
+      prnAmount,
       months,
       totalFee,
-      totalAmount,
-      monthlyPayment,
+      totalCost,
+      monthlyInstallment,
       feePercentage,
     };
   }, [calcAmount, calcPeriod]);
@@ -162,8 +164,8 @@ export default function FinancingPage() {
     try {
       setSubmitting(true);
       await api.post("/financing/", {
-        amount: calcResults.amount,
-        period_months: calcResults.months,
+        bronova_amount: calcResults.prnAmount,
+        repayment_period_months: calcResults.months,
       });
       toast.success("Financing application submitted successfully!");
       setShowApplyDialog(false);
@@ -254,11 +256,12 @@ export default function FinancingPage() {
               <CardContent className="space-y-6">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="amount">Financing Amount (USD)</Label>
+                    <Label htmlFor="amount">How many PRN do you need?</Label>
                     <span className="text-sm font-medium">
-                      ${calcAmount.toLocaleString()}
+                      {calcAmount.toLocaleString()} PRN
                     </span>
                   </div>
+                  <p className="text-xs text-muted-foreground">1 PRN = 1 USD</p>
                   <Input
                     id="amount-input"
                     type="number"
@@ -279,13 +282,13 @@ export default function FinancingPage() {
                     className="w-full accent-primary"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>$500</span>
-                    <span>$100,000</span>
+                    <span>500 PRN</span>
+                    <span>100,000 PRN</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Financing Period</Label>
+                  <Label>Repayment Period</Label>
                   <Select value={calcPeriod} onValueChange={setCalcPeriod}>
                     <SelectTrigger>
                       <SelectValue />
@@ -300,13 +303,16 @@ export default function FinancingPage() {
                   </Select>
                 </div>
 
-                <div className="rounded-lg bg-muted/50 p-3">
+                <div className="rounded-lg bg-muted/50 p-3 space-y-1">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Percent className="h-4 w-4" />
                     <span>
-                      Annual Fee Rate: <strong>{(FEE_RATE * 100).toFixed(1)}%</strong>
+                      Processing Fee: <strong>3-5%</strong> (one-time, non-refundable)
                     </span>
                   </div>
+                  <p className="text-xs text-muted-foreground pl-6">
+                    Interest-free repayment. You only pay the PRN amount in equal monthly installments.
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -322,10 +328,22 @@ export default function FinancingPage() {
                   <div className="rounded-lg border p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <DollarSign className="h-4 w-4" />
-                      Monthly Payment
+                      PRN Amount
                     </div>
                     <p className="mt-1 text-2xl font-bold">
-                      ${calcResults.monthlyPayment.toLocaleString("en-US", {
+                      {calcResults.prnAmount.toLocaleString()} PRN
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      = ${calcResults.prnAmount.toLocaleString()} USD
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      Monthly Installment
+                    </div>
+                    <p className="mt-1 text-2xl font-bold">
+                      ${calcResults.monthlyInstallment.toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
@@ -333,15 +351,8 @@ export default function FinancingPage() {
                   </div>
                   <div className="rounded-lg border p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      Period
-                    </div>
-                    <p className="mt-1 text-2xl font-bold">{calcResults.months} months</p>
-                  </div>
-                  <div className="rounded-lg border p-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Percent className="h-4 w-4" />
-                      Total Fee
+                      Processing Fee ({calcResults.feePercentage}%)
                     </div>
                     <p className="mt-1 text-2xl font-bold">
                       ${calcResults.totalFee.toLocaleString("en-US", {
@@ -350,22 +361,29 @@ export default function FinancingPage() {
                       })}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {calcResults.feePercentage.toFixed(1)}% of principal
+                      One-time, non-refundable
                     </p>
                   </div>
                   <div className="rounded-lg border bg-primary/5 p-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <TrendingUp className="h-4 w-4" />
-                      Total Amount
+                      Total Cost
                     </div>
                     <p className="mt-1 text-2xl font-bold text-primary">
-                      ${calcResults.totalAmount.toLocaleString("en-US", {
+                      ${calcResults.totalCost.toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
                     </p>
+                    <p className="text-xs text-muted-foreground">
+                      PRN amount + processing fee
+                    </p>
                   </div>
                 </div>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  Interest-free. 1 PRN = 1 USD. Upon approval, you receive a Certificate of PRN Ownership for investment with CapiMax.
+                </p>
 
                 <Button
                   className="w-full"
@@ -373,7 +391,7 @@ export default function FinancingPage() {
                   onClick={() => setShowApplyDialog(true)}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Apply for Financing
+                  Apply for PRN Financing
                 </Button>
               </CardContent>
             </Card>
@@ -485,26 +503,30 @@ export default function FinancingPage() {
           <div className="space-y-4">
             <div className="rounded-lg border p-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Amount</span>
-                <span className="font-medium">${calcResults.amount.toLocaleString()}</span>
+                <span className="text-muted-foreground">PRN Amount</span>
+                <span className="font-medium">{calcResults.prnAmount.toLocaleString()} PRN</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Period</span>
+                <span className="text-muted-foreground">USD Equivalent</span>
+                <span className="font-medium">${calcResults.prnAmount.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Repayment Period</span>
                 <span className="font-medium">{calcResults.months} months</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Monthly Payment</span>
+                <span className="text-muted-foreground">Monthly Installment</span>
                 <span className="font-medium">
-                  ${calcResults.monthlyPayment.toFixed(2)}
+                  ${calcResults.monthlyInstallment.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Fee</span>
+                <span className="text-muted-foreground">Processing Fee ({calcResults.feePercentage}%)</span>
                 <span className="font-medium">${calcResults.totalFee.toFixed(2)}</span>
               </div>
               <div className="flex justify-between border-t pt-2 text-sm font-bold">
-                <span>Total Amount</span>
-                <span>${calcResults.totalAmount.toFixed(2)}</span>
+                <span>Total Cost</span>
+                <span>${calcResults.totalCost.toFixed(2)}</span>
               </div>
             </div>
 

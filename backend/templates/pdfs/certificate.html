@@ -8,12 +8,18 @@
         .header { text-align: center; border-bottom: 3px solid #0f3460; padding-bottom: 20px; margin-bottom: 30px; }
         .logo-text { font-size: 28px; font-weight: bold; color: #0f3460; letter-spacing: 2px; }
         .subtitle { font-size: 14px; color: #666; margin-top: 5px; }
-        .certificate-title { text-align: center; font-size: 32px; color: #0f3460; margin: 40px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; }
+        .certificate-title { text-align: center; font-size: 28px; color: #0f3460; margin: 40px 0 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; }
+        .certificate-subtitle { text-align: center; font-size: 16px; color: #555; margin-bottom: 30px; }
         .certificate-body { text-align: center; font-size: 16px; margin: 30px 0; }
-        .highlight { font-size: 20px; font-weight: bold; color: #0f3460; }
+        .highlight { font-size: 22px; font-weight: bold; color: #0f3460; }
+        .highlight-amount { font-size: 28px; font-weight: bold; color: #0f3460; margin: 15px 0; }
+        .rate-note { font-size: 14px; color: #666; margin-top: 5px; }
         .details-table { width: 80%; margin: 30px auto; border-collapse: collapse; }
         .details-table td { padding: 10px 15px; border-bottom: 1px solid #eee; }
         .details-table td:first-child { font-weight: bold; color: #555; width: 40%; }
+        .investment-note { text-align: center; margin: 30px auto; padding: 20px; border: 2px solid #0f3460; border-radius: 8px; max-width: 80%; background: #f8f9ff; }
+        .investment-note p { margin: 5px 0; }
+        .investment-note .title { font-weight: bold; color: #0f3460; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
         .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
         .doc-number { font-size: 11px; color: #999; }
     </style>
@@ -24,15 +30,16 @@
         <div class="subtitle">BroNova (PRN) Cryptocurrency Financing</div>
     </div>
 
-    <div class="certificate-title">Certificate (Sak)</div>
+    <div class="certificate-title">Certificate of PRN Ownership</div>
+    <div class="certificate-subtitle">BroNova (PRN) Token Ownership Document</div>
 
     <div class="certificate-body">
         <p>This is to certify that</p>
         <p class="highlight">{{ user.get_full_name }}</p>
         <p>Client ID: {{ user.client_id }}</p>
-        <p>has been granted financing of</p>
-        <p class="highlight">{{ financing.bronova_amount }} PRN (BroNova)</p>
-        <p>equivalent to USD {{ financing.usd_equivalent }}</p>
+        <p style="margin-top: 20px;">is the verified owner of</p>
+        <p class="highlight-amount">{{ financing.bronova_amount }} PRN</p>
+        <p class="rate-note">Valued at ${{ financing.usd_equivalent }} USD (1 PRN = 1 USD)</p>
     </div>
 
     <table class="details-table">
@@ -41,12 +48,16 @@
             <td>{{ financing.application_number }}</td>
         </tr>
         <tr>
-            <td>BroNova Amount</td>
+            <td>PRN Amount</td>
             <td>{{ financing.bronova_amount }} PRN</td>
         </tr>
         <tr>
-            <td>USD Equivalent</td>
+            <td>USD Value</td>
             <td>${{ financing.usd_equivalent }}</td>
+        </tr>
+        <tr>
+            <td>Exchange Rate</td>
+            <td>1 PRN = 1 USD</td>
         </tr>
         <tr>
             <td>Repayment Period</td>
@@ -54,7 +65,7 @@
         </tr>
         <tr>
             <td>Monthly Installment</td>
-            <td>{{ financing.monthly_installment }} PRN</td>
+            <td>${{ financing.monthly_installment }}</td>
         </tr>
         <tr>
             <td>Date Issued</td>
@@ -62,9 +73,15 @@
         </tr>
     </table>
 
+    <div class="investment-note">
+        <p class="title">Investment Eligibility</p>
+        <p>This certificate entitles the holder to invest the above PRN amount</p>
+        <p>through <strong>CapiMax Investments</strong> (panel.capimaxinvestment.com)</p>
+    </div>
+
     <div class="footer">
-        <p class="doc-number">Document: {{ document_number }}</p>
-        <p>Nova Digital Finance | Interest-Free Financing</p>
+        <p class="doc-number">Document: {{ document_number }} | Verification: {{ verification_code }}</p>
+        <p>Nova Digital Finance | Interest-Free PRN Financing</p>
         <p>This certificate is electronically generated and verified.</p>
     </div>
 </body>

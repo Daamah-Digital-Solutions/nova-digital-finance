@@ -56,12 +56,16 @@ export default function RegisterPage() {
       toast.success("Account created! Please check your email to verify your account.");
       router.push("/verify-email?email=" + encodeURIComponent(data.email));
     } catch (error: any) {
-      const errors = error.response?.data;
-      if (errors) {
-        const firstError = Object.values(errors).flat()[0];
-        toast.error(String(firstError));
+      if (error.code === "ERR_NETWORK" || !error.response) {
+        toast.error("Cannot connect to server. Please make sure the backend is running.");
       } else {
-        toast.error("Registration failed. Please try again.");
+        const errors = error.response?.data;
+        if (errors) {
+          const firstError = Object.values(errors).flat()[0];
+          toast.error(String(firstError));
+        } else {
+          toast.error("Registration failed. Please try again.");
+        }
       }
     } finally {
       setIsLoading(false);

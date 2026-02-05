@@ -23,6 +23,27 @@ api.interceptors.request.use(
   }
 );
 
+// URLs that should not trigger token refresh or redirect on 401
+const AUTH_URLS = ["/auth/login/", "/auth/register/", "/auth/token/refresh/"];
+
+function isAuthUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  return AUTH_URLS.some((authUrl) => url.includes(authUrl));
+}
+
+function redirectToLogin() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    // Only redirect if not already on an auth page
+    if (!window.location.pathname.startsWith("/login") &&
+        !window.location.pathname.startsWith("/register") &&
+        !window.location.pathname.startsWith("/forgot-password")) {
+      window.location.href = "/login";
+    }
+  }
+}
+
 // Response interceptor: handle 401 and attempt token refresh
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -45,6 +66,11 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // Don't attempt refresh for auth endpoints
+    if (isAuthUrl(originalRequest?.url)) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
@@ -70,11 +96,7 @@ api.interceptors.response.use(
 
       if (!refreshToken) {
         isRefreshing = false;
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          window.location.href = "/login";
-        }
+        redirectToLogin();
         return Promise.reject(error);
       }
 
@@ -84,9 +106,9 @@ api.interceptors.response.use(
           { refresh: refreshToken }
         );
 
-        const { access } = response.data;
+        const access = response.data.access || response.data.access_token;
 
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && access) {
           localStorage.setItem("access_token", access);
         }
 
@@ -97,13 +119,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          window.location.href = "/login";
-        }
-
+        redirectToLogin();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

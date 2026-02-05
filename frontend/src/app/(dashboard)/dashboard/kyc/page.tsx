@@ -166,29 +166,30 @@ export default function KYCPage() {
       try {
         setLoading(true);
         const res = await api.get("/users/me/");
-        const data = res.data as KYCProfile;
+        const data = res.data;
+        const profile = data.profile || {};
         setKycStatus(data.kyc_status || "pending");
 
         personalForm.reset({
           first_name: data.first_name || "",
           last_name: data.last_name || "",
-          phone: data.phone || "",
-          date_of_birth: data.date_of_birth || "",
-          address_line_1: data.address_line_1 || "",
-          address_line_2: data.address_line_2 || "",
-          city: data.city || "",
-          state: data.state || "",
-          postal_code: data.postal_code || "",
-          country: data.country || "",
-          nationality: data.nationality || "",
+          phone: profile.phone || "",
+          date_of_birth: profile.date_of_birth || "",
+          address_line_1: profile.address_line_1 || "",
+          address_line_2: profile.address_line_2 || "",
+          city: profile.city || "",
+          state: profile.state || "",
+          postal_code: profile.postal_code || "",
+          country: profile.country || "",
+          nationality: profile.nationality || "",
         });
 
         employmentForm.reset({
-          occupation: data.occupation || "",
-          employer: data.employer || "",
-          income_source: data.income_source || "",
-          monthly_income: data.monthly_income || "",
-          investment_purpose: data.investment_purpose || "",
+          occupation: profile.occupation || "",
+          employer: profile.employer || "",
+          income_source: profile.income_source || "",
+          monthly_income: profile.monthly_income || "",
+          investment_purpose: profile.investment_purpose || "",
         });
       } catch (error: any) {
         toast.error("Failed to load profile data");
@@ -218,27 +219,43 @@ export default function KYCPage() {
       const personalData = personalForm.getValues();
       const employmentData = employmentForm.getValues();
 
-      // Submit profile data
+      // Submit profile data (nested under profile key)
       await api.patch("/users/me/", {
-        ...personalData,
-        ...employmentData,
+        first_name: personalData.first_name,
+        last_name: personalData.last_name,
+        profile: {
+          phone: personalData.phone,
+          date_of_birth: personalData.date_of_birth,
+          address_line_1: personalData.address_line_1,
+          address_line_2: personalData.address_line_2,
+          city: personalData.city,
+          state: personalData.state,
+          postal_code: personalData.postal_code,
+          country: personalData.country,
+          nationality: personalData.nationality,
+          occupation: employmentData.occupation,
+          employer: employmentData.employer,
+          income_source: employmentData.income_source,
+          monthly_income: employmentData.monthly_income,
+          investment_purpose: employmentData.investment_purpose,
+        },
       });
 
-      // Upload documents
+      // Upload KYC documents
       const docEntries = Object.entries(documents).filter(([, doc]) => doc !== null);
       for (const [docType, doc] of docEntries) {
         if (doc) {
           const formData = new FormData();
           formData.append("file", doc.file);
           formData.append("document_type", docType);
-          await api.post("/documents/upload/", formData, {
+          await api.post("/kyc/documents/", formData, {
             headers: { "Content-Type": "multipart/form-data" },
           });
         }
       }
 
-      // Submit KYC
-      await api.post("/users/me/kyc/submit/");
+      // Submit KYC application
+      await api.post("/kyc/submit/");
       setKycStatus("submitted");
       toast.success("KYC application submitted successfully!");
     } catch (error: any) {

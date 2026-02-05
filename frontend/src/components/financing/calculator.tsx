@@ -80,7 +80,8 @@ export function FinancingCalculator({
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>Amount (PRN)</Label>
+            <Label>How many PRN do you need?</Label>
+            <p className="text-xs text-muted-foreground">1 PRN = 1 USD</p>
             <Input
               type="number"
               min={500}
@@ -166,7 +167,8 @@ export function FinancingCalculator({
                 </span>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                * Interest-free. Only the processing fee applies.
+                * Interest-free. 1 PRN = 1 USD. You pay the PRN amount in USD plus the one-time processing fee.
+                Upon approval, you receive a Certificate of PRN Ownership for investment with CapiMax.
               </p>
             </div>
 
@@ -175,7 +177,7 @@ export function FinancingCalculator({
                 className="w-full"
                 onClick={() => onApply(amount, parseInt(period))}
               >
-                Apply for Financing
+                Apply for PRN
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             )}

@@ -27,9 +27,9 @@ export default function HomePage() {
               <span className="text-primary">BroNova (PRN)</span>
             </h1>
             <p className="mb-8 text-lg text-muted-foreground lg:text-xl">
-              Get interest-free financing in BroNova cryptocurrency with only
-              3-5% processing fee. Receive tokens at USD equivalent value, repay
-              monthly, and invest through CapiMax.
+              Acquire BroNova (PRN) tokens at a fixed rate of 1 PRN = 1 USD with
+              only a 3-5% processing fee. Receive a Certificate of PRN Ownership,
+              repay monthly, and invest through CapiMax.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -70,15 +70,15 @@ export default function HomePage() {
               },
               {
                 icon: Zap,
-                title: "Quick Process",
+                title: "1 PRN = 1 USD",
                 description:
-                  "Complete KYC, apply for financing, and receive your BroNova tokens efficiently.",
+                  "Each BroNova token is valued at exactly 1 USD. Choose how many PRN you need and pay the equivalent in dollars.",
               },
               {
                 icon: TrendingUp,
                 title: "Invest via CapiMax",
                 description:
-                  "Use your BroNova tokens to invest through the CapiMax investment platform.",
+                  "Receive a Certificate of PRN Ownership and use it to invest through the CapiMax investment platform.",
               },
               {
                 icon: Clock,
@@ -113,9 +113,9 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-4">
             {[
               { step: "1", title: "Register & KYC", desc: "Create your account and complete identity verification." },
-              { step: "2", title: "Apply for Financing", desc: "Choose your amount (500-100,000 PRN) and repayment period." },
-              { step: "3", title: "Pay Fee & Sign", desc: "Pay the processing fee and sign the contract electronically." },
-              { step: "4", title: "Receive & Invest", desc: "Get your BroNova tokens and invest through CapiMax." },
+              { step: "2", title: "Choose Your PRN", desc: "Select how many PRN you need (500-100,000). 1 PRN = 1 USD." },
+              { step: "3", title: "Pay Fee & Sign", desc: "Pay the USD amount plus processing fee and sign the contract." },
+              { step: "4", title: "Get Certificate & Invest", desc: "Receive your Certificate of PRN Ownership and invest through CapiMax." },
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
