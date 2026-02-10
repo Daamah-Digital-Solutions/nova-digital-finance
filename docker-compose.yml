@@ -79,7 +79,7 @@ services:
     networks:
       - nova_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/admin/login/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -105,16 +105,15 @@ services:
       start_period: 30s
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     container_name: nova_nginx
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/prod.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /var/www/certbot:/var/www/certbot:ro
       - static_files:/var/www/static:ro
       - media_files:/var/www/media:ro
     depends_on:
