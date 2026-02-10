@@ -7,25 +7,31 @@ DEBUG = False
 FRONTEND_URL = config("FRONTEND_URL", default="https://novadf.com")
 GOOGLE_OAUTH_CALLBACK_URL = f"{FRONTEND_URL}/auth/callback"
 
-# Security
+# Security - SSL handled by nginx reverse proxy
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=False, cast=bool)
+SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
+CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 X_FRAME_OPTIONS = "DENY"
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "https://novadf.com",
-    "https://www.novadf.com",
-    config("FRONTEND_URL", default="https://novadf.com"),
-]
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS",
+    default="https://novadf.com,https://www.novadf.com",
+).split(",")
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="https://novadf.com,https://www.novadf.com",
+).split(",")
 
 # Allauth OAuth settings
 LOGIN_REDIRECT_URL = "/api/v1/auth/google/callback/"
