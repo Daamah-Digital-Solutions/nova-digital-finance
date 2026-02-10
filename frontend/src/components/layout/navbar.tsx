@@ -19,6 +19,7 @@ const navLinks = [
   { href: "/how-it-works", label: "How It Works" },
   { href: "/features", label: "Features" },
   { href: "/faq", label: "FAQ" },
+  { href: "/contact", label: "Contact" },
   {
     href: process.env.NEXT_PUBLIC_CAPIMAX_URL || "https://panel.capimaxinvestment.com/",
     label: "CapiMax",
