@@ -114,11 +114,25 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - letsencrypt_data:/etc/letsencrypt:ro
+      - certbot_webroot:/var/www/certbot:ro
       - static_files:/var/www/static:ro
       - media_files:/var/www/media:ro
     depends_on:
       - backend
       - frontend
+    networks:
+      - nova_network
+
+  certbot:
+    image: certbot/certbot
+    container_name: nova_certbot
+    volumes:
+      - letsencrypt_data:/etc/letsencrypt
+      - certbot_webroot:/var/www/certbot
+    depends_on:
+      - nginx
+    command: certonly --webroot --webroot-path=/var/www/certbot --non-interactive --agree-tos --email admin@novadf.com -d novadf.com -d www.novadf.com --force-renewal
     networks:
       - nova_network
 
@@ -130,6 +144,10 @@ volumes:
   media_files:
     driver: local
   static_files:
+    driver: local
+  letsencrypt_data:
+    driver: local
+  certbot_webroot:
     driver: local
 
 networks:
