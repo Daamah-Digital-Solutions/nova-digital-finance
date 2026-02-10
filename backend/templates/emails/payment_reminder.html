@@ -1,0 +1,59 @@
+{% extends "emails/base.html" %}
+{% block title %}Payment Reminder - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Friendly Payment Reminder</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<p>This is a friendly reminder that your upcoming payment is due soon. We want to make sure you have enough time to prepare.</p>
+
+<div class="warning-box">
+    <p><strong>Payment Due in {{ days_until_due }} Day{{ days_until_due|pluralize }}</strong></p>
+    <p>Due Date: <strong>{{ due_date }}</strong></p>
+</div>
+
+<div class="info-box">
+    <p><strong>Payment Details</strong></p>
+    <p>Application: <strong>{{ application_number }}</strong></p>
+    <p>Installment: <strong>#{{ installment_number }} of {{ total_installments }}</strong></p>
+    <p>Amount Due: <strong>${{ amount }}</strong></p>
+    <p>Due Date: <strong>{{ due_date }}</strong></p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/payments" class="button">Make Payment Now</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Quick Payment Options:</strong></p>
+
+<ol>
+    <li><strong>Credit/Debit Card</strong> - Instant processing via Stripe</li>
+    <li><strong>Cryptocurrency</strong> - Pay with USDT, BTC, or ETH</li>
+</ol>
+
+<div class="info-box">
+    <p><strong>Your Payment Progress</strong></p>
+    <p>Payments Completed: {{ installment_number|add:"-1" }} of {{ total_installments }}</p>
+    <p>You're doing great! Keep up the good work.</p>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Why Pay On Time?</strong></p>
+<ul>
+    <li><strong>Avoid Late Fees</strong> - On-time payments mean no extra charges</li>
+    <li><strong>Build Credit History</strong> - Consistent payments reflect positively</li>
+    <li><strong>Peace of Mind</strong> - Stay stress-free with timely payments</li>
+    <li><strong>Future Benefits</strong> - Good standing unlocks better financing options</li>
+</ul>
+
+<p style="font-size: 13px; color: #64748b;">Having trouble making this payment? Please contact our support team before the due date. We're here to help find solutions.</p>
+
+<p>Thank you for being a valued customer!</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Team</strong></p>
+{% endblock %}

@@ -11,12 +11,19 @@ interface AuthState {
   setUser: (user: User | null) => void;
   logout: () => void;
   fetchUser: () => Promise<void>;
+  checkInitialAuth: () => boolean;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+// Check if there's a token on initialization
+const hasToken = () => {
+  if (typeof window === "undefined") return false;
+  return !!localStorage.getItem("access_token");
+};
+
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: hasToken(), // Only loading if we have a token to verify
 
   setUser: (user) => {
     set({
@@ -39,6 +46,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   fetchUser: async () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+
+    if (!token) {
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+      return;
+    }
+
     try {
       set({ isLoading: true });
       const response = await api.get<User>("/users/me/");
@@ -47,12 +65,22 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-    } catch {
+    } catch (error) {
+      // Clear tokens if they're invalid
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+      }
       set({
         user: null,
         isAuthenticated: false,
         isLoading: false,
       });
+      throw error;
     }
+  },
+
+  checkInitialAuth: () => {
+    return hasToken();
   },
 }));

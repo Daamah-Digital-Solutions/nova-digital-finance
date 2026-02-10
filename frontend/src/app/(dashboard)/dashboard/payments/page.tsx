@@ -47,7 +47,7 @@ import {
 interface FinancingApplication {
   id: string;
   application_number: string;
-  amount: number;
+  bronova_amount: number;
   status: string;
   installments?: Installment[];
 }
@@ -57,28 +57,22 @@ interface Installment {
   installment_number: number;
   due_date: string;
   amount: number;
+  paid_amount: number;
+  remaining_amount: number;
   status: string;
+  paid_at: string | null;
 }
 
 interface Payment {
   id: string;
-  reference: string;
+  transaction_reference: string;
   amount: number;
   payment_type: string;
   payment_method: string;
   status: string;
   created_at: string;
-  financing_application?: string;
+  financing?: string;
   installment?: string;
-}
-
-interface ScheduledPayment {
-  id: string;
-  reference: string;
-  amount: number;
-  scheduled_date: string;
-  status: string;
-  financing_application_number: string;
 }
 
 export default function PaymentsPage() {
@@ -86,7 +80,6 @@ export default function PaymentsPage() {
   const [processing, setProcessing] = useState(false);
   const [financingApps, setFinancingApps] = useState<FinancingApplication[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [scheduledPayments, setScheduledPayments] = useState<ScheduledPayment[]>([]);
 
   // Make Payment state
   const [selectedAppId, setSelectedAppId] = useState("");
@@ -101,10 +94,9 @@ export default function PaymentsPage() {
   async function fetchData() {
     try {
       setLoading(true);
-      const [financingRes, paymentsRes, scheduledRes] = await Promise.all([
+      const [financingRes, paymentsRes] = await Promise.all([
         api.get("/financing/"),
         api.get("/payments/"),
-        api.get("/payments/scheduled/").catch(() => ({ data: [] })),
       ]);
 
       const apps = Array.isArray(financingRes.data)
@@ -116,11 +108,6 @@ export default function PaymentsPage() {
         ? paymentsRes.data
         : paymentsRes.data.results || [];
       setPayments(paymentsList);
-
-      const scheduled = Array.isArray(scheduledRes.data)
-        ? scheduledRes.data
-        : scheduledRes.data.results || [];
-      setScheduledPayments(scheduled);
     } catch (error: any) {
       toast.error("Failed to load payment data");
     } finally {
@@ -131,7 +118,7 @@ export default function PaymentsPage() {
   const selectedApp = financingApps.find((a) => a.id === selectedAppId);
   const pendingInstallments =
     selectedApp?.installments?.filter(
-      (i) => i.status === "pending" || i.status === "upcoming" || i.status === "overdue"
+      (i) => i.status === "upcoming" || i.status === "due" || i.status === "overdue"
     ) || [];
   const selectedInstallment = pendingInstallments.find((i) => i.id === selectedInstallmentId);
 
@@ -162,15 +149,14 @@ export default function PaymentsPage() {
     }
   }
 
-  async function handleCancelScheduled(paymentId: string) {
-    try {
-      await api.post(`/payments/scheduled/${paymentId}/cancel/`);
-      toast.success("Scheduled payment cancelled");
-      fetchData();
-    } catch (error: any) {
-      toast.error("Failed to cancel scheduled payment");
-    }
-  }
+  // Compute upcoming installments across all active apps for the Scheduled tab
+  const upcomingInstallments = financingApps
+    .flatMap((app) =>
+      (app.installments || [])
+        .filter((i) => i.status === "upcoming" || i.status === "due" || i.status === "overdue")
+        .map((i) => ({ ...i, application_number: app.application_number }))
+    )
+    .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
 
   const statusVariant = (status: string) => {
     switch (status) {
@@ -231,7 +217,7 @@ export default function PaymentsPage() {
           </TabsTrigger>
           <TabsTrigger value="scheduled">
             <CalendarClock className="mr-2 h-4 w-4" />
-            Scheduled
+            Upcoming
           </TabsTrigger>
         </TabsList>
 
@@ -268,7 +254,7 @@ export default function PaymentsPage() {
                         {financingApps.map((app) => (
                           <SelectItem key={app.id} value={app.id}>
                             {app.application_number} - $
-                            {Number(app.amount).toLocaleString("en-US", {
+                            {Number(app.bronova_amount).toLocaleString("en-US", {
                               minimumFractionDigits: 2,
                             })}
                           </SelectItem>
@@ -433,7 +419,7 @@ export default function PaymentsPage() {
                           })}
                         </TableCell>
                         <TableCell className="font-mono text-xs">
-                          {payment.reference?.slice(0, 16) || "---"}
+                          {payment.transaction_reference?.slice(0, 16) || "---"}
                         </TableCell>
                         <TableCell className="capitalize">
                           {payment.payment_type?.replace("_", " ") || "---"}
@@ -464,59 +450,64 @@ export default function PaymentsPage() {
           </Card>
         </TabsContent>
 
-        {/* Scheduled Tab */}
+        {/* Scheduled Tab - shows upcoming installments */}
         <TabsContent value="scheduled">
           <Card>
             <CardHeader>
-              <CardTitle>Scheduled Payments</CardTitle>
-              <CardDescription>Upcoming automated payments</CardDescription>
+              <CardTitle>Upcoming Installments</CardTitle>
+              <CardDescription>Your upcoming payment schedule from active financing</CardDescription>
             </CardHeader>
             <CardContent>
-              {scheduledPayments.length === 0 ? (
+              {upcomingInstallments.length === 0 ? (
                 <div className="py-12 text-center">
                   <CalendarClock className="mx-auto h-10 w-10 text-muted-foreground" />
-                  <p className="mt-2 text-muted-foreground">No scheduled payments</p>
+                  <p className="mt-2 text-muted-foreground">No upcoming installments</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {scheduledPayments.map((sp) => (
-                    <div
-                      key={sp.id}
-                      className="flex items-center justify-between rounded-lg border p-4"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
-                            ${Number(sp.amount).toLocaleString("en-US", {
-                              minimumFractionDigits: 2,
-                            })}
-                          </p>
-                          <Badge variant={statusVariant(sp.status)}>{sp.status}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {sp.financing_application_number} | Scheduled for{" "}
-                          {new Date(sp.scheduled_date).toLocaleDateString("en-US", {
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>#</TableHead>
+                      <TableHead>Application</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Remaining</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {upcomingInstallments.map((inst) => (
+                      <TableRow key={inst.id}>
+                        <TableCell>{inst.installment_number}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {inst.application_number}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(inst.due_date).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
                             year: "numeric",
                           })}
-                        </p>
-                        <p className="font-mono text-xs text-muted-foreground">
-                          Ref: {sp.reference}
-                        </p>
-                      </div>
-                      {(sp.status === "pending" || sp.status === "scheduled") && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleCancelScheduled(sp.id)}
-                        >
-                          Cancel
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          ${Number(inst.amount).toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          ${Number(inst.remaining_amount).toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariant(inst.status)}>
+                            {inst.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </CardContent>
           </Card>

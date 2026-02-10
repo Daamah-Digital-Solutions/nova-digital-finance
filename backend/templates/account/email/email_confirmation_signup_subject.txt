@@ -1,0 +1,1 @@
+{% load i18n %}{% autoescape off %}Verify Your Email - Nova Digital Finance{% endautoescape %}

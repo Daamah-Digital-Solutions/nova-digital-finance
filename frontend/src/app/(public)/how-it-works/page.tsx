@@ -32,7 +32,7 @@ const steps = [
     icon: FileText,
     title: "Choose Your PRN Amount",
     description:
-      "Once your KYC is approved, decide how many BroNova (PRN) tokens you need. Each PRN is valued at exactly 1 USD, so if you need 10,000 PRN, you will pay 10,000 USD plus the processing fee.",
+      "Once your KYC is approved, decide how many Pronova (PRN) tokens you need. Each PRN is valued at exactly 1 USD, so if you need 10,000 PRN, you will pay 10,000 USD plus the processing fee.",
     details: [
       "Choose from 500 to 100,000 PRN (1 PRN = 1 USD)",
       "Repayment periods from 6 to 36 months",
@@ -68,7 +68,7 @@ const steps = [
     icon: Coins,
     title: "Receive Certificate of PRN Ownership",
     description:
-      "After the contract is signed and the processing fee is paid, you receive an official Certificate of PRN Ownership. This document proves you own the specified number of BroNova tokens and can be used for investment with CapiMax Investments.",
+      "After the contract is signed and the processing fee is paid, you receive an official Certificate of PRN Ownership. This document proves you own the specified number of Pronova tokens and can be used for investment with CapiMax Investments.",
     details: [
       "Official certificate proving your PRN ownership",
       "Each PRN backed at 1 USD value",
@@ -100,7 +100,7 @@ export default function HowItWorksPage() {
               How It Works
             </h1>
             <p className="text-lg text-muted-foreground lg:text-xl">
-              Getting interest-free BroNova financing is simple. Follow these six
+              Getting interest-free Pronova financing is simple. Follow these six
               steps to get started on your journey.
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function HowItWorksPage() {
             </h2>
             <p className="mb-6 text-primary-foreground/80">
               Create your account today and begin the process of obtaining
-              interest-free BroNova financing.
+              interest-free Pronova financing.
             </p>
             <Link href="/register">
               <Button

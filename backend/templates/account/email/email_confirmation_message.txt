@@ -1,0 +1,25 @@
+{% load account %}
+{% load i18n %}
+{% autoescape off %}
+
+Verify Your Email Address
+
+Dear {% user_display user %},
+
+You have requested to verify this email address for your Nova Digital Finance account.
+
+Please click the link below to confirm:
+
+{{ activate_url }}
+
+This verification link will expire in 24 hours.
+
+If you did not request this verification, please disregard this email.
+
+Best regards,
+The Nova Digital Finance Team
+
+---
+Nova Digital Finance
+Interest-Free Cryptocurrency Financing
+{% endautoescape %}

@@ -1,0 +1,60 @@
+{% extends "emails/base.html" %}
+{% block title %}Document Ready for Signature - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Your Document is Ready for Signature</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<p>An important document is ready for your review and signature. This is a required step to proceed with your financing application.</p>
+
+<div class="warning-box">
+    <p><strong>Action Required</strong></p>
+    <p>Please review and sign your document to continue the financing process.</p>
+</div>
+
+<div class="info-box">
+    <p><strong>Document Details</strong></p>
+    <p>Document Type: <strong>{{ document_type }}</strong></p>
+    <p>Application Number: <strong>{{ application_number }}</strong></p>
+    <p>Created Date: <strong>{{ created_date }}</strong></p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/signatures" class="button">Review & Sign Document</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>What You're Signing:</strong></p>
+
+<ul>
+    <li><strong>Financing Agreement</strong> - Terms and conditions of your financing</li>
+    <li><strong>Repayment Schedule</strong> - Your monthly payment obligations</li>
+    <li><strong>Service Terms</strong> - Platform usage guidelines</li>
+</ul>
+
+<div class="info-box">
+    <p><strong>How Digital Signing Works</strong></p>
+    <p>1. Review the document carefully</p>
+    <p>2. Type your full legal name as your signature</p>
+    <p>3. Confirm your consent to the terms</p>
+    <p>4. Receive a signed copy for your records</p>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Important Information:</strong></p>
+
+<ul>
+    <li><strong>Legal Validity</strong> - Digital signatures are legally binding</li>
+    <li><strong>Secure Process</strong> - Your signature is encrypted and timestamped</li>
+    <li><strong>Download Copy</strong> - You'll receive a copy of all signed documents</li>
+    <li><strong>Questions?</strong> - Contact support before signing if needed</li>
+</ul>
+
+<p style="font-size: 13px; color: #64748b;">Please read the document carefully before signing. By signing, you agree to all terms and conditions outlined in the agreement.</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Legal Team</strong></p>
+{% endblock %}

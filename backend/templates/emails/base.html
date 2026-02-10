@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{% block title %}Nova Digital Finance{% endblock %}</title>
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
+    </style>
+    <![endif]-->
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrapper {
+            width: 100%;
+            background-color: #f0f2f5;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+        .header {
+            background: linear-gradient(135deg, #0a0f1e 0%, #1a1f3e 50%, #0a0f1e 100%);
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            margin: 8px 0 0 0;
+            font-size: 14px;
+        }
+        .content {
+            padding: 45px 40px;
+        }
+        .content h2 {
+            color: #0a0f1e;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .content p {
+            margin: 16px 0;
+            color: #4a5568;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        .content ul, .content ol {
+            color: #4a5568;
+            padding-left: 20px;
+        }
+        .content li {
+            margin: 10px 0;
+            font-size: 15px;
+        }
+        .button-wrapper {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #1d2fd4 0%, #0a0f1e 100%);
+            color: #ffffff !important;
+            padding: 16px 40px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 4px 14px rgba(29, 47, 212, 0.35);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 47, 212, 0.45);
+        }
+        .info-box {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-left: 4px solid #1d2fd4;
+            padding: 20px 24px;
+            margin: 25px 0;
+            border-radius: 0 12px 12px 0;
+        }
+        .info-box p {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        .info-box strong {
+            color: #0a0f1e;
+        }
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid #10b981;
+            padding: 20px 24px;
+            margin: 25px 0;
+            border-radius: 0 12px 12px 0;
+        }
+        .success-box p {
+            color: #065f46;
+            margin: 8px 0;
+        }
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 20px 24px;
+            margin: 25px 0;
+            border-radius: 0 12px 12px 0;
+        }
+        .warning-box p {
+            color: #92400e;
+            margin: 8px 0;
+        }
+        .error-box {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left: 4px solid #ef4444;
+            padding: 20px 24px;
+            margin: 25px 0;
+            border-radius: 0 12px 12px 0;
+        }
+        .error-box p {
+            color: #991b1b;
+            margin: 8px 0;
+        }
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 30px 0;
+        }
+        .footer {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 35px 40px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer-logo {
+            max-width: 80px;
+            height: auto;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+        .footer p {
+            margin: 8px 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+        .footer a {
+            color: #1d2fd4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .footer-links {
+            margin: 20px 0;
+        }
+        .footer-links a {
+            display: inline-block;
+            margin: 0 12px;
+            color: #64748b;
+            font-size: 13px;
+        }
+        .footer-links a:hover {
+            color: #1d2fd4;
+        }
+        .copyright {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .copyright p {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        @media only screen and (max-width: 600px) {
+            .wrapper {
+                padding: 20px 10px;
+            }
+            .content {
+                padding: 30px 25px;
+            }
+            .header {
+                padding: 30px 20px;
+            }
+            .footer {
+                padding: 25px 20px;
+            }
+            .button {
+                padding: 14px 30px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <img src="{{ frontend_url }}/logo.png" alt="Nova Digital Finance" class="logo" />
+                <h1>Nova Digital Finance</h1>
+                <p>Interest-Free Cryptocurrency Financing</p>
+            </div>
+
+            <div class="content">
+                {% block content %}{% endblock %}
+            </div>
+
+            <div class="footer">
+                <img src="{{ frontend_url }}/logo.png" alt="Nova" class="footer-logo" />
+                <p><strong>Nova Digital Finance</strong></p>
+                <p>Your trusted partner for interest-free Pronova (PRN) financing</p>
+
+                <div class="footer-links">
+                    <a href="{{ frontend_url }}">Website</a>
+                    <a href="{{ frontend_url }}/dashboard">Dashboard</a>
+                    <a href="{{ frontend_url }}/faq">FAQ</a>
+                    <a href="{{ frontend_url }}/contact">Support</a>
+                </div>
+
+                <div class="copyright">
+                    <p>&copy; {{ year }} Nova Digital Finance. All rights reserved.</p>
+                    <p>This email was sent to {{ user_email }}</p>
+                    <p>If you didn't request this email, you can safely ignore it.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

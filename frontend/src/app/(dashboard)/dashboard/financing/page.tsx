@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/dialog";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { StripeCheckout } from "@/components/payments/stripe-checkout";
+import { CryptoPayment } from "@/components/payments/crypto-payment";
 import {
   Loader2,
   Calculator,
@@ -41,18 +43,28 @@ import {
   Calendar,
   Percent,
   TrendingUp,
+  CheckCircle2,
+  Circle,
+  AlertTriangle,
+  CreditCard,
+  PenTool,
+  Clock,
+  ShieldAlert,
   ChevronRight,
 } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface FinancingApplication {
   id: string;
   application_number: string;
-  amount: number;
-  period_months: number;
-  monthly_payment: number;
+  bronova_amount: number;
+  usd_equivalent: number;
   fee_percentage: number;
-  total_fee: number;
-  total_amount: number;
+  fee_amount: number;
+  repayment_period_months: number;
+  monthly_installment: number;
+  total_with_fee: number;
   status: string;
   created_at: string;
   installments?: Installment[];
@@ -63,10 +75,10 @@ interface Installment {
   installment_number: number;
   due_date: string;
   amount: number;
-  principal: number;
-  fee: number;
+  paid_amount: number;
+  remaining_amount: number;
   status: string;
-  paid_date: string | null;
+  paid_at: string | null;
 }
 
 const PERIOD_OPTIONS = [
@@ -82,10 +94,47 @@ const PERIOD_OPTIONS = [
 // Fee is a one-time processing fee of 3-5% (uses ~4% as default estimate)
 const DEFAULT_FEE_PERCENTAGE = 4;
 
+const STATUS_STEPS = [
+  { key: "submitted", label: "Apply" },
+  { key: "pending_signature", label: "Sign" },
+  { key: "pending_fee", label: "Pay Fee" },
+  { key: "active", label: "Active" },
+];
+
+function getStepIndex(status: string): number {
+  switch (status) {
+    case "draft":
+      return -1;
+    case "pending_signature":
+      return 1;
+    case "signed":
+    case "pending_fee":
+    case "fee_paid":
+      return 2;
+    case "approved":
+    case "active":
+      return 3;
+    case "completed":
+      return 4;
+    default:
+      return 0;
+  }
+}
+
 export default function FinancingPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const actionParam = searchParams.get("action");
+  const tabParam = searchParams.get("tab");
+  const defaultTab = (actionParam === "pay-fee" || tabParam === "applications") ? "applications" : "calculator";
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [applications, setApplications] = useState<FinancingApplication[]>([]);
+
+  // KYC state
+  const [kycStatus, setKycStatus] = useState<string>("pending");
+  const [kycLoading, setKycLoading] = useState(true);
 
   // Calculator state
   const [calcAmount, setCalcAmount] = useState(10000);
@@ -104,6 +153,15 @@ export default function FinancingPage() {
   const [selectedApp, setSelectedApp] = useState<FinancingApplication | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
+
+  // Fee payment dialog
+  const [showFeeDialog, setShowFeeDialog] = useState(false);
+  const [feePaymentApp, setFeePaymentApp] = useState<FinancingApplication | null>(null);
+  const [feePaymentMethod, setFeePaymentMethod] = useState<"stripe" | "crypto" | null>(null);
+
+  // Congratulations dialog
+  const [showCongratsDialog, setShowCongratsDialog] = useState(false);
+  const [congratsApp, setCongratsApp] = useState<FinancingApplication | null>(null);
 
   // Calculator computations: 1 PRN = 1 USD, one-time 3-5% processing fee
   const calcResults = useMemo(() => {
@@ -126,7 +184,47 @@ export default function FinancingPage() {
 
   useEffect(() => {
     fetchApplications();
+    fetchKycStatus();
   }, []);
+
+  // Auto-open fee payment dialog when redirected from signatures page
+  useEffect(() => {
+    if (actionParam === "pay-fee" && !loading && applications.length > 0) {
+      const pendingFeeApp = applications.find((a) => a.status === "pending_fee");
+      if (pendingFeeApp) {
+        openFeePayment(pendingFeeApp);
+        // Clean URL
+        router.replace("/dashboard/financing?tab=applications", { scroll: false });
+      }
+    }
+  }, [actionParam, loading, applications]);
+
+  // Show congrats after Stripe payment redirect
+  useEffect(() => {
+    const feePaid = searchParams.get("fee_paid");
+    if (feePaid === "true" && !loading && applications.length > 0) {
+      const activeApp = applications.find((a) => a.status === "active");
+      if (activeApp) {
+        setCongratsApp(activeApp);
+        setShowCongratsDialog(true);
+        router.replace("/dashboard/financing?tab=applications", { scroll: false });
+      }
+    }
+  }, [loading, applications]);
+
+  async function fetchKycStatus() {
+    try {
+      setKycLoading(true);
+      const res = await api.get("/users/me/");
+      setKycStatus(res.data.kyc_status || "pending");
+    } catch {
+      setKycStatus("pending");
+    } finally {
+      setKycLoading(false);
+    }
+  }
+
+  const kycApproved = kycStatus === "approved";
 
   async function fetchApplications() {
     try {
@@ -134,7 +232,7 @@ export default function FinancingPage() {
       const res = await api.get("/financing/");
       const data = Array.isArray(res.data) ? res.data : res.data.results || [];
       setApplications(data);
-    } catch (error: any) {
+    } catch {
       toast.error("Failed to load financing applications");
     } finally {
       setLoading(false);
@@ -147,7 +245,7 @@ export default function FinancingPage() {
       const res = await api.get(`/financing/${appId}/`);
       setSelectedApp(res.data);
       setShowDetailDialog(true);
-    } catch (error: any) {
+    } catch {
       toast.error("Failed to load application details");
     } finally {
       setLoadingDetail(false);
@@ -161,39 +259,75 @@ export default function FinancingPage() {
       return;
     }
 
+    if (!kycApproved) {
+      toast.error("Please complete KYC verification before applying");
+      return;
+    }
+
     try {
       setSubmitting(true);
-      await api.post("/financing/", {
+
+      // Step 1: Create DRAFT application
+      const createRes = await api.post("/financing/", {
         bronova_amount: calcResults.prnAmount,
         repayment_period_months: calcResults.months,
+        ack_terms: acknowledgments.terms,
+        ack_fee_non_refundable: acknowledgments.fees,
+        ack_repayment_schedule: acknowledgments.repayment,
+        ack_risk_disclosure: acknowledgments.accuracy,
       });
-      toast.success("Financing application submitted successfully!");
+
+      const appId = createRes.data.id;
+
+      // Step 2: Immediately submit → transitions to PENDING_SIGNATURE
+      await api.post(`/financing/${appId}/submit/`);
+
+      toast.success("Application submitted! Redirecting to sign your contract...");
       setShowApplyDialog(false);
       setAcknowledgments({ terms: false, accuracy: false, repayment: false, fees: false });
-      fetchApplications();
+
+      // Direct flow: go straight to signatures page
+      router.push("/dashboard/signatures");
     } catch (error: any) {
-      toast.error(error?.response?.data?.detail || "Failed to submit application");
+      toast.error(error?.response?.data?.detail || error?.response?.data?.error || "Failed to submit application");
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function openFeePayment(app: FinancingApplication) {
+    setFeePaymentApp(app);
+    setFeePaymentMethod(null);
+    setShowFeeDialog(true);
   }
 
   const statusVariant = (status: string) => {
     switch (status) {
       case "approved":
       case "active":
+      case "completed":
         return "default" as const;
-      case "pending":
+      case "pending_fee":
+      case "fee_paid":
+      case "pending_signature":
+      case "signed":
       case "under_review":
         return "secondary" as const;
       case "rejected":
       case "defaulted":
         return "destructive" as const;
-      case "completed":
+      case "draft":
         return "outline" as const;
       default:
         return "secondary" as const;
     }
+  };
+
+  const statusLabel = (status: string) => {
+    return status
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
   };
 
   const installmentStatusVariant = (status: string) => {
@@ -202,6 +336,7 @@ export default function FinancingPage() {
         return "default" as const;
       case "pending":
       case "upcoming":
+      case "due":
         return "secondary" as const;
       case "overdue":
         return "destructive" as const;
@@ -210,7 +345,7 @@ export default function FinancingPage() {
     }
   };
 
-  if (loading) {
+  if (loading || kycLoading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -227,7 +362,28 @@ export default function FinancingPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="calculator" className="space-y-6">
+      {/* KYC Gate Banner */}
+      {!kycApproved && (
+        <Card className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
+          <CardContent className="flex items-center gap-4 p-4">
+            <ShieldAlert className="h-8 w-8 text-yellow-600 shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">
+                KYC Verification Required
+              </h3>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                You must complete KYC verification before applying for financing.
+                Your current KYC status: <strong>{statusLabel(kycStatus)}</strong>
+              </p>
+            </div>
+            <Button asChild variant="outline" className="shrink-0">
+              <Link href="/dashboard/kyc">Complete KYC</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="calculator">
             <Calculator className="mr-2 h-4 w-4" />
@@ -389,9 +545,10 @@ export default function FinancingPage() {
                   className="w-full"
                   size="lg"
                   onClick={() => setShowApplyDialog(true)}
+                  disabled={!kycApproved}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Apply for PRN Financing
+                  {kycApproved ? "Apply for PRN Financing" : "Complete KYC to Apply"}
                 </Button>
               </CardContent>
             </Card>
@@ -416,6 +573,7 @@ export default function FinancingPage() {
                     variant="outline"
                     className="mt-4"
                     onClick={() => setShowApplyDialog(true)}
+                    disabled={!kycApproved}
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Apply Now
@@ -441,19 +599,19 @@ export default function FinancingPage() {
                           {app.application_number}
                         </TableCell>
                         <TableCell>
-                          ${Number(app.amount).toLocaleString("en-US", {
+                          ${Number(app.bronova_amount).toLocaleString("en-US", {
                             minimumFractionDigits: 2,
                           })}
                         </TableCell>
-                        <TableCell>{app.period_months} months</TableCell>
+                        <TableCell>{app.repayment_period_months} months</TableCell>
                         <TableCell>
-                          ${Number(app.monthly_payment).toLocaleString("en-US", {
+                          ${Number(app.monthly_installment).toLocaleString("en-US", {
                             minimumFractionDigits: 2,
                           })}
                         </TableCell>
                         <TableCell>
                           <Badge variant={statusVariant(app.status)}>
-                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                            {statusLabel(app.status)}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -463,7 +621,25 @@ export default function FinancingPage() {
                             year: "numeric",
                           })}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right space-x-1">
+                          {app.status === "pending_signature" && (
+                            <Button variant="default" size="sm" asChild>
+                              <Link href="/dashboard/signatures">
+                                <PenTool className="mr-1 h-4 w-4" />
+                                Sign Contract
+                              </Link>
+                            </Button>
+                          )}
+                          {app.status === "pending_fee" && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => openFeePayment(app)}
+                            >
+                              <CreditCard className="mr-1 h-4 w-4" />
+                              Pay Fee
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -621,24 +797,152 @@ export default function FinancingPage() {
 
           {selectedApp && (
             <div className="space-y-6">
+              {/* Status Stepper */}
+              <div className="rounded-lg border p-4">
+                <div className="flex items-center justify-between">
+                  {STATUS_STEPS.map((step, idx) => {
+                    const currentIdx = getStepIndex(selectedApp.status);
+                    const isCompleted = idx < currentIdx;
+                    const isCurrent = idx === currentIdx;
+                    const isRejected = selectedApp.status === "rejected";
+
+                    return (
+                      <div key={step.key} className="flex items-center">
+                        <div className="flex flex-col items-center">
+                          <div
+                            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium ${
+                              isRejected
+                                ? "bg-destructive/10 text-destructive"
+                                : isCompleted
+                                ? "bg-primary text-primary-foreground"
+                                : isCurrent
+                                ? "bg-primary/20 text-primary ring-2 ring-primary"
+                                : "bg-muted text-muted-foreground"
+                            }`}
+                          >
+                            {isCompleted ? (
+                              <CheckCircle2 className="h-4 w-4" />
+                            ) : isCurrent ? (
+                              <Circle className="h-4 w-4 fill-current" />
+                            ) : (
+                              <Circle className="h-4 w-4" />
+                            )}
+                          </div>
+                          <span
+                            className={`mt-1 text-xs ${
+                              isCompleted || isCurrent
+                                ? "font-medium text-foreground"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {step.label}
+                          </span>
+                        </div>
+                        {idx < STATUS_STEPS.length - 1 && (
+                          <div
+                            className={`mx-1 h-0.5 w-6 sm:w-10 ${
+                              idx < currentIdx ? "bg-primary" : "bg-muted"
+                            }`}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Contextual Action Banner */}
+              {selectedApp.status === "draft" && (
+                <div className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/30">
+                  <AlertTriangle className="h-5 w-5 text-blue-600 shrink-0" />
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    This application is a draft. Submit it to begin the financing process.
+                  </p>
+                </div>
+              )}
+              {selectedApp.status === "pending_signature" && (
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-purple-200 bg-purple-50 p-3 dark:border-purple-800 dark:bg-purple-950/30">
+                  <div className="flex items-center gap-3">
+                    <PenTool className="h-5 w-5 text-purple-600 shrink-0" />
+                    <p className="text-sm text-purple-800 dark:text-purple-200">
+                      Sign your financing contract to proceed.
+                    </p>
+                  </div>
+                  <Button size="sm" asChild>
+                    <Link href="/dashboard/signatures">Sign Contract</Link>
+                  </Button>
+                </div>
+              )}
+              {selectedApp.status === "pending_fee" && (
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-950/30">
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-5 w-5 text-yellow-600 shrink-0" />
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      Pay the processing fee to activate your financing.
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setShowDetailDialog(false);
+                      openFeePayment(selectedApp);
+                    }}
+                  >
+                    Pay Fee (${Number(selectedApp.fee_amount).toFixed(2)})
+                  </Button>
+                </div>
+              )}
+              {selectedApp.status === "active" && (
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/30">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                    <p className="text-sm text-green-800 dark:text-green-200">
+                      Your financing is active. Make payments on time.
+                    </p>
+                  </div>
+                  <Button size="sm" asChild>
+                    <Link href="/dashboard/payments">Make a Payment</Link>
+                  </Button>
+                </div>
+              )}
+              {selectedApp.status === "completed" && (
+                <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/30">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                  <p className="text-sm text-green-800 dark:text-green-200">
+                    All payments completed. Thank you!
+                  </p>
+                </div>
+              )}
+              {selectedApp.status === "rejected" && (
+                <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950/30">
+                  <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
+                  <p className="text-sm text-red-800 dark:text-red-200">
+                    This application was rejected. You may submit a new application.
+                  </p>
+                </div>
+              )}
+
               {/* Summary */}
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="rounded-lg border p-3">
-                  <p className="text-xs text-muted-foreground">Amount</p>
+                  <p className="text-xs text-muted-foreground">Pronova Amount</p>
                   <p className="text-lg font-bold">
-                    ${Number(selectedApp.amount).toLocaleString("en-US", {
+                    {Number(selectedApp.bronova_amount).toLocaleString()} PRN
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    = ${Number(selectedApp.bronova_amount).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <p className="text-xs text-muted-foreground">Period</p>
-                  <p className="text-lg font-bold">{selectedApp.period_months} months</p>
+                  <p className="text-lg font-bold">{selectedApp.repayment_period_months} months</p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <p className="text-xs text-muted-foreground">Status</p>
                   <Badge variant={statusVariant(selectedApp.status)} className="mt-1">
-                    {selectedApp.status.charAt(0).toUpperCase() + selectedApp.status.slice(1)}
+                    {statusLabel(selectedApp.status)}
                   </Badge>
                 </div>
               </div>
@@ -650,25 +954,25 @@ export default function FinancingPage() {
                   <span>{selectedApp.fee_percentage}%</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total Fee</span>
+                  <span className="text-muted-foreground">Processing Fee</span>
                   <span>
-                    ${Number(selectedApp.total_fee).toLocaleString("en-US", {
+                    ${Number(selectedApp.fee_amount).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Monthly Payment</span>
+                  <span className="text-muted-foreground">Monthly Installment</span>
                   <span className="font-medium">
-                    ${Number(selectedApp.monthly_payment).toLocaleString("en-US", {
+                    ${Number(selectedApp.monthly_installment).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-2 text-sm font-bold">
-                  <span>Total Amount</span>
+                  <span>Total Cost (PRN + Fee)</span>
                   <span>
-                    ${Number(selectedApp.total_amount).toLocaleString("en-US", {
+                    ${(Number(selectedApp.bronova_amount) + Number(selectedApp.fee_amount)).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
@@ -685,9 +989,9 @@ export default function FinancingPage() {
                         <TableRow>
                           <TableHead>#</TableHead>
                           <TableHead>Due Date</TableHead>
-                          <TableHead>Principal</TableHead>
-                          <TableHead>Fee</TableHead>
-                          <TableHead>Total</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Paid</TableHead>
+                          <TableHead>Remaining</TableHead>
                           <TableHead>Status</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -702,11 +1006,9 @@ export default function FinancingPage() {
                                 year: "numeric",
                               })}
                             </TableCell>
-                            <TableCell>${Number(inst.principal).toFixed(2)}</TableCell>
-                            <TableCell>${Number(inst.fee).toFixed(2)}</TableCell>
-                            <TableCell className="font-medium">
-                              ${Number(inst.amount).toFixed(2)}
-                            </TableCell>
+                            <TableCell>${Number(inst.amount).toFixed(2)}</TableCell>
+                            <TableCell>${Number(inst.paid_amount || 0).toFixed(2)}</TableCell>
+                            <TableCell>${Number(inst.remaining_amount || inst.amount).toFixed(2)}</TableCell>
                             <TableCell>
                               <Badge variant={installmentStatusVariant(inst.status)}>
                                 {inst.status}
@@ -721,6 +1023,189 @@ export default function FinancingPage() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Fee Payment Dialog */}
+      <Dialog open={showFeeDialog} onOpenChange={setShowFeeDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Pay Processing Fee</DialogTitle>
+            <DialogDescription>
+              Pay the one-time processing fee for application {feePaymentApp?.application_number}
+            </DialogDescription>
+          </DialogHeader>
+
+          {feePaymentApp && (
+            <div className="space-y-4">
+              <div className="rounded-lg border p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Application</span>
+                  <span className="font-mono">{feePaymentApp.application_number}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Pronova Amount</span>
+                  <span>{Number(feePaymentApp.bronova_amount).toLocaleString()} PRN</span>
+                </div>
+                <div className="flex justify-between text-sm font-bold border-t pt-2">
+                  <span>Processing Fee</span>
+                  <span>${Number(feePaymentApp.fee_amount).toFixed(2)}</span>
+                </div>
+              </div>
+
+              {!feePaymentMethod && (
+                <div className="space-y-3">
+                  <Label>Select Payment Method</Label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <button
+                      onClick={() => setFeePaymentMethod("stripe")}
+                      className="flex items-center gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-muted/50"
+                    >
+                      <CreditCard className="h-6 w-6 text-muted-foreground" />
+                      <div>
+                        <p className="font-medium">Card / Bank</p>
+                        <p className="text-xs text-muted-foreground">
+                          Pay via credit card or bank
+                        </p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setFeePaymentMethod("crypto")}
+                      className="flex items-center gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-muted/50"
+                    >
+                      <DollarSign className="h-6 w-6 text-muted-foreground" />
+                      <div>
+                        <p className="font-medium">Cryptocurrency</p>
+                        <p className="text-xs text-muted-foreground">
+                          Pay with BTC, ETH, USDT
+                        </p>
+                      </div>
+                    </button>
+                  </div>
+                  {/* DEV: Mock payment for testing */}
+                  <Button
+                    variant="outline"
+                    className="w-full border-dashed border-orange-400 text-orange-600 hover:bg-orange-50"
+                    onClick={async () => {
+                      try {
+                        const res = await api.post(`/financing/${feePaymentApp.id}/mock-pay-fee/`);
+                        setShowFeeDialog(false);
+                        setCongratsApp(res.data);
+                        setShowCongratsDialog(true);
+                        fetchApplications();
+                      } catch (err: any) {
+                        toast.error(err?.response?.data?.error || "Mock payment failed");
+                      }
+                    }}
+                  >
+                    [DEV] Mock Pay Fee (skip real payment)
+                  </Button>
+                </div>
+              )}
+
+              {feePaymentMethod === "stripe" && (
+                <StripeCheckout
+                  financingId={feePaymentApp.id}
+                  paymentType="fee"
+                  amount={Number(feePaymentApp.fee_amount)}
+                  applicationNumber={feePaymentApp.application_number}
+                  successUrl={`${typeof window !== "undefined" ? window.location.origin : ""}/dashboard/financing?fee_paid=true`}
+                  cancelUrl={`${typeof window !== "undefined" ? window.location.origin : ""}/dashboard/financing?fee_cancelled=true`}
+                />
+              )}
+
+              {feePaymentMethod === "crypto" && (
+                <CryptoPayment
+                  financingId={feePaymentApp.id}
+                  paymentType="fee"
+                  amount={Number(feePaymentApp.fee_amount)}
+                />
+              )}
+
+              {feePaymentMethod && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFeePaymentMethod(null)}
+                  className="w-full"
+                >
+                  Choose a different payment method
+                </Button>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Congratulations Dialog */}
+      <Dialog open={showCongratsDialog} onOpenChange={setShowCongratsDialog}>
+        <DialogContent className="max-w-md text-center">
+          <div className="flex flex-col items-center space-y-6 py-4">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <CheckCircle2 className="h-10 w-10 text-green-600" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold">Congratulations!</h2>
+              <p className="text-muted-foreground">
+                Your financing has been activated successfully.
+              </p>
+            </div>
+
+            {congratsApp && (
+              <div className="w-full rounded-lg border bg-muted/30 p-4 space-y-2 text-left">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Application</span>
+                  <span className="font-mono">{congratsApp.application_number}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Pronova Amount</span>
+                  <span className="font-medium">{Number(congratsApp.bronova_amount).toLocaleString()} PRN</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Monthly Installment</span>
+                  <span className="font-medium">
+                    ${Number(congratsApp.monthly_installment).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Period</span>
+                  <span className="font-medium">{congratsApp.repayment_period_months} months</span>
+                </div>
+                <div className="flex justify-between text-sm border-t pt-2">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge variant="default">Active</Badge>
+                </div>
+              </div>
+            )}
+
+            <p className="text-sm text-muted-foreground">
+              Your installment schedule is now active. You can view your documents and payment schedule from your dashboard.
+            </p>
+
+            <div className="flex w-full gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setShowCongratsDialog(false);
+                  router.push("/dashboard/documents");
+                }}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Download Documents
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  setShowCongratsDialog(false);
+                  router.push("/dashboard");
+                }}
+              >
+                Go to Dashboard
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

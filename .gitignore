@@ -55,3 +55,5 @@ coverage/
 .pytest_cache/
 playwright-report/
 test-results/
+nul
+*.nul

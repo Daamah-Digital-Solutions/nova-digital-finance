@@ -1,0 +1,58 @@
+{% extends "emails/base.html" %}
+{% block title %}Financing Application Submitted - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Financing Application Submitted Successfully</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<p>Great news! Your financing application has been successfully submitted and is now being processed. We're excited to help you access interest-free digital financing.</p>
+
+<div class="success-box">
+    <p><strong>Application Received!</strong></p>
+    <p>Your application is now in our system and ready for the next steps.</p>
+</div>
+
+<div class="info-box">
+    <p><strong>Application Summary</strong></p>
+    <p>Application Number: <strong>{{ application_number }}</strong></p>
+    <p>Financing Amount: <strong>{{ amount }} PRN</strong></p>
+    <p>Repayment Period: <strong>{{ period_months }} months</strong></p>
+    <p>Processing Fee: <strong>${{ fee_amount }}</strong> (one-time)</p>
+    <p>Monthly Installment: <strong>${{ monthly_installment }}</strong></p>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Next Steps to Complete Your Financing:</strong></p>
+
+<ol>
+    <li><strong>Sign Your Contract</strong> - Review and digitally sign your financing agreement</li>
+    <li><strong>Pay Processing Fee</strong> - Complete the one-time processing fee payment</li>
+    <li><strong>Receive Your Tokens</strong> - Your Pronova tokens will be allocated within 24-48 hours</li>
+</ol>
+
+<div class="warning-box">
+    <p><strong>Action Required</strong></p>
+    <p>Please sign your financing contract to proceed. Your application will remain pending until the contract is signed.</p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/signatures" class="button">Sign Contract Now</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Your Financing Benefits:</strong></p>
+<ul>
+    <li><strong>0% Interest</strong> - No interest charges on your financing</li>
+    <li><strong>Fixed Payments</strong> - Same payment amount every month</li>
+    <li><strong>Flexible Use</strong> - Use your tokens for investments with CapiMax</li>
+    <li><strong>Early Payoff</strong> - Pay off early without penalties</li>
+</ul>
+
+<p>If you have any questions about your application, our support team is ready to assist you.</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Team</strong></p>
+{% endblock %}

@@ -67,19 +67,26 @@ export default function DocumentsPage() {
     }
   }
 
+  function base64ToBlob(base64: string, contentType: string): Blob {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return new Blob([bytes], { type: contentType });
+  }
+
   async function handleDownload(doc: Document) {
     try {
-      const res = await api.get(`/documents/${doc.id}/download/`, {
-        responseType: "blob",
-      });
-      const blob = new Blob([res.data]);
+      const res = await api.get(`/documents/${doc.id}/download/`);
+      const blob = base64ToBlob(res.data.data, res.data.content_type || "application/pdf");
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = window.document.createElement("a");
       link.href = url;
-      link.download = doc.title || `document-${doc.document_number}`;
-      document.body.appendChild(link);
+      link.download = res.data.filename || `${doc.document_number || "document"}.pdf`;
+      window.document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      window.document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
       toast.error("Failed to download document");
@@ -88,14 +95,10 @@ export default function DocumentsPage() {
 
   async function handleView(doc: Document) {
     try {
-      if (doc.file_url) {
-        window.open(doc.file_url, "_blank");
-      } else {
-        const res = await api.get(`/documents/${doc.id}/view/`);
-        if (res.data.url) {
-          window.open(res.data.url, "_blank");
-        }
-      }
+      const res = await api.get(`/documents/${doc.id}/download/`);
+      const blob = base64ToBlob(res.data.data, res.data.content_type || "application/pdf");
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
     } catch (error: any) {
       toast.error("Failed to open document");
     }

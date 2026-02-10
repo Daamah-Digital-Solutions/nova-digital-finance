@@ -29,6 +29,18 @@ class FinancingListCreateView(generics.ListCreateAPIView):
             user=self.request.user
         ).prefetch_related("installments")
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        kyc_status = None
+        if hasattr(user, "kyc_application"):
+            kyc_status = user.kyc_application.status
+        if kyc_status != "approved":
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied(
+                "KYC verification must be approved before applying for financing."
+            )
+        serializer.save(user=user)
+
 
 class FinancingDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated, IsOwner]
@@ -64,8 +76,69 @@ class FinancingSubmitView(APIView):
         )
         serializer.is_valid(raise_exception=True)
 
-        financing.status = FinancingApplication.Status.PENDING_FEE
+        # Generate contract PDF + create signature request
+        try:
+            from apps.documents.services import DocumentService
+            DocumentService.create_signing_request(financing)
+        except Exception as e:
+            import logging
+            import traceback
+            logger = logging.getLogger(__name__)
+            logger.error(f"Submit signing request failed: {e}")
+            logger.error(traceback.format_exc())
+            return Response(
+                {"error": f"Failed to generate contract: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Refresh from DB after status change
+        financing.refresh_from_db()
+
+        return Response(
+            FinancingApplicationSerializer(financing).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class MockFeePaymentView(APIView):
+    """DEV ONLY: Simulates fee payment and advances the application status."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            financing = FinancingApplication.objects.get(pk=pk, user=request.user)
+        except FinancingApplication.DoesNotExist:
+            return Response(
+                {"error": "Application not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if financing.status != FinancingApplication.Status.PENDING_FEE:
+            return Response(
+                {"error": f"Cannot pay fee. Current status: {financing.status}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Go straight to ACTIVE, generate installments
+        from apps.financing.services import FinancingService
+        from apps.documents.services import DocumentService
+        from apps.documents.models import Document
+
+        financing.status = FinancingApplication.Status.ACTIVE
         financing.save(update_fields=["status", "updated_at"])
+        FinancingService.generate_installments(financing)
+
+        # Only generate certificate if one doesn't already exist
+        existing_cert = Document.objects.filter(
+            financing=financing,
+            document_type=Document.DocumentType.CERTIFICATE,
+        ).exists()
+        if not existing_cert:
+            try:
+                DocumentService.generate_certificate(financing)
+            except Exception:
+                pass  # Certificate generation is non-blocking
 
         return Response(
             FinancingApplicationSerializer(financing).data,

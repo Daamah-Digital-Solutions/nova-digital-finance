@@ -61,7 +61,7 @@ interface ClientRequest {
 interface FinancingApplication {
   id: string;
   application_number: string;
-  amount: number;
+  bronova_amount: number;
   status: string;
 }
 
@@ -350,7 +350,7 @@ export default function RequestsPage() {
                   {financingApps.map((app) => (
                     <SelectItem key={app.id} value={app.id}>
                       {app.application_number} - $
-                      {Number(app.amount).toLocaleString("en-US", {
+                      {Number(app.bronova_amount).toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                       })}
                     </SelectItem>

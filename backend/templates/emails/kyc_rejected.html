@@ -1,0 +1,55 @@
+{% extends "emails/base.html" %}
+{% block title %}KYC Application Update - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>KYC Verification Requires Additional Action</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<p>Thank you for submitting your KYC application. After reviewing your documents, we were unable to complete the verification process at this time.</p>
+
+<div class="error-box">
+    <p><strong>Reason for Review:</strong></p>
+    <p>{{ rejection_reason }}</p>
+</div>
+
+<p><strong>Don't worry - this is easily resolved!</strong> Most verification issues can be fixed by resubmitting the correct documents.</p>
+
+<div class="divider"></div>
+
+<p><strong>Common Issues & Solutions:</strong></p>
+
+<ul>
+    <li><strong>Blurry Images</strong> - Ensure good lighting and a steady hand when photographing documents</li>
+    <li><strong>Expired Documents</strong> - Please use valid, non-expired government-issued ID</li>
+    <li><strong>Name Mismatch</strong> - Ensure the name on documents matches your registered name</li>
+    <li><strong>Incomplete Documents</strong> - All four corners of the document should be visible</li>
+    <li><strong>Wrong Document Type</strong> - Use accepted documents: Passport, National ID, or Driver's License</li>
+</ul>
+
+<div class="info-box">
+    <p><strong>How to Resubmit:</strong></p>
+    <p>1. Log in to your Nova Digital Finance account</p>
+    <p>2. Go to KYC Verification section</p>
+    <p>3. Upload new, clear photos of your documents</p>
+    <p>4. Submit for review</p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/kyc" class="button">Resubmit Documents</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Need Help?</strong></p>
+<p>If you're unsure about the requirements or need assistance, our support team is ready to help. Contact us and we'll guide you through the process.</p>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/contact" class="button" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%); box-shadow: 0 4px 14px rgba(100, 116, 139, 0.35);">Contact Support</a>
+</div>
+
+<p>We look forward to completing your verification soon.</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Compliance Team</strong></p>
+{% endblock %}

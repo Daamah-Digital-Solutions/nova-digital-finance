@@ -17,7 +17,7 @@ const benefits = [
   {
     title: "Seamless Financing to Investment",
     description:
-      "Receive BroNova tokens through Nova Finance and deploy them directly into CapiMax investment opportunities without friction.",
+      "Receive Pronova tokens through Nova Finance and deploy them directly into CapiMax investment opportunities without friction.",
   },
   {
     title: "Professional Portfolio Management",
@@ -109,7 +109,7 @@ export default function PartnershipPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    Disburses BroNova tokens
+                    Disburses Pronova tokens
                   </li>
                 </ul>
               </CardContent>
@@ -211,7 +211,7 @@ export default function PartnershipPage() {
                   Step 3
                 </div>
                 <p className="text-sm font-semibold">
-                  BroNova tokens deployed to CapiMax for investment
+                  Pronova tokens deployed to CapiMax for investment
                 </p>
               </div>
               <div className="rounded-xl border bg-card p-4 text-center">

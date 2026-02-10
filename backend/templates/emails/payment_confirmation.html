@@ -1,0 +1,64 @@
+{% extends "emails/base.html" %}
+{% block title %}Payment Confirmed - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Payment Successfully Processed</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<div class="success-box">
+    <p><strong>Thank You!</strong></p>
+    <p>Your payment has been successfully received and processed.</p>
+</div>
+
+<div class="info-box">
+    <p><strong>Payment Receipt</strong></p>
+    <p>Amount Paid: <strong>${{ amount }}</strong></p>
+    <p>Payment Type: <strong>{{ payment_type }}</strong></p>
+    <p>Transaction ID: <strong>{{ transaction_id }}</strong></p>
+    <p>Payment Date: <strong>{{ payment_date }}</strong></p>
+    {% if application_number %}
+    <p>Application: <strong>{{ application_number }}</strong></p>
+    {% endif %}
+</div>
+
+{% if remaining_balance %}
+<div class="divider"></div>
+
+<p><strong>Account Status</strong></p>
+
+<div class="info-box">
+    <p>Remaining Balance: <strong>${{ remaining_balance }}</strong></p>
+    <p>Next Payment Due: <strong>{{ next_due_date }}</strong></p>
+    <p>Next Payment Amount: <strong>${{ next_payment_amount|default:monthly_installment }}</strong></p>
+</div>
+
+<p>You're making great progress on your financing! Keep up the excellent payment history.</p>
+{% else %}
+<div class="success-box">
+    <p><strong>Account Fully Paid!</strong></p>
+    <p>This payment completes your financing. Congratulations!</p>
+</div>
+{% endif %}
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/payments" class="button">View Payment History</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Payment Tips:</strong></p>
+<ul>
+    <li><strong>Keep Records</strong> - Save this email as your payment receipt</li>
+    <li><strong>Track Progress</strong> - Monitor all payments in your dashboard</li>
+    <li><strong>Pay Early</strong> - Make additional payments anytime without penalties</li>
+    <li><strong>Set Reminders</strong> - We'll email you before each due date</li>
+</ul>
+
+<p style="font-size: 13px; color: #64748b;">This email serves as your official payment receipt. Please keep it for your records.</p>
+
+<p>Thank you for your payment!</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Team</strong></p>
+{% endblock %}

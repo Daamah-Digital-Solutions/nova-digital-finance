@@ -18,25 +18,50 @@ export default function DashboardLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
-    if (!user && !isAuthenticated) {
-      fetchUser().finally(() => setAuthChecked(true));
-    } else {
+    const checkAuth = async () => {
+      const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+
+      if (!token) {
+        setShouldRedirect(true);
+        setAuthChecked(true);
+        return;
+      }
+
+      // Only fetch if we don't have user data
+      if (!user) {
+        try {
+          await fetchUser();
+        } catch (error) {
+          console.error("Auth check failed:", error);
+          setShouldRedirect(true);
+        }
+      }
       setAuthChecked(true);
-    }
+    };
+
+    checkAuth();
   }, []);
 
+  // Handle redirect after auth check is complete
   useEffect(() => {
-    if (authChecked && !isLoading && !isAuthenticated) {
+    if (authChecked && shouldRedirect) {
       router.replace("/login");
     }
-  }, [authChecked, isLoading, isAuthenticated, router]);
+  }, [authChecked, shouldRedirect, router]);
+
+  // Also redirect if user fetch completed but user is not authenticated
+  useEffect(() => {
+    if (authChecked && !isLoading && !isAuthenticated && !shouldRedirect) {
+      // Double check token exists - if not, redirect
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        router.replace("/login");
+      }
+    }
+  }, [authChecked, isLoading, isAuthenticated, shouldRedirect, router]);
 
   if (!authChecked || isLoading) {
     return (
@@ -49,7 +74,7 @@ export default function DashboardLayout({
     );
   }
 
-  if (!isAuthenticated) {
+  if (shouldRedirect || !isAuthenticated) {
     return null;
   }
 

@@ -44,13 +44,23 @@ class FinancingApplicationSerializer(serializers.ModelSerializer):
 
 
 class FinancingApplicationCreateSerializer(serializers.ModelSerializer):
+    # These are computed by the service if not provided
+    usd_equivalent = serializers.DecimalField(
+        max_digits=14, decimal_places=2, required=False
+    )
+    fee_percentage = serializers.DecimalField(
+        max_digits=4, decimal_places=2, required=False
+    )
+
     class Meta:
         model = FinancingApplication
         fields = [
+            "id", "application_number",
             "bronova_amount", "usd_equivalent", "fee_percentage",
             "repayment_period_months", "ack_terms", "ack_fee_non_refundable",
             "ack_repayment_schedule", "ack_risk_disclosure",
         ]
+        read_only_fields = ["id", "application_number"]
 
     def validate_bronova_amount(self, value):
         from django.conf import settings

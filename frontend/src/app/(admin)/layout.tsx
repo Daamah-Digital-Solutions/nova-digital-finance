@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -57,12 +58,25 @@ export default function AdminLayout({
         )}
       >
         <div className="flex h-16 items-center justify-between border-b px-4">
+          <Link href="/admin" className={collapsed ? "mx-auto block" : ""}>
+            <Image
+              src="/logo.png"
+              alt="Nova Digital Finance"
+              width={48}
+              height={48}
+              className="h-12 w-12 object-contain"
+            />
+          </Link>
           {!collapsed && (
-            <span className="font-bold text-primary">Admin Panel</span>
+            <button onClick={() => setCollapsed(!collapsed)} className="hidden lg:block">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
           )}
-          <button onClick={() => setCollapsed(!collapsed)} className="hidden lg:block">
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </button>
+          {collapsed && (
+            <button onClick={() => setCollapsed(!collapsed)} className="hidden lg:block">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         <nav className="flex-1 space-y-1 p-2">

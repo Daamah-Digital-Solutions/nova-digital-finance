@@ -1,0 +1,31 @@
+{% load account %}
+{% load i18n %}
+{% autoescape off %}
+
+Welcome to Nova Digital Finance!
+
+Dear {% user_display user %},
+
+Thank you for registering with Nova Digital Finance - your gateway to interest-free cryptocurrency financing.
+
+To complete your registration and verify your email address, please click the link below:
+
+{{ activate_url }}
+
+This verification link will expire in 24 hours.
+
+After verification, you can:
+- Complete KYC verification to unlock financing
+- Apply for Pronova (PRN) tokens at 0% interest
+- Invest with CapiMax for investment opportunities
+- Track everything in your dashboard
+
+If you did not create an account with Nova Digital Finance, please disregard this email.
+
+Best regards,
+The Nova Digital Finance Team
+
+---
+Nova Digital Finance
+Interest-Free Cryptocurrency Financing
+{% endautoescape %}

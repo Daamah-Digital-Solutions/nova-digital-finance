@@ -1,0 +1,47 @@
+{% extends "emails/base.html" %}
+{% block title %}Welcome to Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Welcome to Nova Digital Finance!</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<p>Thank you for joining <strong>Nova Digital Finance</strong> - your gateway to interest-free cryptocurrency financing. We're thrilled to have you as part of our growing community.</p>
+
+<div class="info-box">
+    <p><strong>Your Account Details</strong></p>
+    <p>Email: {{ user_email }}</p>
+    <p>Client ID: {{ client_id }}</p>
+    <p>Account Status: Active</p>
+</div>
+
+<p><strong>Getting Started is Easy:</strong></p>
+
+<ol>
+    <li><strong>Complete Your Profile</strong> - Add your personal details to personalize your experience</li>
+    <li><strong>Verify Your Identity (KYC)</strong> - Submit your documents for quick verification</li>
+    <li><strong>Apply for Financing</strong> - Get access to Pronova (PRN) tokens with 0% interest</li>
+    <li><strong>Start Investing</strong> - Use your tokens with our partner CapiMax Investment</li>
+</ol>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard" class="button">Access Your Dashboard</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Why Choose Nova Digital Finance?</strong></p>
+<ul>
+    <li><strong>Zero Interest</strong> - Only a small processing fee (3-5%)</li>
+    <li><strong>Flexible Terms</strong> - Choose repayment periods that work for you</li>
+    <li><strong>Fast Processing</strong> - Quick approval and disbursement</li>
+    <li><strong>Secure Platform</strong> - Bank-grade security for your peace of mind</li>
+</ul>
+
+<p>If you have any questions, our support team is available to assist you. Simply visit our <a href="{{ frontend_url }}/contact">Contact Page</a> or reply to this email.</p>
+
+<p>Welcome aboard!</p>
+
+<p>Warm regards,<br>
+<strong>The Nova Digital Finance Team</strong></p>
+{% endblock %}

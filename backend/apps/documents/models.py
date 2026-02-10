@@ -6,8 +6,8 @@ from common.models import TimeStampedModel
 
 class Document(TimeStampedModel):
     class DocumentType(models.TextChoices):
-        CERTIFICATE = "certificate", "Certificate (Sak)"
-        CONTRACT = "contract", "Trilateral Contract"
+        CERTIFICATE = "certificate", "Financing Certificate"
+        CONTRACT = "contract", "Financing Contract"
         RECEIPT = "receipt", "Payment Receipt"
         KYC_SUMMARY = "kyc_summary", "KYC Summary"
         STATEMENT = "statement", "Account Statement"

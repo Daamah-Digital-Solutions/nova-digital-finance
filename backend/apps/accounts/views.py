@@ -1,11 +1,19 @@
 import base64
 import io
+import urllib.parse
 
 import pyotp
 import qrcode
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
+from django.conf import settings
+from django.http import HttpResponseRedirect
+from django.views import View
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from common.permissions import IsAdminUser
 
@@ -217,3 +225,42 @@ class AdminClientDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = AdminUserListSerializer
     queryset = CustomUser.objects.filter(is_staff=False).select_related("profile")
+
+
+# Google OAuth Views
+class GoogleLogin(SocialLoginView):
+    """
+    Google OAuth2 login endpoint.
+    Frontend should redirect to /accounts/google/login/ for OAuth flow,
+    or POST access_token here for token-based login.
+    """
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = settings.GOOGLE_OAUTH_CALLBACK_URL if hasattr(settings, 'GOOGLE_OAUTH_CALLBACK_URL') else "http://localhost:3001/auth/callback"
+    client_class = OAuth2Client
+
+
+class GoogleOAuthCallbackView(View):
+    """
+    Handle the OAuth callback from Google (via allauth).
+    This view generates JWT tokens and redirects to the frontend.
+    """
+    def get(self, request):
+        # After allauth handles the callback, the user should be authenticated
+        user = request.user
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3001')
+
+        if user.is_authenticated:
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
+
+            # Redirect to frontend with tokens
+            params = urllib.parse.urlencode({
+                'access': access_token,
+                'refresh': refresh_token,
+            })
+            return HttpResponseRedirect(f"{frontend_url}/auth/callback?{params}")
+        else:
+            # Authentication failed
+            return HttpResponseRedirect(f"{frontend_url}/login?error=oauth_failed")

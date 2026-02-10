@@ -1,0 +1,47 @@
+{% extends "emails/base.html" %}
+{% block title %}KYC Application Received - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>KYC Application Submitted Successfully</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<p>Thank you for submitting your Know Your Customer (KYC) verification documents. We have received your application and our compliance team is now reviewing it.</p>
+
+<div class="info-box">
+    <p><strong>Application Status: Under Review</strong></p>
+    <p>Submitted: {{ submitted_date|default:"Just now" }}</p>
+    <p>Expected Review Time: 1-3 Business Days</p>
+</div>
+
+<p><strong>Documents Received:</strong></p>
+<ul>
+    <li>✓ Government-Issued ID Document</li>
+    <li>✓ Proof of Address</li>
+    {% if selfie_submitted %}<li>✓ Selfie Verification</li>{% endif %}
+</ul>
+
+<div class="divider"></div>
+
+<p><strong>What Happens Next?</strong></p>
+<ol>
+    <li><strong>Document Review</strong> - Our team will verify the authenticity of your documents</li>
+    <li><strong>Identity Verification</strong> - We'll confirm your identity matches the provided documents</li>
+    <li><strong>Approval Notification</strong> - You'll receive an email once your KYC is approved</li>
+    <li><strong>Start Financing</strong> - Apply for Pronova financing immediately after approval</li>
+</ol>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/kyc" class="button">Check Application Status</a>
+</div>
+
+<div class="warning-box">
+    <p><strong>Need to Update Your Documents?</strong></p>
+    <p>If you've submitted incorrect documents or need to make changes, please contact our support team before the review is complete.</p>
+</div>
+
+<p>Thank you for choosing Nova Digital Finance.</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Compliance Team</strong></p>
+{% endblock %}

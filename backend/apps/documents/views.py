@@ -1,4 +1,5 @@
-from django.http import FileResponse
+import base64
+
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -42,11 +43,12 @@ class DocumentDownloadView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        return FileResponse(
-            document.file.open("rb"),
-            as_attachment=True,
-            filename=f"{document.document_number}.pdf",
-        )
+        file_content = document.file.read()
+        return Response({
+            "filename": f"{document.document_number}.pdf",
+            "content_type": "application/pdf",
+            "data": base64.b64encode(file_content).decode("ascii"),
+        })
 
 
 class DocumentVerifyView(APIView):

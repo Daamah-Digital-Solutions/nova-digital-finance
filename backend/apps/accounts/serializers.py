@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
 
@@ -56,8 +57,14 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 
 class CustomRegisterSerializer(RegisterSerializer):
+    username = None  # Remove username field - we use email only
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
+
+    def validate_email(self, email):
+        if CustomUser.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return email
 
     def get_cleaned_data(self):
         data = super().get_cleaned_data()
@@ -66,10 +73,15 @@ class CustomRegisterSerializer(RegisterSerializer):
         return data
 
     def save(self, request):
-        user = super().save(request)
+        try:
+            user = super().save(request)
+        except IntegrityError:
+            raise serializers.ValidationError(
+                {"email": ["A user with this email already exists."]}
+            )
         user.first_name = self.cleaned_data.get("first_name")
         user.last_name = self.cleaned_data.get("last_name")
-        user.save()
+        user.save(update_fields=["first_name", "last_name"])
         UserProfile.objects.get_or_create(user=user)
         return user
 

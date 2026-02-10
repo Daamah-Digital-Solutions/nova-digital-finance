@@ -1,0 +1,64 @@
+{% extends "emails/base.html" %}
+{% block title %}Response to Your Request - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Response to Your Support Request</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<p>Our support team has reviewed your request and provided a response below.</p>
+
+<div class="info-box">
+    <p><strong>Original Request</strong></p>
+    <p>Subject: <strong>{{ subject }}</strong></p>
+    <p>Submitted: <strong>{{ submitted_date }}</strong></p>
+    {% if reference_number %}
+    <p>Reference: <strong>{{ reference_number }}</strong></p>
+    {% endif %}
+</div>
+
+<div class="divider"></div>
+
+<div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 25px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #10b981;">
+    <p style="margin: 0 0 15px 0; font-weight: 600; color: #065f46; font-size: 16px;">Our Response:</p>
+    <div style="color: #1f2937; line-height: 1.7;">
+        {{ admin_response|linebreaks }}
+    </div>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/requests" class="button">View Full Request Details</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Was This Helpful?</strong></p>
+
+<p>We hope this response addressed your concerns. If you need further assistance or have additional questions:</p>
+
+<ul>
+    <li><strong>Reply to This Request</strong> - Submit a follow-up through your dashboard</li>
+    <li><strong>New Question</strong> - Create a new support request for different issues</li>
+    <li><strong>Browse FAQ</strong> - Check our help center for quick answers</li>
+</ul>
+
+<div class="info-box">
+    <p><strong>Your Feedback Matters</strong></p>
+    <p>We're always working to improve our service. If you have any feedback about your support experience, please let us know!</p>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Still Need Help?</strong></p>
+
+<p>If this response doesn't fully resolve your issue, please don't hesitate to reach out again. Our team is here to ensure you have the best possible experience with Nova Digital Finance.</p>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/requests/new" class="button" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%); box-shadow: 0 4px 14px rgba(100, 116, 139, 0.35);">Submit Another Request</a>
+</div>
+
+<p>Thank you for choosing Nova Digital Finance!</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Support Team</strong></p>
+{% endblock %}

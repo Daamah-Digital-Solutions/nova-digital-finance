@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 
 const footerLinks = {
@@ -58,15 +59,18 @@ export function Footer() {
 
         <div className="mt-8 border-t pt-8">
           <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
-            <div className="flex items-center space-x-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded bg-primary">
-                <span className="text-xs font-bold text-primary-foreground">N</span>
-              </div>
-              <span className="text-sm font-semibold">Nova Digital Finance</span>
-            </div>
+            <Link href="/">
+              <Image
+                src="/logo.png"
+                alt="Nova Digital Finance"
+                width={48}
+                height={48}
+                className="h-12 w-12 object-contain"
+              />
+            </Link>
             <p className="text-center text-xs text-muted-foreground">
               &copy; {new Date().getFullYear()} Nova Digital Finance. All rights reserved.
-              Interest-free financing in BroNova (PRN) cryptocurrency.
+              Interest-free financing in Pronova (PRN) cryptocurrency.
             </p>
           </div>
         </div>

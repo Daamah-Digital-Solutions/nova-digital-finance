@@ -35,10 +35,12 @@ function redirectToLogin() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
-    // Only redirect if not already on an auth page
-    if (!window.location.pathname.startsWith("/login") &&
-        !window.location.pathname.startsWith("/register") &&
-        !window.location.pathname.startsWith("/forgot-password")) {
+    // Only redirect if not already on an auth page or callback
+    const currentPath = window.location.pathname;
+    if (!currentPath.startsWith("/login") &&
+        !currentPath.startsWith("/register") &&
+        !currentPath.startsWith("/forgot-password") &&
+        !currentPath.startsWith("/auth/callback")) {
       window.location.href = "/login";
     }
   }

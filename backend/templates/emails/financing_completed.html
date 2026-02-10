@@ -1,0 +1,58 @@
+{% extends "emails/base.html" %}
+{% block title %}Financing Completed - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Congratulations! Financing Completed</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<div class="success-box">
+    <p><strong>Outstanding Achievement!</strong></p>
+    <p>You have successfully completed all payments for your financing. Your account is now in excellent standing!</p>
+</div>
+
+<p>We are proud of your commitment to fulfilling your financial obligations. This demonstrates excellent financial responsibility.</p>
+
+<div class="info-box">
+    <p><strong>Final Summary</strong></p>
+    <p>Application Number: <strong>{{ application_number }}</strong></p>
+    <p>Total Amount Financed: <strong>{{ amount }} PRN</strong></p>
+    <p>Total Amount Paid: <strong>${{ total_paid }}</strong></p>
+    <p>Completion Date: <strong>{{ completion_date }}</strong></p>
+    <p>Payment History: <strong>✓ All payments on time</strong></p>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>What This Means For You:</strong></p>
+
+<ul>
+    <li><strong>Clean Record</strong> - Your financing is fully cleared with no outstanding balance</li>
+    <li><strong>Good Standing</strong> - You're eligible for future financing with favorable terms</li>
+    <li><strong>Investment Continues</strong> - Your CapiMax investments continue to work for you</li>
+    <li><strong>Ready for More</strong> - Apply for new financing whenever you need it</li>
+</ul>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/financing" class="button">Apply for New Financing</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Why Finance Again with Nova?</strong></p>
+
+<div class="info-box">
+    <p><strong>As a returning customer, you enjoy:</strong></p>
+    <p>✓ Faster approval process</p>
+    <p>✓ Higher financing limits available</p>
+    <p>✓ Priority customer support</p>
+    <p>✓ Same great 0% interest rate</p>
+</div>
+
+<p>Thank you for being a valued member of the Nova Digital Finance community. We've enjoyed serving you and look forward to helping you with your future financial needs.</p>
+
+<p>If you have any questions or feedback about your experience, we'd love to hear from you.</p>
+
+<p>With gratitude,<br>
+<strong>The Nova Digital Finance Team</strong></p>
+{% endblock %}

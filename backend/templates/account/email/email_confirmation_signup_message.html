@@ -1,0 +1,54 @@
+{% extends "account/email/base_email.html" %}
+{% load account %}
+{% load i18n %}
+
+{% block title %}Verify Your Email - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Welcome to Nova Digital Finance!</h2>
+
+<p>Dear {{ user.first_name|default:user.email }},</p>
+
+<p>Thank you for registering with <strong>Nova Digital Finance</strong>! To complete your registration and secure your account, please verify your email address by clicking the button below.</p>
+
+<div class="success-box">
+    <p><strong>You're Almost There!</strong></p>
+    <p>Just one more step to unlock interest-free cryptocurrency financing.</p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{ activate_url }}" class="button">Verify My Email</a>
+</div>
+
+<p style="text-align: center; font-size: 13px; color: #64748b;">Or copy and paste this link into your browser:</p>
+<div class="info-box" style="word-break: break-all; font-size: 12px; background: #f8fafc;">
+    <p style="margin: 0;">{{ activate_url }}</p>
+</div>
+
+<div class="warning-box">
+    <p><strong>Important:</strong></p>
+    <p>This verification link will expire in <strong>24 hours</strong>. If the link expires, you can request a new one from the login page.</p>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>After verification, you can:</strong></p>
+<ul>
+    <li><strong>Complete KYC</strong> - Verify your identity to unlock financing</li>
+    <li><strong>Apply for Financing</strong> - Get Pronova (PRN) tokens at 0% interest</li>
+    <li><strong>Invest with CapiMax</strong> - Use your tokens for investment opportunities</li>
+    <li><strong>Track Everything</strong> - Monitor payments and applications in your dashboard</li>
+</ul>
+
+<div class="info-box">
+    <p><strong>Why Verify Your Email?</strong></p>
+    <p>Email verification ensures your account security and allows you to receive important updates about your financing applications, payment reminders, and account activity.</p>
+</div>
+
+<p style="font-size: 13px; color: #64748b;">If you did not create an account with Nova Digital Finance, please disregard this email. No account will be activated without verification.</p>
+
+<p>Welcome aboard!</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Team</strong></p>
+{% endblock %}

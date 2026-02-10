@@ -6,6 +6,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # Allauth (needed for email confirmation URL resolution)
+    path("accounts/", include("allauth.urls")),
     # API v1
     path("api/v1/auth/", include("apps.accounts.urls")),
     path("api/v1/users/", include("apps.accounts.urls_users")),

@@ -24,10 +24,10 @@ export default function HomePage() {
             </div>
             <h1 className="mb-6 text-4xl font-bold tracking-tight lg:text-6xl">
               Finance Your Future with{" "}
-              <span className="text-primary">BroNova (PRN)</span>
+              <span className="text-primary">Pronova (PRN)</span>
             </h1>
             <p className="mb-8 text-lg text-muted-foreground lg:text-xl">
-              Acquire BroNova (PRN) tokens at a fixed rate of 1 PRN = 1 USD with
+              Acquire Pronova (PRN) tokens at a fixed rate of 1 PRN = 1 USD with
               only a 3-5% processing fee. Receive a Certificate of PRN Ownership,
               repay monthly, and invest through CapiMax.
             </p>
@@ -56,7 +56,7 @@ export default function HomePage() {
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold">Why Nova Digital Finance?</h2>
             <p className="mx-auto max-w-2xl text-muted-foreground">
-              We provide a transparent and accessible way to access BroNova
+              We provide a transparent and accessible way to access Pronova
               cryptocurrency financing.
             </p>
           </div>
@@ -72,7 +72,7 @@ export default function HomePage() {
                 icon: Zap,
                 title: "1 PRN = 1 USD",
                 description:
-                  "Each BroNova token is valued at exactly 1 USD. Choose how many PRN you need and pay the equivalent in dollars.",
+                  "Each Pronova token is valued at exactly 1 USD. Choose how many PRN you need and pay the equivalent in dollars.",
               },
               {
                 icon: TrendingUp,
@@ -137,7 +137,7 @@ export default function HomePage() {
               Ready to Get Started?
             </h2>
             <p className="mb-6 text-primary-foreground/80">
-              Join Nova Digital Finance today and access interest-free BroNova
+              Join Nova Digital Finance today and access interest-free Pronova
               cryptocurrency financing.
             </p>
             <Link

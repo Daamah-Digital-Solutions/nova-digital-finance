@@ -1,0 +1,63 @@
+{% extends "emails/base.html" %}
+{% block title %}Request Received - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>We've Received Your Request</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<p>Thank you for contacting Nova Digital Finance. We have received your support request and our team is working on it.</p>
+
+<div class="success-box">
+    <p><strong>Request Submitted!</strong></p>
+    <p>Your request has been logged and assigned to our support team.</p>
+</div>
+
+<div class="info-box">
+    <p><strong>Request Details</strong></p>
+    <p>Subject: <strong>{{ subject }}</strong></p>
+    <p>Request Type: <strong>{{ request_type }}</strong></p>
+    <p>Submitted: <strong>{{ submitted_date }}</strong></p>
+    <p>Reference Number: <strong>{{ reference_number|default:"Will be assigned shortly" }}</strong></p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/requests" class="button">Track Request Status</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>What to Expect:</strong></p>
+
+<div class="info-box">
+    <p><strong>Response Time</strong></p>
+    <p>We typically respond within <strong>1-2 business days</strong>. Complex requests may take longer, but we'll keep you updated on progress.</p>
+</div>
+
+<ol>
+    <li><strong>Review</strong> - Our team will review your request thoroughly</li>
+    <li><strong>Investigation</strong> - We'll gather all necessary information</li>
+    <li><strong>Response</strong> - You'll receive a detailed response via email</li>
+    <li><strong>Follow-up</strong> - We'll check in to ensure your issue is resolved</li>
+</ol>
+
+<div class="divider"></div>
+
+<p><strong>Need Faster Assistance?</strong></p>
+
+<p>For urgent matters, you can check our FAQ section which covers common questions and may provide an immediate solution:</p>
+
+<ul>
+    <li><strong>Account Issues</strong> - Password reset, login problems</li>
+    <li><strong>KYC Questions</strong> - Document requirements, verification status</li>
+    <li><strong>Payment Help</strong> - Payment methods, transaction issues</li>
+    <li><strong>Financing Info</strong> - Application process, terms and conditions</li>
+</ul>
+
+<p style="font-size: 13px; color: #64748b;">Please do not submit multiple requests for the same issue, as this may delay our response time.</p>
+
+<p>We appreciate your patience and look forward to assisting you!</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Support Team</strong></p>
+{% endblock %}

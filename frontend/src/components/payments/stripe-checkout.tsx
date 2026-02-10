@@ -13,6 +13,8 @@ interface StripeCheckoutProps {
   installmentId?: string;
   amount: number;
   applicationNumber?: string;
+  successUrl?: string;
+  cancelUrl?: string;
 }
 
 export function StripeCheckout({
@@ -21,6 +23,8 @@ export function StripeCheckout({
   installmentId,
   amount,
   applicationNumber,
+  successUrl,
+  cancelUrl,
 }: StripeCheckoutProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,8 +36,8 @@ export function StripeCheckout({
         payment_type: paymentType,
         installment_id: installmentId,
         amount,
-        success_url: `${window.location.origin}/dashboard/payments?success=true`,
-        cancel_url: `${window.location.origin}/dashboard/payments?cancelled=true`,
+        success_url: successUrl || `${window.location.origin}/dashboard/financing?success=true`,
+        cancel_url: cancelUrl || `${window.location.origin}/dashboard/financing?cancelled=true`,
       });
 
       // Redirect to Stripe Checkout

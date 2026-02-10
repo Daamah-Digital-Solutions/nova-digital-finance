@@ -32,31 +32,35 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 
 interface Application {
-  id: number;
+  id: string;
   application_number: string;
-  client_name: string;
-  amount: number;
-  period_months: number;
-  processing_fee: number;
+  user_name: string;
+  user_email: string;
+  bronova_amount: number;
+  repayment_period_months: number;
+  fee_amount: number;
   status: string;
   created_at: string;
 }
 
 const statusColors: Record<string, "default" | "success" | "warning" | "destructive" | "secondary"> = {
   draft: "default",
-  submitted: "warning",
+  pending_signature: "warning",
+  pending_fee: "warning",
+  signed: "secondary",
   under_review: "secondary",
   approved: "success",
+  active: "success",
+  completed: "success",
   rejected: "destructive",
   cancelled: "default",
-  disbursed: "success",
 };
 
 export default function AdminApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchApplications = async () => {
     try {
@@ -76,7 +80,7 @@ export default function AdminApplicationsPage() {
     fetchApplications();
   }, [statusFilter]);
 
-  const handleAction = async (id: number, action: "approve" | "reject") => {
+  const handleAction = async (id: string, action: "approve" | "reject") => {
     setActionLoading(id);
     try {
       await api.post(`/admin/applications/${id}/${action}/`);
@@ -113,11 +117,12 @@ export default function AdminApplicationsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="submitted">Submitted</SelectItem>
-                <SelectItem value="under_review">Under Review</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="pending_signature">Pending Signature</SelectItem>
+                <SelectItem value="pending_fee">Pending Fee</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="disbursed">Disbursed</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
@@ -154,17 +159,18 @@ export default function AdminApplicationsPage() {
                     <TableCell className="font-mono text-sm">
                       {app.application_number}
                     </TableCell>
-                    <TableCell className="font-medium">
-                      {app.client_name}
+                    <TableCell>
+                      <div className="font-medium">{app.user_name}</div>
+                      <div className="text-xs text-muted-foreground">{app.user_email}</div>
                     </TableCell>
                     <TableCell>
-                      {new Intl.NumberFormat("en-US").format(app.amount)}
+                      ${new Intl.NumberFormat("en-US").format(app.bronova_amount || 0)}
                     </TableCell>
-                    <TableCell>{app.period_months} months</TableCell>
+                    <TableCell>{app.repayment_period_months} months</TableCell>
                     <TableCell>
-                      {new Intl.NumberFormat("en-US", {
+                      ${new Intl.NumberFormat("en-US", {
                         minimumFractionDigits: 2,
-                      }).format(app.processing_fee)}
+                      }).format(app.fee_amount || 0)}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -177,8 +183,8 @@ export default function AdminApplicationsPage() {
                       {new Date(app.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      {(app.status === "submitted" ||
-                        app.status === "under_review") && (
+                      {/* Show actions for pending_fee status - admin can activate or reject */}
+                      {app.status === "pending_fee" && (
                         <div className="flex gap-2">
                           <Button
                             size="sm"
@@ -186,6 +192,7 @@ export default function AdminApplicationsPage() {
                             className="h-8 text-green-600 hover:bg-green-50 hover:text-green-700"
                             disabled={actionLoading === app.id}
                             onClick={() => handleAction(app.id, "approve")}
+                            title="Activate Application"
                           >
                             {actionLoading === app.id ? (
                               <Loader2 className="h-3 w-3 animate-spin" />
@@ -199,10 +206,18 @@ export default function AdminApplicationsPage() {
                             className="h-8 text-red-600 hover:bg-red-50 hover:text-red-700"
                             disabled={actionLoading === app.id}
                             onClick={() => handleAction(app.id, "reject")}
+                            title="Reject Application"
                           >
                             <XCircle className="h-3 w-3" />
                           </Button>
                         </div>
+                      )}
+                      {/* Show view details for other statuses */}
+                      {app.status !== "pending_fee" && (
+                        <span className="text-xs text-muted-foreground">
+                          {app.status === "active" ? "Active" :
+                           app.status === "completed" ? "Completed" : "—"}
+                        </span>
                       )}
                     </TableCell>
                   </TableRow>

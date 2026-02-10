@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
@@ -18,7 +17,6 @@ import {
   Info,
   Save,
   Key,
-  Smartphone,
   Eye,
   EyeOff,
 } from "lucide-react";
@@ -37,7 +35,6 @@ interface UserProfile {
   country: string;
   client_id: string;
   account_number: string;
-  mfa_enabled: boolean;
 }
 
 export default function SettingsPage() {
@@ -45,7 +42,6 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
-  const [togglingMFA, setTogglingMFA] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   // Profile form
@@ -160,27 +156,6 @@ export default function SettingsPage() {
       toast.error(error?.response?.data?.detail || "Failed to change password");
     } finally {
       setChangingPassword(false);
-    }
-  }
-
-  async function handleToggleMFA() {
-    if (!profile) return;
-
-    try {
-      setTogglingMFA(true);
-      if (profile.mfa_enabled) {
-        await api.post("/auth/mfa/disable/");
-        setProfile({ ...profile, mfa_enabled: false });
-        toast.success("MFA has been disabled");
-      } else {
-        await api.post("/auth/mfa/enable/");
-        setProfile({ ...profile, mfa_enabled: true });
-        toast.success("MFA has been enabled. Please set up your authenticator app.");
-      }
-    } catch (error: any) {
-      toast.error(error?.response?.data?.detail || "Failed to toggle MFA");
-    } finally {
-      setTogglingMFA(false);
     }
   }
 
@@ -449,27 +424,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <Separator />
-
-          {/* MFA Toggle */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Smartphone className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <h3 className="font-medium">Two-Factor Authentication (MFA)</h3>
-                <p className="text-sm text-muted-foreground">
-                  {profile?.mfa_enabled
-                    ? "MFA is currently enabled on your account"
-                    : "Add an extra layer of security to your account"}
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={profile?.mfa_enabled || false}
-              onCheckedChange={handleToggleMFA}
-              disabled={togglingMFA}
-            />
-          </div>
         </CardContent>
       </Card>
     </div>

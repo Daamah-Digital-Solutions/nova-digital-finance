@@ -2,6 +2,18 @@ from .base import *  # noqa: F401, F403
 
 DEBUG = True
 
+# Frontend URL for OAuth redirects (use localhost for dev, override in .env for production)
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3001")
+GOOGLE_OAUTH_CALLBACK_URL = f"{FRONTEND_URL}/auth/callback"
+
+# Allauth OAuth settings
+LOGIN_REDIRECT_URL = "/api/v1/auth/google/callback/"
+ACCOUNT_LOGOUT_REDIRECT_URL = FRONTEND_URL
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Email - use SMTP settings from .env (override console backend from base)
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+
 # Use SQLite for local development when PostgreSQL is not available
 DATABASES = {
     "default": {
@@ -11,8 +23,13 @@ DATABASES = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Use real SMTP for email (configured in .env)
+# EMAIL_BACKEND is already set above from .env
+
+# Skip email verification in development (user can login without verifying)
+ACCOUNT_EMAIL_VERIFICATION = "optional"
 
 # Debug toolbar (optional)
 # INSTALLED_APPS += ["debug_toolbar"]

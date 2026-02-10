@@ -114,7 +114,7 @@ class FinancingService:
             user=financing.user,
             title="Financing Approved",
             message=f"Your financing application {financing.application_number} has been approved. "
-                    f"Your BroNova tokens ({financing.bronova_amount} PRN) are now available.",
+                    f"Your Pronova tokens ({financing.bronova_amount} PRN) are now available.",
             category="financing",
             action_url="/dashboard/financing",
         )

@@ -33,7 +33,7 @@ export default function TermsPage() {
             <h2 className="text-2xl font-bold">2. Service Description</h2>
             <p className="mb-6 text-muted-foreground leading-relaxed">
               Nova Digital Finance provides interest-free cryptocurrency
-              financing services through the BroNova (PRN) token. Our platform
+              financing services through the Pronova (PRN) token. Our platform
               enables qualified individuals to apply for financing ranging from
               500 to 100,000 PRN, with repayment periods of 6 to 36 months. A
               one-time processing fee of 3-5% applies to all financing

@@ -30,18 +30,28 @@ import {
   ExternalLink,
 } from "lucide-react";
 
+interface Installment {
+  id: string;
+  installment_number: number;
+  due_date: string;
+  amount: number;
+  paid_amount: number;
+  remaining_amount: number;
+  status: string;
+}
+
 interface FinancingApplication {
   id: string;
   application_number: string;
-  amount: number;
+  bronova_amount: number;
+  monthly_installment: number;
   status: string;
-  monthly_payment: number;
-  next_payment_date: string | null;
+  installments: Installment[];
 }
 
 interface Payment {
   id: string;
-  reference: string;
+  transaction_reference: string;
   amount: number;
   payment_type: string;
   payment_method: string;
@@ -102,14 +112,23 @@ export default function DashboardPage() {
   const activeFinancing = financingApps.filter(
     (app) => app.status === "active" || app.status === "approved"
   );
-  const totalActiveAmount = activeFinancing.reduce((sum, app) => sum + Number(app.amount), 0);
+  const totalActiveAmount = activeFinancing.reduce((sum, app) => sum + Number(app.bronova_amount || 0), 0);
 
   const completedPayments = recentPayments.filter((p) => p.status === "completed" || p.status === "confirmed");
   const totalPaid = completedPayments.reduce((sum, p) => sum + Number(p.amount), 0);
 
-  const nextPaymentApp = activeFinancing.find((app) => app.next_payment_date);
-  const nextPaymentDate = nextPaymentApp?.next_payment_date
-    ? new Date(nextPaymentApp.next_payment_date).toLocaleDateString("en-US", {
+  // Find the next upcoming installment across all active financing apps
+  const upcomingInstallments = activeFinancing
+    .flatMap((app) =>
+      (app.installments || [])
+        .filter((i) => i.status === "upcoming" || i.status === "due" || i.status === "overdue")
+        .map((i) => ({ ...i, app }))
+    )
+    .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
+
+  const nextInstallment = upcomingInstallments[0];
+  const nextPaymentDate = nextInstallment
+    ? new Date(nextInstallment.due_date).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -149,7 +168,7 @@ export default function DashboardPage() {
   // Simple bar data from active financing for the chart placeholder
   const barData = activeFinancing.slice(0, 6).map((app) => ({
     label: app.application_number.slice(-6),
-    amount: Number(app.monthly_payment || 0),
+    amount: Number(app.monthly_installment || 0),
   }));
   const maxBarValue = Math.max(...barData.map((d) => d.amount), 1);
 
@@ -209,8 +228,8 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{nextPaymentDate}</div>
             <p className="text-xs text-muted-foreground">
-              {nextPaymentApp
-                ? `$${Number(nextPaymentApp.monthly_payment).toLocaleString("en-US", { minimumFractionDigits: 2 })} due`
+              {nextInstallment
+                ? `$${Number(nextInstallment.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })} due`
                 : "No active installments"}
             </p>
           </CardContent>
@@ -306,7 +325,7 @@ export default function DashboardPage() {
                   {recentPayments.map((payment) => (
                     <TableRow key={payment.id}>
                       <TableCell className="font-mono text-xs">
-                        {payment.reference?.slice(0, 12) || "---"}
+                        {payment.transaction_reference?.slice(0, 12) || "---"}
                       </TableCell>
                       <TableCell>
                         ${Number(payment.amount).toLocaleString("en-US", {

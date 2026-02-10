@@ -38,7 +38,8 @@ class Signature(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="signature",
     )
-    signature_image = models.ImageField(upload_to="signatures/")
+    signature_text = models.CharField(max_length=255, blank=True)
+    signature_image = models.ImageField(upload_to="signatures/", blank=True)
     signature_data = models.JSONField(default=dict)
     consent_text = models.TextField()
     ip_address = models.GenericIPAddressField()

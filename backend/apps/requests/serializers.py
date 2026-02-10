@@ -4,11 +4,18 @@ from .models import ClientRequest
 
 
 class ClientRequestSerializer(serializers.ModelSerializer):
+    # Make details optional - it's a JSONField with a default
+    details = serializers.JSONField(required=False, default=dict)
+    # Also return financing application number for display
+    financing_application_number = serializers.CharField(
+        source="financing.application_number", read_only=True, allow_null=True
+    )
+
     class Meta:
         model = ClientRequest
         fields = [
-            "id", "financing", "request_type", "status", "subject",
-            "details", "description", "admin_response",
+            "id", "financing", "financing_application_number", "request_type",
+            "status", "subject", "details", "description", "admin_response",
             "reviewed_at", "created_at", "updated_at",
         ]
         read_only_fields = [

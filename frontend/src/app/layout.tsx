@@ -11,10 +11,13 @@ export const metadata: Metadata = {
     template: "%s | Nova Digital Finance",
   },
   description:
-    "Interest-free financing in BroNova (PRN) cryptocurrency. Apply for financing, receive tokens, and invest through CapiMax.",
+    "Interest-free financing in Pronova (PRN) cryptocurrency. Apply for financing, receive tokens, and invest through CapiMax.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/icons/icon-192.png",
+    icon: [
+      { url: "/favicon.png", sizes: "any" },
+      { url: "/icons/icon-192.png", sizes: "192x192" },
+    ],
     apple: "/icons/icon-512.png",
   },
 };

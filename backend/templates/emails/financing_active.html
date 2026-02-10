@@ -1,0 +1,65 @@
+{% extends "emails/base.html" %}
+{% block title %}Financing Activated - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Your Financing is Now Active!</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<div class="success-box">
+    <p><strong>Congratulations!</strong></p>
+    <p>Your financing application has been approved and activated. Your Pronova (PRN) tokens are now available in your account!</p>
+</div>
+
+<p>You can now use your tokens to invest with CapiMax and start generating returns.</p>
+
+<div class="info-box">
+    <p><strong>Financing Details</strong></p>
+    <p>Application Number: <strong>{{ application_number }}</strong></p>
+    <p>Amount Financed: <strong>{{ amount }} PRN</strong></p>
+    <p>Monthly Installment: <strong>${{ monthly_installment }}</strong></p>
+    <p>First Payment Due: <strong>{{ first_due_date }}</strong></p>
+    <p>Total Installments: <strong>{{ total_installments }}</strong></p>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>What Happens Next?</strong></p>
+
+<ol>
+    <li><strong>Access Your Tokens</strong> - Your PRN tokens are now in your Nova Digital Finance wallet</li>
+    <li><strong>Invest with CapiMax</strong> - Transfer your tokens to CapiMax to start earning</li>
+    <li><strong>Track Your Payments</strong> - Monitor your installments in your dashboard</li>
+    <li><strong>Set Up Reminders</strong> - We'll notify you before each payment is due</li>
+</ol>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard" class="button">Go to Dashboard</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Payment Schedule</strong></p>
+
+<div class="info-box">
+    <p>Your monthly payment of <strong>${{ monthly_installment }}</strong> is due on the same date each month. You'll receive a reminder email 3 days before each due date.</p>
+</div>
+
+<p><strong>Payment Tips:</strong></p>
+<ul>
+    <li><strong>On-Time Payments</strong> - Build your credit history with consistent payments</li>
+    <li><strong>Multiple Payment Methods</strong> - Pay via card or cryptocurrency</li>
+    <li><strong>Early Payoff</strong> - Pay extra anytime without penalties</li>
+    <li><strong>Payment History</strong> - Track all payments in your dashboard</li>
+</ul>
+
+<div class="warning-box">
+    <p><strong>First Payment Reminder</strong></p>
+    <p>Your first payment of <strong>${{ monthly_installment }}</strong> is due on <strong>{{ first_due_date }}</strong>. Mark your calendar!</p>
+</div>
+
+<p>Thank you for choosing Nova Digital Finance. We're here to help you succeed!</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Team</strong></p>
+{% endblock %}

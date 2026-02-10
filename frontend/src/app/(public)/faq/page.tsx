@@ -69,7 +69,7 @@ export default function FAQPage() {
             </h1>
             <p className="text-lg text-muted-foreground lg:text-xl">
               Find answers to common questions about Nova Digital Finance,
-              BroNova tokens, and our financing process.
+              Pronova tokens, and our financing process.
             </p>
           </div>
         </div>

@@ -19,7 +19,7 @@ class KYCDocumentSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "kyc_application", "is_verified", "notes", "created_at", "updated_at"]
+        read_only_fields = ["id", "kyc_application", "file_name", "file_size", "is_verified", "notes", "created_at", "updated_at"]
 
     def validate_file(self, value):
         max_size = 10 * 1024 * 1024  # 10 MB

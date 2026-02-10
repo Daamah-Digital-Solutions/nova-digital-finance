@@ -15,4 +15,7 @@ urlpatterns = [
     path("mfa/enable/", views.MFAEnableView.as_view(), name="mfa-enable"),
     path("mfa/verify/", views.MFAVerifyView.as_view(), name="mfa-verify"),
     path("mfa/disable/", views.MFADisableView.as_view(), name="mfa-disable"),
+    # Google OAuth
+    path("google/", views.GoogleLogin.as_view(), name="google-login"),
+    path("google/callback/", views.GoogleOAuthCallbackView.as_view(), name="google-callback"),
 ]

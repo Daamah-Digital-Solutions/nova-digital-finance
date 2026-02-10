@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -48,19 +49,15 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       )}
     >
       <div className="flex h-16 items-center justify-between border-b px-4">
-        {!collapsed && (
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">N</span>
-            </div>
-            <span className="font-bold">Nova Finance</span>
-          </Link>
-        )}
-        {collapsed && (
-          <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">N</span>
-          </div>
-        )}
+        <Link href="/dashboard" className={collapsed ? "mx-auto block" : ""}>
+          <Image
+            src="/logo.png"
+            alt="Nova Digital Finance"
+            width={48}
+            height={48}
+            className="h-12 w-12 object-contain"
+          />
+        </Link>
         <button onClick={onToggle} className="hidden lg:block">
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />

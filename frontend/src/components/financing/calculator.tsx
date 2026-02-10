@@ -126,7 +126,7 @@ export function FinancingCalculator({
             <Separator />
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-lg bg-muted p-3">
-                <p className="text-xs text-muted-foreground">BroNova Amount</p>
+                <p className="text-xs text-muted-foreground">Pronova Amount</p>
                 <p className="text-lg font-bold">
                   {parseFloat(result.bronova_amount).toLocaleString()} PRN
                 </p>

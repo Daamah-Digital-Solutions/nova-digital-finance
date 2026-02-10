@@ -28,7 +28,7 @@ const values = [
     icon: Lightbulb,
     title: "Innovation",
     description:
-      "Leveraging blockchain technology and the BroNova token to provide a modern, interest-free financing solution.",
+      "Leveraging blockchain technology and the Pronova token to provide a modern, interest-free financing solution.",
   },
   {
     icon: Handshake,
@@ -50,7 +50,7 @@ export default function AboutPage() {
             </h1>
             <p className="text-lg text-muted-foreground lg:text-xl">
               Providing accessible, interest-free cryptocurrency financing to
-              empower individuals and businesses through the BroNova (PRN) token
+              empower individuals and businesses through the Pronova (PRN) token
               ecosystem.
             </p>
           </div>
@@ -79,7 +79,7 @@ export default function AboutPage() {
                 </p>
                 <p className="text-muted-foreground">
                   Through our innovative financing model, clients receive
-                  BroNova (PRN) tokens at their USD equivalent value, repaying
+                  Pronova (PRN) tokens at their USD equivalent value, repaying
                   only the principal amount in equal monthly installments with
                   just a small one-time processing fee.
                 </p>
@@ -89,10 +89,10 @@ export default function AboutPage() {
                   <Coins className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="mb-3 text-xl font-semibold">
-                  About BroNova (PRN)
+                  About Pronova (PRN)
                 </h3>
                 <p className="mb-4 text-muted-foreground">
-                  BroNova (PRN) is the cryptocurrency token at the heart of our
+                  Pronova (PRN) is the cryptocurrency token at the heart of our
                   financing ecosystem. When you receive financing through Nova
                   Digital Finance, your approved amount is disbursed in PRN
                   tokens at the current USD equivalent value.
@@ -159,7 +159,7 @@ export default function AboutPage() {
                   <p className="text-muted-foreground">
                     Through this trilateral relationship between Nova Finance,
                     the client, and CapiMax, clients can seamlessly use their
-                    BroNova tokens for investment opportunities while managing
+                    Pronova tokens for investment opportunities while managing
                     their repayment schedule through our platform.
                   </p>
                 </div>
@@ -167,7 +167,7 @@ export default function AboutPage() {
                   <div className="rounded-lg border bg-muted/50 p-4">
                     <h4 className="mb-1 font-semibold">Nova Digital Finance</h4>
                     <p className="text-sm text-muted-foreground">
-                      Provides interest-free financing in BroNova tokens and
+                      Provides interest-free financing in Pronova tokens and
                       manages the client relationship.
                     </p>
                   </div>
@@ -175,7 +175,7 @@ export default function AboutPage() {
                     <h4 className="mb-1 font-semibold">CapiMax Investment</h4>
                     <p className="text-sm text-muted-foreground">
                       Manages investment portfolios and provides the platform for
-                      deploying BroNova tokens.
+                      deploying Pronova tokens.
                     </p>
                   </div>
                   <div className="rounded-lg border bg-muted/50 p-4">

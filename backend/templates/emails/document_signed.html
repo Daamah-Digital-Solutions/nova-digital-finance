@@ -1,0 +1,61 @@
+{% extends "emails/base.html" %}
+{% block title %}Document Signed Successfully - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>Document Signed Successfully</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<div class="success-box">
+    <p><strong>Signature Confirmed!</strong></p>
+    <p>Your document has been successfully signed and recorded in our system.</p>
+</div>
+
+<p>A legally binding copy of your signed document is now available for download in your dashboard.</p>
+
+<div class="info-box">
+    <p><strong>Signature Details</strong></p>
+    <p>Document Type: <strong>{{ document_type }}</strong></p>
+    <p>Application Number: <strong>{{ application_number }}</strong></p>
+    <p>Signed On: <strong>{{ signed_date }}</strong></p>
+    <p>Verification Code: <strong>{{ verification_code }}</strong></p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/documents" class="button">Download Signed Document</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>What Happens Next?</strong></p>
+
+<ol>
+    <li><strong>Document Processing</strong> - Your signed document is being processed</li>
+    <li><strong>Fee Payment</strong> - Complete the processing fee payment (if not done)</li>
+    <li><strong>Account Activation</strong> - Your financing will be activated after review</li>
+    <li><strong>Token Allocation</strong> - Receive your Pronova tokens within 24-48 hours</li>
+</ol>
+
+<div class="info-box">
+    <p><strong>Verification Information</strong></p>
+    <p>Your document can be verified anytime using the verification code above. This code proves the authenticity and timestamp of your signature.</p>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Document Security:</strong></p>
+
+<ul>
+    <li><strong>Encrypted Storage</strong> - Your document is securely stored</li>
+    <li><strong>Tamper-Proof</strong> - Any modifications would invalidate the signature</li>
+    <li><strong>Always Available</strong> - Download your documents anytime from your dashboard</li>
+    <li><strong>Legal Record</strong> - Serves as official proof of agreement</li>
+</ul>
+
+<p style="font-size: 13px; color: #64748b;">Keep this email and the verification code for your records. You can use the verification code to prove document authenticity at any time.</p>
+
+<p>Thank you for completing this important step!</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Legal Team</strong></p>
+{% endblock %}

@@ -31,7 +31,7 @@ const acknowledgments = [
     field: "ackRepaymentSchedule",
     label: "Repayment Schedule",
     description:
-      "I agree to repay the full BroNova amount in equal monthly installments as per the schedule above.",
+      "I agree to repay the full Pronova amount in equal monthly installments as per the schedule above.",
   },
   {
     field: "ackRiskDisclosure",

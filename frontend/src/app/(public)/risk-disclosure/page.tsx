@@ -51,25 +51,25 @@ export default function RiskDisclosurePage() {
             </h2>
             <p className="mb-4 text-muted-foreground leading-relaxed">
               Cryptocurrency markets are highly volatile and subject to
-              significant price fluctuations. The value of BroNova (PRN) tokens
+              significant price fluctuations. The value of Pronova (PRN) tokens
               and other cryptocurrencies can increase or decrease substantially
               in a short period of time. Specific risks include:
             </p>
             <ul className="mb-6 space-y-2 text-muted-foreground">
               <li>
-                <strong>Price Volatility:</strong> The market value of BroNova
+                <strong>Price Volatility:</strong> The market value of Pronova
                 tokens may fluctuate significantly, and past performance is not
                 indicative of future results
               </li>
               <li>
                 <strong>Market Liquidity:</strong> There may be periods where it
-                is difficult to buy or sell BroNova tokens at desired prices due
+                is difficult to buy or sell Pronova tokens at desired prices due
                 to low market liquidity
               </li>
               <li>
                 <strong>Regulatory Changes:</strong> Cryptocurrency regulations
                 may change in various jurisdictions, potentially affecting the
-                value, legality, or usability of BroNova tokens
+                value, legality, or usability of Pronova tokens
               </li>
               <li>
                 <strong>Technology Risks:</strong> Blockchain technology, while
@@ -83,7 +83,7 @@ export default function RiskDisclosurePage() {
               2. Investment Risks through CapiMax
             </h2>
             <p className="mb-4 text-muted-foreground leading-relaxed">
-              BroNova tokens received through financing may be used for
+              Pronova tokens received through financing may be used for
               investment through the CapiMax Investment platform. Investment
               activities carry inherent risks:
             </p>
@@ -114,7 +114,7 @@ export default function RiskDisclosurePage() {
             <h2 className="text-2xl font-bold">3. Repayment Obligations</h2>
             <p className="mb-4 text-muted-foreground leading-relaxed">
               Regardless of the performance of your investments or the market
-              value of BroNova tokens, you are obligated to make all scheduled
+              value of Pronova tokens, you are obligated to make all scheduled
               repayments as specified in your financing contract:
             </p>
             <ul className="mb-6 space-y-2 text-muted-foreground">
@@ -143,7 +143,7 @@ export default function RiskDisclosurePage() {
             <p className="mb-6 text-muted-foreground leading-relaxed">
               Nova Digital Finance does not provide any guarantee of returns on
               investments made through CapiMax or any other platform. The value
-              of BroNova tokens and any investment returns are subject to market
+              of Pronova tokens and any investment returns are subject to market
               forces and other factors beyond our control. You should only
               engage in financing and investment activities that you can afford
               and with funds you are prepared to potentially lose.
@@ -184,7 +184,7 @@ export default function RiskDisclosurePage() {
               The regulatory landscape for cryptocurrency and digital finance is
               evolving. Changes in laws, regulations, or enforcement actions in
               any jurisdiction may adversely affect the use, transfer, or value
-              of BroNova tokens, or the ability of Nova Digital Finance or
+              of Pronova tokens, or the ability of Nova Digital Finance or
               CapiMax to operate. There is no assurance that the current
               regulatory environment will remain unchanged.
             </p>

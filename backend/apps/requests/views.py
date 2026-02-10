@@ -3,6 +3,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.notifications.services import NotificationService
 from common.permissions import IsAdminUser
 
 from .models import ClientRequest
@@ -18,7 +19,9 @@ class ClientRequestListCreateView(generics.ListCreateAPIView):
         return ClientRequest.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        client_request = serializer.save(user=self.request.user)
+        # Send notification and email
+        NotificationService.notify_request_received(client_request)
 
 
 class ClientRequestDetailView(generics.RetrieveAPIView):
@@ -46,7 +49,15 @@ class AdminRequestDetailView(generics.RetrieveUpdateAPIView):
     queryset = ClientRequest.objects.select_related("user")
 
     def perform_update(self, serializer):
-        serializer.save(
+        # Check if admin_response is being added/updated
+        old_response = self.get_object().admin_response
+        new_response = serializer.validated_data.get("admin_response", "")
+
+        client_request = serializer.save(
             reviewed_by=self.request.user,
             reviewed_at=timezone.now(),
         )
+
+        # Send notification if admin added a new response
+        if new_response and new_response != old_response:
+            NotificationService.notify_request_responded(client_request)

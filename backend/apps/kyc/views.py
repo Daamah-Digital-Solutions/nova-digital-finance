@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.kyc.models import KYCApplication, KYCDocument
-from apps.notifications.models import Notification
+from apps.notifications.services import NotificationService
 from common.pagination import StandardPagination
 from common.permissions import IsAdminUser
 
@@ -72,14 +72,8 @@ class KYCSubmitView(APIView):
         kyc_application.submitted_at = timezone.now()
         kyc_application.save(update_fields=["status", "submitted_at", "updated_at"])
 
-        Notification.objects.create(
-            user=request.user,
-            title="KYC Submitted",
-            message="Your KYC application has been submitted and is pending review.",
-            category=Notification.Category.KYC,
-            channel=Notification.Channel.BOTH,
-            action_url="/kyc",
-        )
+        # Send notification and email
+        NotificationService.notify_kyc_submitted(kyc_application)
 
         return Response(
             KYCApplicationSerializer(kyc_application).data,
@@ -189,19 +183,5 @@ class AdminKYCDetailView(generics.RetrieveUpdateAPIView):
             instance.reviewed_at = timezone.now()
             instance.save(update_fields=["reviewed_by", "reviewed_at", "updated_at"])
 
-            if new_status == KYCApplication.Status.APPROVED:
-                title = "KYC Approved"
-                message = "Your KYC application has been approved. You can now access all services."
-            else:
-                reason = instance.rejection_reason or "No reason provided."
-                title = "KYC Rejected"
-                message = f"Your KYC application has been rejected. Reason: {reason}"
-
-            Notification.objects.create(
-                user=instance.user,
-                title=title,
-                message=message,
-                category=Notification.Category.KYC,
-                channel=Notification.Channel.BOTH,
-                action_url="/kyc",
-            )
+            # Send notification and email
+            NotificationService.notify_kyc_status_change(instance, new_status)

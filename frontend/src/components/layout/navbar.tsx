@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
@@ -32,11 +33,14 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">N</span>
-          </div>
-          <span className="text-xl font-bold">Nova Digital Finance</span>
+        <Link href="/">
+          <Image
+            src="/logo.png"
+            alt="Nova Digital Finance"
+            width={56}
+            height={56}
+            className="h-14 w-14 object-contain"
+          />
         </Link>
 
         {/* Desktop nav */}

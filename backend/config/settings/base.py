@@ -121,6 +121,13 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_ADAPTER = "apps.accounts.adapters.AccountAdapter"
+SOCIALACCOUNT_ADAPTER = "apps.accounts.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_QUERY_EMAIL = True
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ""  # No prefix, we include "Nova Digital Finance" in subject
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True  # Auto-login after email confirmation
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -192,7 +199,7 @@ REST_AUTH = {
 # drf-spectacular
 SPECTACULAR_SETTINGS = {
     "TITLE": "Nova Digital Finance API",
-    "DESCRIPTION": "API for Nova Digital Finance platform - BroNova (PRN) cryptocurrency financing",
+    "DESCRIPTION": "API for Nova Digital Finance platform - Pronova (PRN) cryptocurrency financing",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
@@ -235,9 +242,19 @@ NOWPAYMENTS_API_KEY = config("NOWPAYMENTS_API_KEY", default="")
 NOWPAYMENTS_IPN_SECRET = config("NOWPAYMENTS_IPN_SECRET", default="")
 NOWPAYMENTS_SANDBOX = config("NOWPAYMENTS_SANDBOX", default=True, cast=bool)
 
-# Email
-EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
-DEFAULT_FROM_EMAIL = "Nova Digital Finance <noreply@novadigitalfinance.com>"
+# Frontend URL
+FRONTEND_URL = config("FRONTEND_URL", default="https://novadf.com")
+
+# Email Configuration
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False, cast=bool)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Nova Digital Finance <noreply@novadf.tech>")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # File upload limits
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB

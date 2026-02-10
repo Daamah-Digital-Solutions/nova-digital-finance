@@ -1,0 +1,55 @@
+{% extends "emails/base.html" %}
+{% block title %}KYC Approved - Nova Digital Finance{% endblock %}
+
+{% block content %}
+<h2>🎉 Congratulations! Your KYC is Approved</h2>
+
+<p>Dear {{ user_name }},</p>
+
+<div class="success-box">
+    <p><strong>Great News!</strong></p>
+    <p>Your identity has been successfully verified. You now have full access to all Nova Digital Finance services.</p>
+</div>
+
+<p>Your account is now fully activated and you can apply for interest-free Pronova (PRN) cryptocurrency financing.</p>
+
+<div class="info-box">
+    <p><strong>Account Status</strong></p>
+    <p>KYC Status: <span style="color: #10b981; font-weight: 600;">✓ Verified</span></p>
+    <p>Financing Access: <span style="color: #10b981; font-weight: 600;">✓ Enabled</span></p>
+    <p>Maximum Financing: Up to $100,000 PRN</p>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>What You Can Do Now:</strong></p>
+
+<ol>
+    <li><strong>Apply for Financing</strong> - Request Pronova tokens with 0% interest</li>
+    <li><strong>Choose Your Terms</strong> - Select a repayment period from 3 to 24 months</li>
+    <li><strong>Sign Documents</strong> - Complete digital contract signing</li>
+    <li><strong>Receive Tokens</strong> - Get your PRN tokens deposited to your account</li>
+    <li><strong>Invest with CapiMax</strong> - Use your tokens for investment opportunities</li>
+</ol>
+
+<div class="button-wrapper">
+    <a href="{{ frontend_url }}/dashboard/financing" class="button">Apply for Financing Now</a>
+</div>
+
+<div class="divider"></div>
+
+<p><strong>Financing Benefits:</strong></p>
+<ul>
+    <li><strong>0% Interest</strong> - Only pay a one-time processing fee (3-5%)</li>
+    <li><strong>Flexible Amounts</strong> - Finance from $500 to $100,000</li>
+    <li><strong>Easy Repayments</strong> - Equal monthly installments</li>
+    <li><strong>Quick Approval</strong> - Get funded within 24-48 hours</li>
+</ul>
+
+<p>If you have any questions about your financing options, our team is here to help.</p>
+
+<p>Congratulations again!</p>
+
+<p>Best regards,<br>
+<strong>The Nova Digital Finance Team</strong></p>
+{% endblock %}

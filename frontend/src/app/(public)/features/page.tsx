@@ -69,7 +69,7 @@ const features = [
     icon: TrendingUp,
     title: "Investment through CapiMax",
     description:
-      "Through our strategic partnership with CapiMax Investment, you can deploy your BroNova tokens into investment opportunities. The trilateral relationship ensures a seamless experience.",
+      "Through our strategic partnership with CapiMax Investment, you can deploy your Pronova tokens into investment opportunities. The trilateral relationship ensures a seamless experience.",
     highlight: "Grow Your Tokens",
   },
 ];

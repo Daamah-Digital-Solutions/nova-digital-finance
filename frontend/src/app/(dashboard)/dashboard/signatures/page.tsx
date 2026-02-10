@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -23,22 +24,23 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Eraser,
-  Download,
+  Eye,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface SignatureRequest {
   id: string;
   document_title: string;
   document_type: string;
   document_id: string;
+  document_number: string;
   status: string;
   expires_at: string;
   created_at: string;
-  document_preview_url?: string;
 }
 
 export default function SignaturesPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [signing, setSigning] = useState(false);
   const [requests, setRequests] = useState<SignatureRequest[]>([]);
@@ -47,11 +49,7 @@ export default function SignaturesPage() {
   const [selectedRequest, setSelectedRequest] = useState<SignatureRequest | null>(null);
   const [showSignDialog, setShowSignDialog] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
-
-  // Canvas signature pad
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [hasSignature, setHasSignature] = useState(false);
+  const [signatureText, setSignatureText] = useState("");
 
   useEffect(() => {
     fetchRequests();
@@ -60,7 +58,7 @@ export default function SignaturesPage() {
   async function fetchRequests() {
     try {
       setLoading(true);
-      const res = await api.get("/signatures/");
+      const res = await api.get("/signatures/pending/");
       const data = Array.isArray(res.data) ? res.data : res.data.results || [];
       setRequests(data);
     } catch (error: any) {
@@ -74,109 +72,34 @@ export default function SignaturesPage() {
     setSelectedRequest(request);
     setShowSignDialog(true);
     setConsentChecked(false);
-    setHasSignature(false);
-
-    // Initialize canvas after dialog opens
-    setTimeout(() => {
-      initCanvas();
-    }, 100);
+    setSignatureText("");
   }
 
-  function initCanvas() {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Set canvas size
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * window.devicePixelRatio;
-    canvas.height = rect.height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-    // Setup drawing style
-    ctx.strokeStyle = "#1a1a1a";
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    // Fill white background
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, rect.width, rect.height);
-
-    // Draw signature line
-    ctx.strokeStyle = "#e5e7eb";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(20, rect.height - 30);
-    ctx.lineTo(rect.width - 20, rect.height - 30);
-    ctx.stroke();
-
-    // Reset drawing style
-    ctx.strokeStyle = "#1a1a1a";
-    ctx.lineWidth = 2;
-  }
-
-  function clearCanvas() {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    initCanvas();
-    setHasSignature(false);
-  }
-
-  function getCanvasCoords(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    const rect = canvas.getBoundingClientRect();
-
-    if ("touches" in e) {
-      const touch = e.touches[0];
-      return {
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top,
-      };
+  function base64ToBlob(base64: string, contentType: string): Blob {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
     }
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
+    return new Blob([bytes], { type: contentType });
   }
 
-  function startDrawing(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!ctx) return;
-
-    setIsDrawing(true);
-    setHasSignature(true);
-    const { x, y } = getCanvasCoords(e);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  }
-
-  function draw(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
-    e.preventDefault();
-    if (!isDrawing) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!ctx) return;
-
-    const { x, y } = getCanvasCoords(e);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  }
-
-  function stopDrawing() {
-    setIsDrawing(false);
+  async function handleViewContract(request: SignatureRequest) {
+    try {
+      const res = await api.get(`/documents/${request.document_id}/download/`);
+      const blob = base64ToBlob(res.data.data, res.data.content_type || "application/pdf");
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (error: any) {
+      toast.error("Failed to open document");
+    }
   }
 
   async function handleSign() {
     if (!selectedRequest) return;
 
-    if (!hasSignature) {
-      toast.error("Please draw your signature");
+    if (!signatureText.trim()) {
+      toast.error("Please type your full name as signature");
       return;
     }
 
@@ -187,20 +110,29 @@ export default function SignaturesPage() {
 
     try {
       setSigning(true);
-      const canvas = canvasRef.current;
-      let signatureData = "";
-      if (canvas) {
-        signatureData = canvas.toDataURL("image/png");
-      }
 
       await api.post(`/signatures/${selectedRequest.id}/sign/`, {
-        signature_data: signatureData,
+        signature_text: signatureText.trim(),
+        consent_text:
+          "I hereby confirm that I have reviewed the document in its entirety and agree to be legally bound by its terms. I understand that this electronic signature has the same legal effect as a handwritten signature.",
       });
 
       toast.success("Document signed successfully!");
       setShowSignDialog(false);
       setSelectedRequest(null);
-      fetchRequests();
+
+      // Refresh list to check if more documents need signing
+      const res = await api.get("/signatures/pending/");
+      const remaining = Array.isArray(res.data) ? res.data : res.data.results || [];
+
+      if (remaining.length > 0) {
+        setRequests(remaining);
+        toast.info(`${remaining.length} more document(s) to sign`);
+      } else {
+        // All documents signed - go to fee payment
+        toast.success("All documents signed! Redirecting to pay processing fee...");
+        router.push("/dashboard/financing?action=pay-fee");
+      }
     } catch (error: any) {
       toast.error(error?.response?.data?.detail || "Failed to sign document");
     } finally {
@@ -291,10 +223,16 @@ export default function SignaturesPage() {
                     </Badge>
                   </div>
                 </div>
-                <Button onClick={() => openSignDialog(request)}>
-                  <PenTool className="mr-2 h-4 w-4" />
-                  Sign
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => handleViewContract(request)}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Contract
+                  </Button>
+                  <Button onClick={() => openSignDialog(request)}>
+                    <PenTool className="mr-2 h-4 w-4" />
+                    Sign
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -367,7 +305,7 @@ export default function SignaturesPage() {
           if (!open) {
             setSelectedRequest(null);
             setConsentChecked(false);
-            setHasSignature(false);
+            setSignatureText("");
           }
         }}
       >
@@ -380,59 +318,48 @@ export default function SignaturesPage() {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Document Preview Area */}
+            {/* Document Preview */}
             <div className="rounded-lg border bg-muted/30 p-6">
-              <div className="flex items-center gap-3">
-                <FileText className="h-8 w-8 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">{selectedRequest?.document_title}</p>
-                  <p className="text-sm capitalize text-muted-foreground">
-                    {selectedRequest?.document_type?.replace(/_/g, " ") || "Document"}
-                  </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-8 w-8 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">{selectedRequest?.document_title}</p>
+                    <p className="text-sm capitalize text-muted-foreground">
+                      {selectedRequest?.document_type?.replace(/_/g, " ") || "Document"}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              {selectedRequest?.document_preview_url && (
-                <div className="mt-4">
-                  <Button variant="outline" size="sm" asChild>
-                    <a
-                      href={selectedRequest.document_preview_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      View Full Document
-                    </a>
+                {selectedRequest && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewContract(selectedRequest)}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Contract
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
-            {/* Signature Pad */}
+            {/* Signature Input */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Draw Your Signature</Label>
-                <Button variant="ghost" size="sm" onClick={clearCanvas}>
-                  <Eraser className="mr-1 h-3.5 w-3.5" />
-                  Clear
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Use your mouse or touch to draw your signature below. For production use, this
-                integrates with the signature_pad library for smoother curves.
-              </p>
-              <div className="overflow-hidden rounded-lg border">
-                <canvas
-                  ref={canvasRef}
-                  className="h-40 w-full cursor-crosshair touch-none bg-white"
-                  onMouseDown={startDrawing}
-                  onMouseMove={draw}
-                  onMouseUp={stopDrawing}
-                  onMouseLeave={stopDrawing}
-                  onTouchStart={startDrawing}
-                  onTouchMove={draw}
-                  onTouchEnd={stopDrawing}
-                />
-              </div>
+              <Label htmlFor="signature-text">Type Your Full Name as Signature</Label>
+              <Input
+                id="signature-text"
+                placeholder="Enter your full legal name"
+                value={signatureText}
+                onChange={(e) => setSignatureText(e.target.value)}
+              />
+              {signatureText && (
+                <div className="mt-2 rounded-lg border bg-white p-4 dark:bg-gray-950">
+                  <p className="text-xs text-muted-foreground mb-1">Signature Preview:</p>
+                  <p className="text-2xl italic font-semibold text-blue-900 dark:text-blue-300">
+                    {signatureText}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Consent Checkbox */}
@@ -460,7 +387,7 @@ export default function SignaturesPage() {
               </Button>
               <Button
                 onClick={handleSign}
-                disabled={signing || !hasSignature || !consentChecked}
+                disabled={signing || !signatureText.trim() || !consentChecked}
                 className="flex-1"
               >
                 {signing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -11,14 +11,14 @@ import type {
 export function useApplications() {
   return useApiQuery<PaginatedResponse<FinancingApplication>>(
     ["financing", "applications"],
-    "/financing/applications/"
+    "/financing/"
   );
 }
 
 export function useApplication(id: string) {
   return useApiQuery<FinancingApplication>(
     ["financing", "applications", id],
-    `/financing/applications/${id}/`,
+    `/financing/${id}/`,
     {
       enabled: !!id,
     }
@@ -28,7 +28,7 @@ export function useApplication(id: string) {
 export function useInstallments(id: string) {
   return useApiQuery<PaginatedResponse<Installment>>(
     ["financing", "installments", id],
-    `/financing/applications/${id}/installments/`,
+    `/financing/${id}/installments/`,
     {
       enabled: !!id,
     }
@@ -38,7 +38,7 @@ export function useInstallments(id: string) {
 export function useStatement(id: string) {
   return useApiQuery<Blob>(
     ["financing", "statement", id],
-    `/financing/applications/${id}/statement/`,
+    `/financing/${id}/statement/`,
     {
       enabled: !!id,
     }
