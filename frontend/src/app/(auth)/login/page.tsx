@@ -174,7 +174,7 @@ export default function LoginPage() {
           className="w-full"
           type="button"
           onClick={() => {
-            window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"}/accounts/google/login/?process=login`;
+            window.location.href = "/accounts/google/login/?process=login";
           }}
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
