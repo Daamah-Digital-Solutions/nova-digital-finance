@@ -36,6 +36,7 @@ CSRF_TRUSTED_ORIGINS = config(
 # Allauth OAuth settings
 LOGIN_REDIRECT_URL = "/api/v1/auth/google/callback/"
 ACCOUNT_LOGOUT_REDIRECT_URL = FRONTEND_URL
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Email - Using SMTP (can be changed to SendGrid/Mailgun/etc.)
