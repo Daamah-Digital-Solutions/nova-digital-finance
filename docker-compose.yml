@@ -1,5 +1,3 @@
-version: "3.8"
-
 # Nova Digital Finance - Production Docker Compose
 # For local development, use: docker compose -f docker-compose.dev.yml up
 
