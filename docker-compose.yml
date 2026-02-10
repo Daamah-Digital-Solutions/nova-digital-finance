@@ -45,7 +45,7 @@ services:
       - DJANGO_SETTINGS_MODULE=config.settings.prod
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DJANGO_DEBUG=false
-      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,novadf.com}
       - POSTGRES_DB=${POSTGRES_DB:-nova_finance_prod}
       - POSTGRES_USER=${POSTGRES_USER:-nova_prod_user}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
