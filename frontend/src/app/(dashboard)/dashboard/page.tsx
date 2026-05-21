@@ -28,6 +28,11 @@ import {
   ArrowRight,
   Wallet,
   ExternalLink,
+  Briefcase,
+  Smartphone,
+  Globe,
+  Network,
+  HeartHandshake,
 } from "lucide-react";
 
 interface Installment {
@@ -288,6 +293,129 @@ export default function DashboardPage() {
                 <span>Invest via CapiMax</span>
               </a>
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Use Nova */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">Use Nova</CardTitle>
+          </div>
+          <CardDescription>
+            Spend your Nova Digital Finance (PRN) certificates across these
+            platforms in the Capimax Group ecosystem.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: Briefcase,
+                title: "Capimax ASSET",
+                tagline: "Investment platform",
+                href: "https://panel.capimaxinvestment.com/",
+                external: true,
+              },
+              {
+                icon: Smartphone,
+                title: "Capimax ASSET Application",
+                tagline: "Mobile & web app",
+                href: "https://panel.capimaxinvestment.com/",
+                external: true,
+              },
+              {
+                icon: Globe,
+                title: "Capimaxrt.tech",
+                tagline: "Real-time technology",
+                href: "https://capimaxrt.tech",
+                external: true,
+              },
+              {
+                icon: Network,
+                title: "CapimaxGroup.com",
+                tagline: "Group directory",
+                href: "https://capimaxgroup.com",
+                external: true,
+              },
+              {
+                icon: HeartHandshake,
+                title: "Partners",
+                tagline: "Real-estate partner network",
+                href: "/partners",
+                external: false,
+                highlight: true,
+              },
+            ].map((platform) => {
+              const innerNode = (
+                <div className="flex w-full items-center gap-3 text-left">
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+                      platform.highlight
+                        ? "bg-primary-foreground/15 ring-1 ring-primary-foreground/20"
+                        : "bg-primary/10 ring-1 ring-primary/15"
+                    }`}
+                  >
+                    <platform.icon
+                      className={`h-4 w-4 ${platform.highlight ? "text-primary-foreground" : "text-primary"}`}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate text-sm font-semibold">
+                        {platform.title}
+                      </span>
+                      {platform.external ? (
+                        <ExternalLink
+                          className={`h-3 w-3 shrink-0 ${platform.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}
+                        />
+                      ) : (
+                        <ArrowRight
+                          className={`h-3 w-3 shrink-0 transition-transform group-hover:translate-x-0.5 ${platform.highlight ? "text-primary-foreground" : "text-primary"}`}
+                        />
+                      )}
+                    </div>
+                    <p
+                      className={`mt-0.5 truncate text-xs ${
+                        platform.highlight
+                          ? "text-primary-foreground/80"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {platform.tagline}
+                    </p>
+                  </div>
+                </div>
+              );
+
+              const baseClasses =
+                "group flex w-full items-center rounded-xl border p-3 transition-all";
+              const variantClasses = platform.highlight
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                : "bg-card hover:border-primary/40 hover:bg-primary/5";
+
+              return platform.external ? (
+                <a
+                  key={platform.title}
+                  href={platform.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${baseClasses} ${variantClasses}`}
+                >
+                  {innerNode}
+                </a>
+              ) : (
+                <Link
+                  key={platform.title}
+                  href={platform.href}
+                  className={`${baseClasses} ${variantClasses}`}
+                >
+                  {innerNode}
+                </Link>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
