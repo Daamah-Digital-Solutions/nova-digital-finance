@@ -119,7 +119,13 @@ class EmailService:
         """Send KYC submission confirmation."""
         user = kyc_application.user
         context = cls._get_base_context(user)
-        context['selfie_submitted'] = bool(kyc_application.selfie)
+        # `KYCApplication` exposes uploaded files via the reverse `documents`
+        # relation, not a dedicated `selfie` field. The old code crashed
+        # the entire /kyc/submit/ endpoint with AttributeError. We now just
+        # check whether a selfie record was uploaded.
+        context['selfie_submitted'] = kyc_application.documents.filter(
+            document_type='selfie'
+        ).exists()
 
         return cls._send_email(
             to_email=user.email,

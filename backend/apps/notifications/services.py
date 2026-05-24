@@ -16,6 +16,27 @@ class NotificationService:
     """Service for creating notifications and sending emails."""
 
     @staticmethod
+    def _safe_email(send_fn, *args, **kwargs) -> bool:
+        """Run an EmailService.send_* call and swallow any exception.
+
+        Email is a best-effort side effect of user-facing actions like KYC
+        submission or financing approval. Historically an AttributeError in
+        a context builder (e.g. referencing a non-existent field) bubbled
+        all the way up and returned a 500 to the user, even though the
+        actual write to the DB had already succeeded. This wrapper keeps
+        notification failures out of the request path.
+        """
+        try:
+            return bool(send_fn(*args, **kwargs))
+        except Exception as e:  # pragma: no cover - defensive
+            logger.exception(
+                "EmailService.%s raised; suppressed so the request still succeeds: %s",
+                getattr(send_fn, "__name__", "<unknown>"),
+                e,
+            )
+            return False
+
+    @staticmethod
     def notify(
         user,
         title: str,
@@ -92,7 +113,7 @@ class NotificationService:
     @staticmethod
     def notify_kyc_submitted(kyc_application) -> Notification:
         """Notify user that KYC has been submitted."""
-        EmailService.send_kyc_submitted_email(kyc_application)
+        NotificationService._safe_email(EmailService.send_kyc_submitted_email, kyc_application)
 
         return NotificationService.notify(
             user=kyc_application.user,
@@ -117,9 +138,9 @@ class NotificationService:
 
         # Send appropriate email
         if new_status == "approved":
-            EmailService.send_kyc_approved_email(kyc_application)
+            NotificationService._safe_email(EmailService.send_kyc_approved_email, kyc_application)
         elif new_status == "rejected":
-            EmailService.send_kyc_rejected_email(kyc_application)
+            NotificationService._safe_email(EmailService.send_kyc_rejected_email, kyc_application)
 
         return NotificationService.notify(
             user=kyc_application.user,
@@ -135,7 +156,7 @@ class NotificationService:
     @staticmethod
     def notify_financing_submitted(financing) -> Notification:
         """Notify user that financing application has been submitted."""
-        EmailService.send_financing_submitted_email(financing)
+        NotificationService._safe_email(EmailService.send_financing_submitted_email, financing)
 
         return NotificationService.notify(
             user=financing.user,
@@ -149,7 +170,7 @@ class NotificationService:
     @staticmethod
     def notify_financing_active(financing) -> Notification:
         """Notify user that financing is now active."""
-        EmailService.send_financing_active_email(financing)
+        NotificationService._safe_email(EmailService.send_financing_active_email, financing)
 
         return NotificationService.notify(
             user=financing.user,
@@ -163,7 +184,7 @@ class NotificationService:
     @staticmethod
     def notify_financing_completed(financing) -> Notification:
         """Notify user that financing has been completed."""
-        EmailService.send_financing_completed_email(financing)
+        NotificationService._safe_email(EmailService.send_financing_completed_email, financing)
 
         return NotificationService.notify(
             user=financing.user,
@@ -179,7 +200,7 @@ class NotificationService:
     @staticmethod
     def notify_payment_confirmed(payment) -> Notification:
         """Notify user of successful payment."""
-        EmailService.send_payment_confirmation_email(payment)
+        NotificationService._safe_email(EmailService.send_payment_confirmation_email, payment)
 
         return NotificationService.notify(
             user=payment.user,
@@ -193,7 +214,7 @@ class NotificationService:
     @staticmethod
     def notify_payment_reminder(installment, days_before: int) -> Notification:
         """Send payment reminder notification."""
-        EmailService.send_payment_reminder_email(installment, days_before)
+        NotificationService._safe_email(EmailService.send_payment_reminder_email, installment, days_before)
 
         return NotificationService.notify(
             user=installment.financing.user,
@@ -207,7 +228,7 @@ class NotificationService:
     @staticmethod
     def notify_payment_overdue(installment, days_overdue: int) -> Notification:
         """Send payment overdue notification."""
-        EmailService.send_payment_overdue_email(installment, days_overdue)
+        NotificationService._safe_email(EmailService.send_payment_overdue_email, installment, days_overdue)
 
         return NotificationService.notify(
             user=installment.financing.user,
@@ -223,7 +244,7 @@ class NotificationService:
     @staticmethod
     def notify_signature_required(signature_request) -> Notification:
         """Notify user that a document needs signing."""
-        EmailService.send_signature_required_email(signature_request)
+        NotificationService._safe_email(EmailService.send_signature_required_email, signature_request)
 
         document = signature_request.document
 
@@ -239,7 +260,7 @@ class NotificationService:
     @staticmethod
     def notify_document_signed(signature) -> Notification:
         """Notify user that document has been signed."""
-        EmailService.send_document_signed_email(signature)
+        NotificationService._safe_email(EmailService.send_document_signed_email, signature)
 
         document = signature.signature_request.document
 
@@ -257,7 +278,7 @@ class NotificationService:
     @staticmethod
     def notify_request_received(client_request) -> Notification:
         """Notify user that their request has been received."""
-        EmailService.send_request_received_email(client_request)
+        NotificationService._safe_email(EmailService.send_request_received_email, client_request)
 
         return NotificationService.notify(
             user=client_request.user,
@@ -271,7 +292,7 @@ class NotificationService:
     @staticmethod
     def notify_request_responded(client_request) -> Notification:
         """Notify user that their request has been responded to."""
-        EmailService.send_request_response_email(client_request)
+        NotificationService._safe_email(EmailService.send_request_response_email, client_request)
 
         return NotificationService.notify(
             user=client_request.user,

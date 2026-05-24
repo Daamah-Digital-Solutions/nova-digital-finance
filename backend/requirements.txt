@@ -18,7 +18,12 @@ django-celery-beat==2.7.0
 redis==5.2.1
 
 # PDF & Images
+# WeasyPrint is stripped from the prod image (needs cairo/pango system libs).
+# reportlab is the pure-Python fallback used by DocumentService when WeasyPrint
+# is unavailable — it MUST be installed in prod or every /financing/*/submit/
+# crashes with ModuleNotFoundError.
 WeasyPrint==63.1
+reportlab==4.2.5
 Pillow==11.1.0
 qrcode==8.0
 

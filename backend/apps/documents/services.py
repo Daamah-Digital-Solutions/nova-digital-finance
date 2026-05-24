@@ -8,10 +8,6 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from django.utils import timezone
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import cm
-from reportlab.lib.utils import ImageReader
-from reportlab.pdfgen import canvas as pdf_canvas
 
 from common.utils import generate_document_number
 
@@ -19,12 +15,29 @@ from .models import Document
 
 logger = logging.getLogger(__name__)
 
+# Both PDF backends are optional: WeasyPrint is the primary HTML renderer
+# (needs system libs like cairo/pango) and reportlab is the fallback for
+# bare-bones PDFs. If either import fails we still want the rest of the
+# Django process to start — historically the unconditional reportlab
+# import crashed *every* /api/v1/financing/<id>/submit/ request with a
+# 500 because the prod image didn't ship the wheel.
 try:
     from weasyprint import HTML
     HAS_WEASYPRINT = True
 except (ImportError, OSError) as e:
     HAS_WEASYPRINT = False
     logger.warning(f"WeasyPrint not available: {e}. Using reportlab fallback for PDFs.")
+
+try:
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import cm
+    from reportlab.lib.utils import ImageReader
+    from reportlab.pdfgen import canvas as pdf_canvas
+    HAS_REPORTLAB = True
+except ImportError as e:
+    HAS_REPORTLAB = False
+    A4 = cm = ImageReader = pdf_canvas = None  # type: ignore[assignment]
+    logger.warning(f"reportlab not available: {e}. Simple-PDF fallback disabled.")
 
 
 class DocumentService:
@@ -49,6 +62,11 @@ class DocumentService:
                 - signer_name: Name of the person who signed
                 - signed_at: datetime when signed
         """
+        if not HAS_REPORTLAB:
+            raise RuntimeError(
+                "reportlab is not installed in this image — add it to "
+                "backend/requirements.txt to enable the simple-PDF fallback."
+            )
         buf = io.BytesIO()
         c = pdf_canvas.Canvas(buf, pagesize=A4)
         width, height = A4
