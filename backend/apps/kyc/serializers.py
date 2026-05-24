@@ -92,11 +92,19 @@ class KYCApplicationCreateSerializer(serializers.ModelSerializer):
 
 
 class KYCSubmitSerializer(serializers.Serializer):
-    """Validates that the KYC application has the minimum required documents before submission."""
+    """Validates that the KYC application has the minimum required documents before submission.
 
-    REQUIRED_DOCUMENT_TYPES = [
+    Minimal-friction policy: we only require a government-issued ID (passport or
+    national ID) plus a selfie with that ID. Proof of address and proof of income
+    are optional uploads — they can be requested later if needed.
+    """
+
+    # Either a passport OR a national ID satisfies the identity requirement.
+    REQUIRED_IDENTITY_TYPES = [
         KYCDocument.DocumentType.PASSPORT,
-        KYCDocument.DocumentType.ADDRESS_PROOF,
+        KYCDocument.DocumentType.NATIONAL_ID,
+    ]
+    REQUIRED_DOCUMENT_TYPES = [
         KYCDocument.DocumentType.SELFIE,
     ]
 
@@ -113,7 +121,12 @@ class KYCSubmitSerializer(serializers.Serializer):
         uploaded_types = set(
             kyc_application.documents.values_list("document_type", flat=True)
         )
+
         missing = []
+        # Identity: any one of the accepted ID types is enough.
+        if not any(t in uploaded_types for t in self.REQUIRED_IDENTITY_TYPES):
+            missing.append("Passport or National ID")
+        # Other strictly-required types.
         for doc_type in self.REQUIRED_DOCUMENT_TYPES:
             if doc_type not in uploaded_types:
                 missing.append(doc_type.label)

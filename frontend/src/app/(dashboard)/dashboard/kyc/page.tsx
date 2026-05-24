@@ -82,12 +82,13 @@ const STEPS = [
   { number: 4, title: "Review", icon: ClipboardCheck },
 ];
 
+// IMPORTANT: these values must match `UserProfile.IncomeSource` choices in
+// backend/apps/accounts/models.py exactly, or the profile PATCH will fail
+// with a 400 "is not a valid choice" error.
 const INCOME_SOURCES = [
-  { value: "salary", label: "Salary / Employment" },
+  { value: "employment", label: "Salary / Employment" },
   { value: "business", label: "Business Income" },
-  { value: "investments", label: "Investment Returns" },
-  { value: "rental", label: "Rental Income" },
-  { value: "pension", label: "Pension / Retirement" },
+  { value: "investment", label: "Investment Returns" },
   { value: "other", label: "Other" },
 ];
 
@@ -200,12 +201,91 @@ export default function KYCPage() {
     fetchProfile();
   }, []);
 
+  const validateCurrentStep = (): boolean => {
+    if (currentStep === 1) {
+      const v = personalForm.getValues();
+      const missing: string[] = [];
+      if (!v.first_name) missing.push("First Name");
+      if (!v.last_name) missing.push("Last Name");
+      if (!v.phone) missing.push("Phone");
+      if (!v.date_of_birth) missing.push("Date of Birth");
+      if (!v.address_line_1) missing.push("Address");
+      if (!v.city) missing.push("City");
+      if (!v.country) missing.push("Country");
+      if (!v.nationality) missing.push("Nationality");
+      if (missing.length) {
+        toast.error(`Please fill in: ${missing.join(", ")}`);
+        return false;
+      }
+    }
+    if (currentStep === 2) {
+      const v = employmentForm.getValues();
+      const missing: string[] = [];
+      if (!v.occupation) missing.push("Occupation");
+      if (!v.income_source) missing.push("Source of Income");
+      if (!v.monthly_income) missing.push("Monthly Income");
+      if (!v.investment_purpose) missing.push("Purpose of Financing");
+      if (missing.length) {
+        toast.error(`Please fill in: ${missing.join(", ")}`);
+        return false;
+      }
+    }
+    if (currentStep === 3) {
+      if (!documents.passport) {
+        toast.error("Please upload a Passport or National ID.");
+        return false;
+      }
+      if (!documents.selfie) {
+        toast.error("Please upload a selfie holding your ID.");
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleNext = () => {
+    if (!validateCurrentStep()) return;
     if (currentStep < 4) setCurrentStep((s) => s + 1);
   };
 
   const handleBack = () => {
     if (currentStep > 1) setCurrentStep((s) => s - 1);
+  };
+
+  // Flatten DRF validation error payloads into a single readable string so the
+  // toast actually tells the user which field failed instead of a generic
+  // "Failed to submit KYC application".
+  const formatApiError = (error: any, fallback: string): string => {
+    const data = error?.response?.data;
+    if (!data) return error?.message || fallback;
+    if (typeof data === "string") return data;
+    if (typeof data.detail === "string") return data.detail;
+    const parts: string[] = [];
+    const walk = (val: any, prefix = ""): void => {
+      if (val == null) return;
+      if (typeof val === "string") {
+        parts.push(prefix ? `${prefix}: ${val}` : val);
+      } else if (Array.isArray(val)) {
+        val.forEach((v) => walk(v, prefix));
+      } else if (typeof val === "object") {
+        for (const [k, v] of Object.entries(val)) {
+          walk(v, prefix ? `${prefix}.${k}` : k);
+        }
+      }
+    };
+    walk(data);
+    return parts.slice(0, 3).join(" — ") || fallback;
+  };
+
+  // Strip empty strings before sending to the backend so DateField /
+  // DecimalField don't reject "" with "wrong format" / "valid number" errors.
+  const cleanProfilePayload = (obj: Record<string, any>) => {
+    const out: Record<string, any> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (v === "" || v === undefined) continue;
+      out[k] = v;
+    }
+    return out;
   };
 
   const handleSubmitKYC = async () => {
@@ -214,16 +294,29 @@ export default function KYCPage() {
       return;
     }
 
+    // Required docs: any one identity document + a selfie.
+    if (!documents.passport) {
+      toast.error("Please upload a Passport or National ID before submitting.");
+      setCurrentStep(3);
+      return;
+    }
+    if (!documents.selfie) {
+      toast.error("Please upload a selfie holding your ID before submitting.");
+      setCurrentStep(3);
+      return;
+    }
+
     try {
       setSubmitting(true);
       const personalData = personalForm.getValues();
       const employmentData = employmentForm.getValues();
 
-      // Submit profile data (nested under profile key)
+      // Submit profile data (nested under profile key). Empty optional fields
+      // are stripped so DRF doesn't reject "" for date/decimal columns.
       await api.patch("/users/me/", {
         first_name: personalData.first_name,
         last_name: personalData.last_name,
-        profile: {
+        profile: cleanProfilePayload({
           phone: personalData.phone,
           date_of_birth: personalData.date_of_birth,
           address_line_1: personalData.address_line_1,
@@ -238,19 +331,26 @@ export default function KYCPage() {
           income_source: employmentData.income_source,
           monthly_income: employmentData.monthly_income,
           investment_purpose: employmentData.investment_purpose,
-        },
+        }),
       });
 
-      // Upload KYC documents
+      // Upload KYC documents one-by-one. If a single upload fails, surface
+      // the exact field error and abort before /kyc/submit/ so the user can
+      // re-try just that document.
       const docEntries = Object.entries(documents).filter(([, doc]) => doc !== null);
       for (const [docType, doc] of docEntries) {
-        if (doc) {
-          const formData = new FormData();
-          formData.append("file", doc.file);
-          formData.append("document_type", docType);
+        if (!doc) continue;
+        const formData = new FormData();
+        formData.append("file", doc.file);
+        formData.append("document_type", docType);
+        try {
           await api.post("/kyc/documents/", formData, {
             headers: { "Content-Type": "multipart/form-data" },
           });
+        } catch (uploadErr: any) {
+          throw new Error(
+            formatApiError(uploadErr, `Failed to upload ${docType.replace("_", " ")}`),
+          );
         }
       }
 
@@ -259,7 +359,7 @@ export default function KYCPage() {
       setKycStatus("submitted");
       toast.success("KYC application submitted successfully!");
     } catch (error: any) {
-      toast.error(error?.response?.data?.detail || "Failed to submit KYC application");
+      toast.error(formatApiError(error, "Failed to submit KYC application"));
     } finally {
       setSubmitting(false);
     }
@@ -672,29 +772,30 @@ export default function KYCPage() {
           <CardHeader>
             <CardTitle>Document Upload</CardTitle>
             <CardDescription>
-              Upload the required documents for identity verification
+              Only two documents are required to submit. The other two are optional —
+              you can add them later if our compliance team asks for them.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <DocumentDropzone
               docKey="passport"
               label="Passport or National ID *"
-              description="Upload a clear copy of your passport or national ID card"
-            />
-            <DocumentDropzone
-              docKey="address_proof"
-              label="Proof of Address *"
-              description="Utility bill, bank statement, or government letter (less than 3 months old)"
-            />
-            <DocumentDropzone
-              docKey="income_proof"
-              label="Proof of Income *"
-              description="Salary certificate, bank statements, or tax return"
+              description="Required. Upload a clear photo or scan of your passport or government-issued ID."
             />
             <DocumentDropzone
               docKey="selfie"
               label="Selfie with ID *"
-              description="Take a selfie holding your passport or ID next to your face"
+              description="Required. A selfie holding your ID next to your face so we can match identities."
+            />
+            <DocumentDropzone
+              docKey="address_proof"
+              label="Proof of Address (optional)"
+              description="Utility bill, bank statement, or government letter (less than 3 months old). Optional."
+            />
+            <DocumentDropzone
+              docKey="income_proof"
+              label="Proof of Income (optional)"
+              description="Salary certificate, bank statement, or tax return. Optional."
             />
           </CardContent>
         </Card>
@@ -799,23 +900,44 @@ export default function KYCPage() {
               <div className="grid gap-2 rounded-lg border p-4 sm:grid-cols-2">
                 {(
                   [
-                    ["passport", "Passport / ID"],
-                    ["address_proof", "Address Proof"],
-                    ["income_proof", "Income Proof"],
-                    ["selfie", "Selfie with ID"],
+                    ["passport", "Passport / ID", true],
+                    ["selfie", "Selfie with ID", true],
+                    ["address_proof", "Address Proof", false],
+                    ["income_proof", "Income Proof", false],
                   ] as const
-                ).map(([key, label]) => (
-                  <div key={key} className="flex items-center gap-2">
-                    {documents[key] ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <X className="h-4 w-4 text-destructive" />
-                    )}
-                    <span className="text-sm">
-                      {label}: {documents[key]?.file.name || "Not uploaded"}
-                    </span>
-                  </div>
-                ))}
+                ).map(([key, label, required]) => {
+                  const uploaded = !!documents[key];
+                  // Optional & missing → neutral dot, not a red X.
+                  const Icon = uploaded
+                    ? CheckCircle2
+                    : required
+                      ? X
+                      : (props: { className?: string }) => (
+                          <span
+                            className={`inline-block h-2 w-2 rounded-full bg-muted-foreground/40 ${props.className ?? ""}`}
+                          />
+                        );
+                  return (
+                    <div key={key} className="flex items-center gap-2">
+                      <Icon
+                        className={`h-4 w-4 ${
+                          uploaded
+                            ? "text-green-600"
+                            : required
+                              ? "text-destructive"
+                              : "text-muted-foreground"
+                        }`}
+                      />
+                      <span className="text-sm">
+                        {label}
+                        {!required && (
+                          <span className="text-muted-foreground"> (optional)</span>
+                        )}
+                        : {documents[key]?.file.name || (required ? "Not uploaded" : "Skipped")}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
