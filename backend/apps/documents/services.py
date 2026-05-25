@@ -2,6 +2,7 @@ import hashlib
 import io
 import logging
 from datetime import timedelta
+from decimal import Decimal
 
 import qrcode
 from django.conf import settings
@@ -174,14 +175,170 @@ class DocumentService:
         img.save(buffer, format="PNG")
         return buffer.getvalue()
 
+    # ------------------------------------------------------------------
+    # Shared template-context builders. Used by both the initial
+    # generate_* calls AND regenerate_signed_document so the signed PDF
+    # re-renders the exact same Master Facility Agreement / Nova Finance
+    # Instrument content (not a stripped-down reportlab fallback) with
+    # the signature object embedded.
+    # ------------------------------------------------------------------
+
     @staticmethod
-    def generate_certificate(financing):
-        context = {
+    def _logo_path() -> str:
+        """Absolute path to the brand logo embedded in PDFs.
+
+        WeasyPrint needs a `file://` URL or an absolute filesystem path for
+        local images. The logo lives at backend/templates/pdfs/assets/logo.png.
+        """
+        import os
+        return os.path.join(
+            settings.BASE_DIR, "templates", "pdfs", "assets", "logo.png"
+        )
+
+    @staticmethod
+    def _residential_address(user) -> str:
+        profile = getattr(user, "profile", None)
+        if not profile:
+            return ""
+        parts = [
+            getattr(profile, "address_line_1", "") or "",
+            getattr(profile, "address_line_2", "") or "",
+            getattr(profile, "city", "") or "",
+            getattr(profile, "state", "") or "",
+            getattr(profile, "postal_code", "") or "",
+            getattr(profile, "country", "") or "",
+        ]
+        return ", ".join(p for p in parts if p)
+
+    @staticmethod
+    def _id_or_passport(user) -> str:
+        """Pick the most authoritative ID number we have on file.
+
+        Pulls from a KYC passport/national-id record if one exists, otherwise
+        falls back to the profile id_number field if the project has one.
+        """
+        try:
+            from apps.kyc.models import KYCApplication, KYCDocument
+            app = KYCApplication.objects.filter(user=user).first()
+            if app:
+                doc = app.documents.filter(
+                    document_type__in=[
+                        KYCDocument.DocumentType.PASSPORT,
+                        KYCDocument.DocumentType.NATIONAL_ID,
+                    ]
+                ).first()
+                if doc and getattr(doc, "id_number", None):
+                    return doc.id_number  # not currently in schema, future-proof
+        except Exception:  # pragma: no cover - defensive
+            pass
+        return ""
+
+    @staticmethod
+    def _maturity_date(financing):
+        """Maturity = facility issue date (= created_at) + N months.
+
+        Calendar arithmetic uses timedelta of 30 days per month to match
+        FinancingService.generate_installments() which uses the same
+        approximation for installment due dates.
+        """
+        from datetime import timedelta
+        start = financing.created_at or timezone.now()
+        months = int(financing.repayment_period_months or 0)
+        return (start + timedelta(days=30 * months)).date()
+
+    @staticmethod
+    def _mfa_reference(financing) -> str:
+        """Stable MFA reference derived from the financing application."""
+        year = (financing.created_at or timezone.now()).year
+        return f"MFA-NDF-{financing.application_number}-{year}"
+
+    @staticmethod
+    def _installments_table(financing) -> list[dict]:
+        """Schedule A monthly installment rows with running balance.
+
+        If FinancingService.generate_installments has already run, use the
+        real installment objects; otherwise project the schedule forward
+        from today using the financing's monthly_installment value.
+        """
+        from datetime import timedelta
+        rows: list[dict] = []
+        installments = list(financing.installments.all().order_by("installment_number"))
+        if installments:
+            total = sum((i.amount for i in installments), start=Decimal("0"))
+            paid_so_far = Decimal("0")
+            for inst in installments:
+                paid_so_far += inst.amount
+                rows.append({
+                    "number": inst.installment_number,
+                    "due_date": inst.due_date,
+                    "amount": inst.amount,
+                    "outstanding_after": (total - paid_so_far).quantize(Decimal("0.01")),
+                    "status": inst.get_status_display() if hasattr(inst, "get_status_display") else "Pending",
+                })
+        else:
+            monthly = Decimal(str(financing.monthly_installment))
+            months = int(financing.repayment_period_months or 0)
+            total = monthly * months
+            start = (financing.created_at or timezone.now()).date()
+            paid_so_far = Decimal("0")
+            for i in range(1, months + 1):
+                paid_so_far += monthly
+                rows.append({
+                    "number": i,
+                    "due_date": start + timedelta(days=30 * i),
+                    "amount": monthly.quantize(Decimal("0.01")),
+                    "outstanding_after": (total - paid_so_far).quantize(Decimal("0.01")),
+                    "status": "Pending",
+                })
+        return rows
+
+    @staticmethod
+    def _certificate_context(financing, document_number: str, signature=None) -> dict:
+        return {
             "financing": financing,
             "user": financing.user,
-            "date": timezone.now(),
-            "document_number": generate_document_number("CRT"),
+            "today": timezone.now(),
+            "document_number": document_number,
+            "maturity_date": DocumentService._maturity_date(financing),
+            "logo_path": DocumentService._logo_path(),
+            "id_or_passport": DocumentService._id_or_passport(financing.user),
+            "signature": signature,
+            # verification_code is filled in after we hash the PDF; the
+            # template guards with a default so the first render still works.
+            "verification_code": "",
         }
+
+    @staticmethod
+    def _contract_context(financing, document_number: str, signature=None) -> dict:
+        monthly = Decimal(str(financing.monthly_installment))
+        months = int(financing.repayment_period_months or 0)
+        total_payable = (monthly * months).quantize(Decimal("0.01"))
+        return {
+            "financing": financing,
+            "user": financing.user,
+            "today": timezone.now(),
+            "document_number": document_number,
+            "instrument_id": document_number,
+            "maturity_date": DocumentService._maturity_date(financing),
+            "mfa_reference": DocumentService._mfa_reference(financing),
+            "logo_path": DocumentService._logo_path(),
+            "id_or_passport": DocumentService._id_or_passport(financing.user),
+            "residential_address": DocumentService._residential_address(financing.user),
+            # Sensible defaults for clauses with placeholders the model
+            # doesn't yet store. Override via Django admin / env later if
+            # legal asks for different numbers.
+            "default_interest_rate": getattr(settings, "FINANCING_DEFAULT_INTEREST_RATE", 18),
+            "availability_days": getattr(settings, "FINANCING_AVAILABILITY_DAYS", 30),
+            "total_payable": total_payable,
+            "installments_table": DocumentService._installments_table(financing),
+            "signature": signature,
+            "verification_code": "",
+        }
+
+    @staticmethod
+    def generate_certificate(financing):
+        document_number = generate_document_number("CRT")
+        context = DocumentService._certificate_context(financing, document_number)
 
         try:
             pdf_bytes = DocumentService._generate_pdf(
@@ -193,7 +350,7 @@ class DocumentService:
             pdf_bytes = DocumentService._generate_simple_pdf(
                 f"Financing Certificate - {financing.application_number}",
                 [
-                    f"Document Number: {context['document_number']}",
+                    f"Document Number: {document_number}",
                     f"Date: {now.strftime('%Y-%m-%d %H:%M')}",
                     "---",
                     "## Client Information",
@@ -239,14 +396,8 @@ class DocumentService:
 
     @staticmethod
     def generate_contract(financing):
-        context = {
-            "financing": financing,
-            "user": financing.user,
-            "profile": getattr(financing.user, "profile", None),
-            "installments": financing.installments.all(),
-            "date": timezone.now(),
-            "document_number": generate_document_number("CTR"),
-        }
+        document_number = generate_document_number("CTR")
+        context = DocumentService._contract_context(financing, document_number)
 
         try:
             pdf_bytes = DocumentService._generate_pdf(
@@ -418,93 +569,86 @@ class DocumentService:
 
     @staticmethod
     def regenerate_signed_document(document):
-        """Regenerate a document's PDF with the signature embedded."""
+        """Regenerate a document's PDF with the signature embedded.
+
+        Re-renders the same WeasyPrint HTML template as the original
+        generation (Master Facility Agreement / Nova Finance Instrument),
+        passing the signature object so the templates can drop the typed
+        signature into the IN WITNESS WHEREOF block. If WeasyPrint isn't
+        available, falls back to the reportlab simple-PDF path with the
+        key document metadata only.
+        """
         from apps.signatures.models import Signature
 
-        # Find the signature for this document
         sig_request = document.signature_requests.filter(status="signed").first()
         if not sig_request:
             logger.warning(f"No signed signature request for document {document.id}")
             return
-
         try:
             signature = sig_request.signature
         except Signature.DoesNotExist:
             logger.warning(f"No signature record for request {sig_request.id}")
             return
 
-        signature_info = {
-            "signature_text": signature.signature_text or document.user.get_full_name(),
-            "signer_name": document.user.get_full_name(),
-            "signed_at": sig_request.signed_at,
-        }
-
         financing = document.financing
         if not financing:
             logger.warning(f"No financing linked to document {document.id}")
             return
 
-        # Build content lines based on document type
-        now = timezone.now()
-        profile = getattr(financing.user, "profile", None)
+        # Re-render the rich template with the signature object so the
+        # signed PDF carries the full MFA / instrument content, not a
+        # stripped-down summary.
+        pdf_bytes = None
+        try:
+            if document.document_type == Document.DocumentType.CONTRACT:
+                ctx = DocumentService._contract_context(
+                    financing, document.document_number, signature=signature
+                )
+                pdf_bytes = DocumentService._generate_pdf("pdfs/contract.html", ctx)
+            elif document.document_type == Document.DocumentType.CERTIFICATE:
+                ctx = DocumentService._certificate_context(
+                    financing, document.document_number, signature=signature
+                )
+                pdf_bytes = DocumentService._generate_pdf("pdfs/certificate.html", ctx)
+        except Exception as e:
+            logger.error(
+                "WeasyPrint re-render failed for document %s (%s); falling back to simple PDF: %s",
+                document.id, document.document_type, e,
+            )
 
-        if document.document_type == Document.DocumentType.CONTRACT:
-            lines = [
+        # Fallback: reportlab simple PDF with title + key fields + signature block.
+        if pdf_bytes is None:
+            signature_info = {
+                "signature_text": signature.signature_text or document.user.get_full_name(),
+                "signer_name": document.user.get_full_name(),
+                "signed_at": sig_request.signed_at,
+            }
+            now = timezone.now()
+            common_lines = [
                 f"Document Number: {document.document_number}",
                 f"Date: {document.created_at.strftime('%Y-%m-%d %H:%M')}",
                 "---",
-                "## Parties",
-                f"Borrower: {financing.user.get_full_name()}",
-                f"Email: {financing.user.email}",
-                f"Phone: {getattr(profile, 'phone_number', 'N/A') if profile else 'N/A'}",
-                "Lender: Nova Digital Finance",
-                "---",
-                "## Financing Terms",
-                f"Application Number: {financing.application_number}",
-                f"Financing Amount: {financing.bronova_amount}",
-                f"USD Equivalent: ${financing.usd_equivalent}",
-                f"Repayment Period: {financing.repayment_period_months} months",
-                f"Monthly Installment: {financing.monthly_installment}",
-                f"Processing Fee: {financing.fee_amount}",
-                f"Total with Fee: {financing.total_with_fee}",
-                "---",
-                "## Terms and Conditions",
-                "1. The borrower agrees to repay the total amount in monthly installments.",
-                "2. Late payments may incur additional charges as per platform policy.",
-                "3. The borrower acknowledges all terms of the financing program.",
-                "4. This contract is binding upon electronic signature by all parties.",
-                "5. All disputes shall be resolved per the platform's dispute resolution policy.",
-                "---",
-            ]
-            title = f"Financing Contract - {financing.application_number}"
-        elif document.document_type == Document.DocumentType.CERTIFICATE:
-            lines = [
-                f"Document Number: {document.document_number}",
-                f"Date: {document.created_at.strftime('%Y-%m-%d %H:%M')}",
-                "---",
-                "## Client Information",
-                f"Name: {financing.user.get_full_name()}",
+                "## Client",
+                f"Name: {financing.user.get_full_name() or financing.user.email}",
                 f"Client ID: {getattr(financing.user, 'client_id', 'N/A')}",
                 f"Email: {financing.user.email}",
                 "---",
                 "## Financing Details",
                 f"Application Number: {financing.application_number}",
-                f"Financing Amount: {financing.bronova_amount}",
-                f"USD Equivalent: ${financing.usd_equivalent}",
-                f"Status: {financing.get_status_display()}",
+                f"Facility Amount: {financing.bronova_amount} PRN ({financing.usd_equivalent} USD)",
+                f"Term: {financing.repayment_period_months} months",
+                f"Monthly Installment: {financing.monthly_installment} USD",
+                f"Fee: {financing.fee_amount} USD ({financing.fee_percentage}%)",
                 "---",
             ]
-            title = f"Financing Certificate - {financing.application_number}"
-        else:
-            lines = [
-                f"Document Number: {document.document_number}",
-                f"Date: {document.created_at.strftime('%Y-%m-%d %H:%M')}",
-                "---",
-            ]
-            title = document.title
-
-        # Generate new PDF with signature
-        pdf_bytes = DocumentService._generate_simple_pdf(title, lines, signature_info=signature_info)
+            title = (
+                f"Master Facility Agreement - {financing.application_number}"
+                if document.document_type == Document.DocumentType.CONTRACT
+                else f"Nova Finance Instrument - {financing.application_number}"
+            )
+            pdf_bytes = DocumentService._generate_simple_pdf(
+                title, common_lines, signature_info=signature_info
+            )
 
         # Delete old file to avoid Django creating a suffixed duplicate
         old_name = document.file.name
@@ -512,7 +656,6 @@ class DocumentService:
         if old_name and storage.exists(old_name):
             storage.delete(old_name)
 
-        # Save new PDF and update database (must include "file" in update_fields!)
         document.file.save(old_name, ContentFile(pdf_bytes), save=False)
         document.verification_code = DocumentService._generate_verification_code(pdf_bytes)
         document.save(update_fields=["verification_code", "file"])

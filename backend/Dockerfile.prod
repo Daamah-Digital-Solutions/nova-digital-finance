@@ -5,17 +5,30 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies.
+# - build-essential + libpq-dev: psycopg / native wheels at install time
+# - curl: healthchecks
+# - WeasyPrint runtime: needs libpango, libharfbuzz, libpangoft2, libffi,
+#   shared-mime-info, fonts (DejaVu has full coverage of Latin/Arabic).
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        build-essential \
        libpq-dev \
        curl \
+       libpango-1.0-0 \
+       libpangoft2-1.0-0 \
+       libharfbuzz0b \
+       libffi8 \
+       shared-mime-info \
+       fonts-dejavu-core \
+       fonts-noto-core \
     && rm -rf /var/lib/apt/lists/*
 
+# WeasyPrint is now installable in this image (system libs above are
+# present), so we install the full requirements.txt as-is rather than
+# stripping it out like the previous build did.
 COPY requirements.txt .
-RUN grep -v WeasyPrint requirements.txt > requirements-prod.txt \
-    && pip install --no-cache-dir -r requirements-prod.txt gunicorn
+RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
 COPY . .
 

@@ -1,88 +1,242 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <style>
-        @page { size: A4; margin: 2cm; }
-        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1a1a2e; line-height: 1.6; }
-        .header { text-align: center; border-bottom: 3px solid #0f3460; padding-bottom: 20px; margin-bottom: 30px; }
-        .logo-text { font-size: 28px; font-weight: bold; color: #0f3460; letter-spacing: 2px; }
-        .subtitle { font-size: 14px; color: #666; margin-top: 5px; }
-        .certificate-title { text-align: center; font-size: 28px; color: #0f3460; margin: 40px 0 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; }
-        .certificate-subtitle { text-align: center; font-size: 16px; color: #555; margin-bottom: 30px; }
-        .certificate-body { text-align: center; font-size: 16px; margin: 30px 0; }
-        .highlight { font-size: 22px; font-weight: bold; color: #0f3460; }
-        .highlight-amount { font-size: 28px; font-weight: bold; color: #0f3460; margin: 15px 0; }
-        .rate-note { font-size: 14px; color: #666; margin-top: 5px; }
-        .details-table { width: 80%; margin: 30px auto; border-collapse: collapse; }
-        .details-table td { padding: 10px 15px; border-bottom: 1px solid #eee; }
-        .details-table td:first-child { font-weight: bold; color: #555; width: 40%; }
-        .investment-note { text-align: center; margin: 30px auto; padding: 20px; border: 2px solid #0f3460; border-radius: 8px; max-width: 80%; background: #f8f9ff; }
-        .investment-note p { margin: 5px 0; }
-        .investment-note .title { font-weight: bold; color: #0f3460; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
-        .doc-number { font-size: 11px; color: #999; }
-    </style>
+<meta charset="UTF-8">
+<title>Nova Finance Instrument (Digital) - {{ document_number }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 18mm 26mm 18mm;
+    @bottom-left {
+      content: "Nova Digital Finance Limited · 128 City Road, London EC1V 2NX, United Kingdom";
+      font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
+      font-size: 8pt;
+      color: #6b7280;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
+      font-size: 8pt;
+      color: #6b7280;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: #1f2937;
+    margin: 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid #0a1f44;
+    padding-bottom: 10mm;
+    margin-bottom: 8mm;
+  }
+  .brand img { height: 18mm; margin-right: 8mm; }
+  .brand .lockup .name {
+    font-size: 18pt;
+    font-weight: 700;
+    color: #0a1f44;
+    letter-spacing: 0.3pt;
+  }
+  .brand .lockup .tag {
+    font-size: 9pt;
+    color: #6b7280;
+    margin-top: 1mm;
+  }
+  .doc-title {
+    text-align: center;
+    margin: 4mm 0 2mm;
+    font-size: 19pt;
+    font-weight: 800;
+    color: #0a1f44;
+    letter-spacing: 0.5pt;
+  }
+  .doc-sub {
+    text-align: center;
+    font-size: 10pt;
+    color: #6b7280;
+    margin-bottom: 8mm;
+  }
+  .meta-grid {
+    display: table;
+    width: 100%;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 4mm;
+    padding: 5mm 6mm;
+    margin-bottom: 7mm;
+    font-size: 10pt;
+  }
+  .meta-grid .row { display: table-row; }
+  .meta-grid .cell { display: table-cell; padding: 1.5mm 4mm 1.5mm 0; width: 50%; }
+  .meta-grid .label { color: #6b7280; }
+  .meta-grid .value { color: #111827; font-weight: 600; }
+  h2.section {
+    font-size: 12pt;
+    color: #0a1f44;
+    border-left: 4px solid #d4af37;
+    padding: 0 0 0 3mm;
+    margin: 6mm 0 3mm;
+  }
+  p { margin: 0 0 3mm; text-align: justify; }
+  ul { margin: 0 0 4mm 6mm; padding: 0; }
+  ul li { margin-bottom: 2mm; }
+  table.details {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2mm 0 6mm;
+    font-size: 10pt;
+  }
+  table.details th, table.details td {
+    border: 1px solid #d1d5db;
+    padding: 2.5mm 3mm;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.details th {
+    background: #0a1f44;
+    color: #fff;
+    font-weight: 600;
+  }
+  table.details tr:nth-child(even) td { background: #f9fafb; }
+  .signature-block {
+    margin-top: 10mm;
+    border-top: 1px solid #d1d5db;
+    padding-top: 6mm;
+  }
+  .signature-block .label {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0a1f44;
+    margin-bottom: 4mm;
+  }
+  .signature-text {
+    font-family: 'DejaVu Serif', 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 18pt;
+    color: #0a1f44;
+    border-bottom: 1px solid #6b7280;
+    padding-bottom: 1mm;
+    width: 70mm;
+    margin-bottom: 2mm;
+  }
+  .signature-meta {
+    font-size: 9pt;
+    color: #4b5563;
+  }
+  .verify-card {
+    margin-top: 8mm;
+    background: #f1f5f9;
+    border: 1px dashed #94a3b8;
+    border-radius: 3mm;
+    padding: 4mm 5mm;
+    font-size: 9pt;
+    color: #334155;
+  }
+  .verify-card .label { font-weight: 700; color: #0a1f44; display: block; margin-bottom: 1mm; }
+  .verify-card code {
+    font-family: 'DejaVu Sans Mono', monospace;
+    word-break: break-all;
+  }
+</style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo-text">NOVA DIGITAL FINANCE</div>
-        <div class="subtitle">Pronova (PRN) Cryptocurrency Financing</div>
-    </div>
 
-    <div class="certificate-title">Certificate of PRN Ownership</div>
-    <div class="certificate-subtitle">Pronova (PRN) Token Ownership Document</div>
+<header class="brand">
+  <img src="{{ logo_path }}" alt="Nova Digital Finance">
+  <div class="lockup">
+    <div class="name">NOVA DIGITAL FINANCE</div>
+    <div class="tag">Digital Financing Platform &middot; United Kingdom</div>
+  </div>
+</header>
 
-    <div class="certificate-body">
-        <p>This is to certify that</p>
-        <p class="highlight">{{ user.get_full_name }}</p>
-        <p>Client ID: {{ user.client_id }}</p>
-        <p style="margin-top: 20px;">is the verified owner of</p>
-        <p class="highlight-amount">{{ financing.bronova_amount }} PRN</p>
-        <p class="rate-note">Valued at ${{ financing.usd_equivalent }} USD (1 PRN = 1 USD)</p>
-    </div>
+<h1 class="doc-title">Nova Finance Instrument (Digital)</h1>
+<div class="doc-sub">Issued under the Master Facility Agreement</div>
 
-    <table class="details-table">
-        <tr>
-            <td>Application Number</td>
-            <td>{{ financing.application_number }}</td>
-        </tr>
-        <tr>
-            <td>PRN Amount</td>
-            <td>{{ financing.bronova_amount }} PRN</td>
-        </tr>
-        <tr>
-            <td>USD Value</td>
-            <td>${{ financing.usd_equivalent }}</td>
-        </tr>
-        <tr>
-            <td>Exchange Rate</td>
-            <td>1 PRN = 1 USD</td>
-        </tr>
-        <tr>
-            <td>Repayment Period</td>
-            <td>{{ financing.repayment_period_months }} months</td>
-        </tr>
-        <tr>
-            <td>Monthly Installment</td>
-            <td>${{ financing.monthly_installment }}</td>
-        </tr>
-        <tr>
-            <td>Date Issued</td>
-            <td>{{ date|date:"F d, Y" }}</td>
-        </tr>
-    </table>
+<div class="meta-grid">
+  <div class="row">
+    <div class="cell"><span class="label">Instrument ID:</span> <span class="value">{{ document_number }}</span></div>
+    <div class="cell"><span class="label">Issue Date:</span> <span class="value">{{ today|date:"d M Y" }}</span></div>
+  </div>
+  <div class="row">
+    <div class="cell"><span class="label">Issuer:</span> <span class="value">Nova Digital Finance Ltd, UK</span></div>
+    <div class="cell"><span class="label">Borrower:</span> <span class="value">{{ user.get_full_name|default:user.email }}</span></div>
+  </div>
+  <div class="row">
+    <div class="cell"><span class="label">Client ID:</span> <span class="value">{{ user.client_id|default:"--" }}</span></div>
+    <div class="cell"><span class="label">ID / Passport No.:</span> <span class="value">{{ id_or_passport|default:"--" }}</span></div>
+  </div>
+</div>
 
-    <div class="investment-note">
-        <p class="title">Investment Eligibility</p>
-        <p>This certificate entitles the holder to invest the above PRN amount</p>
-        <p>through <strong>CapiMax Investments</strong> (panel.capimaxinvestment.com)</p>
-    </div>
+<h2 class="section">Preamble</h2>
+<p>This digital instrument is issued in accordance with the Master Facility Agreement signed between Nova Digital Finance and the Borrower on {{ today|date:"d M Y" }}. It represents financing in Pronova (PRN) currency, exclusively for use on Capimax Platforms, under the terms and conditions of the financing agreement.</p>
 
-    <div class="footer">
-        <p class="doc-number">Document: {{ document_number }} | Verification: {{ verification_code }}</p>
-        <p>Nova Digital Finance | Interest-Free PRN Financing</p>
-        <p>This certificate is electronically generated and verified.</p>
-    </div>
+<p>The Borrower acknowledges that this instrument:</p>
+<ul>
+  <li>Is pledged to the platform until full repayment of all due installments.</li>
+  <li>May be used fully or partially for investments on one or more Capimax Platforms, provided that the total usage does not exceed the instrument&rsquo;s total value.</li>
+  <li>Upon full settlement, repayment, or cancellation of the financing, the pledge and restrictions on the instrument will be released automatically.</li>
+  <li>Cannot be converted into cash or used outside the specified Capimax Platforms.</li>
+</ul>
+
+<h2 class="section">Financing Details</h2>
+<table class="details">
+  <tr><th style="width: 45%;">Item</th><th>Details</th></tr>
+  <tr><td>Financing Amount (PRN)</td><td>{{ financing.bronova_amount }} PRN</td></tr>
+  <tr><td>USD Equivalent Value</td><td>{{ financing.usd_equivalent }} USD</td></tr>
+  <tr><td>Issue Date</td><td>{{ today|date:"d M Y" }}</td></tr>
+  <tr><td>Maturity Date</td><td>{{ maturity_date|date:"d M Y" }}</td></tr>
+  <tr><td>Financing Term</td><td>{{ financing.repayment_period_months }} Months</td></tr>
+  <tr><td>Installment Schedule</td><td>Attached Schedule A &mdash; Repayment Schedule</td></tr>
+  <tr><td>Interest / Fees</td><td>{{ financing.fee_amount }} USD ({{ financing.fee_percentage }}% of facility amount)</td></tr>
+  <tr><td>Exclusive Investment Platforms</td><td>Capimax Platforms</td></tr>
+</table>
+
+<h2 class="section">Platform Rights</h2>
+<ul>
+  <li>Right to suspend investment or halt returns in the event of the Borrower&rsquo;s default or violation of agreement terms.</li>
+  <li>Right to delegate collection of debt to any office, legal or financial entity, anywhere in the world, including authorized agencies for debt recovery, and to represent the loan before any authority.</li>
+  <li>Right to claim the remaining balance in USD in case of default, after deducting any prior payments.</li>
+  <li>Right to verify the investments applied through the instrument on Capimax Platforms before approval.</li>
+</ul>
+
+<h2 class="section">Terms of Use</h2>
+<ul>
+  <li>The instrument is exclusively for investment on Capimax Platforms, and cannot be used elsewhere.</li>
+  <li>The Borrower may use the instrument fully or partially.</li>
+  <li>The instrument may be used on one or more platforms, not exceeding its total value.</li>
+  <li><strong>Flexible Payment Methods:</strong> Installments may be paid using cryptocurrencies, fiat currency via bank transfer, platform wallet, or platform payment link.</li>
+  <li><strong>Pledge Release:</strong> Upon full repayment, settlement, or financing cancellation, the pledge and restrictions on the instrument are automatically lifted.</li>
+</ul>
+
+{% if signature %}
+<div class="signature-block">
+  <div class="label">Electronic Signature &mdash; Borrower</div>
+  <div class="signature-text">{{ signature.signature_text }}</div>
+  <div class="signature-meta">
+    Signed by: {{ user.get_full_name|default:user.email }}<br>
+    Signed at: {{ signature.created_at|date:"d M Y H:i:s" }} UTC<br>
+    IP: {{ signature.ip_address|default:"--" }}
+  </div>
+</div>
+{% else %}
+<div class="signature-block">
+  <div class="label">Electronic Signature &mdash; Borrower</div>
+  <div style="border-bottom: 1px solid #6b7280; width: 70mm; height: 12mm;"></div>
+  <div class="signature-meta">Awaiting signature.</div>
+</div>
+{% endif %}
+
+<div class="verify-card">
+  <span class="label">Document Verification</span>
+  Verify the authenticity of this instrument at <strong>novadf.com/verify</strong> using the code below:<br>
+  <code>{{ verification_code }}</code>
+</div>
+
 </body>
 </html>

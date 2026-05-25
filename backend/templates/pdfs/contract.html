@@ -1,123 +1,818 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <style>
-        @page { size: A4; margin: 2cm; }
-        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.8; font-size: 13px; }
-        .header { text-align: center; border-bottom: 2px solid #0f3460; padding-bottom: 15px; margin-bottom: 25px; }
-        .logo-text { font-size: 22px; font-weight: bold; color: #0f3460; }
-        h1 { text-align: center; color: #0f3460; font-size: 20px; margin: 20px 0; }
-        h2 { color: #0f3460; font-size: 15px; margin-top: 25px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-        .parties { margin: 20px 0; }
-        .party { margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0f3460; }
-        .clause { margin: 10px 0; }
-        .schedule-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
-        .schedule-table th { background: #0f3460; color: white; padding: 8px; text-align: left; }
-        .schedule-table td { padding: 6px 8px; border-bottom: 1px solid #eee; }
-        .schedule-table tr:nth-child(even) { background: #f9f9f9; }
-        .signature-block { margin-top: 50px; display: flex; justify-content: space-between; }
-        .sig-line { width: 40%; border-top: 1px solid #333; padding-top: 5px; text-align: center; font-size: 12px; }
-        .footer { text-align: center; margin-top: 40px; font-size: 10px; color: #999; }
-    </style>
+<meta charset="UTF-8">
+<title>Master Facility Agreement - {{ document_number }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 18mm 24mm 18mm;
+    @top-right {
+      content: "MFA Ref: {{ mfa_reference }}";
+      font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
+      font-size: 8pt;
+      color: #6b7280;
+    }
+    @bottom-left {
+      content: "Nova Digital Finance Limited · Company No. 16483755 · London, UK";
+      font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
+      font-size: 8pt;
+      color: #6b7280;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
+      font-size: 8pt;
+      color: #6b7280;
+    }
+  }
+  @page :first { @top-right { content: ""; } }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.55;
+    color: #1f2937;
+    margin: 0;
+  }
+  /* Cover */
+  .brand {
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid #0a1f44;
+    padding-bottom: 10mm;
+    margin-bottom: 12mm;
+  }
+  .brand img { height: 18mm; margin-right: 8mm; }
+  .brand .name {
+    font-size: 18pt;
+    font-weight: 700;
+    color: #0a1f44;
+    letter-spacing: 0.3pt;
+  }
+  .brand .tag {
+    font-size: 9pt;
+    color: #6b7280;
+    margin-top: 1mm;
+  }
+  .cover-title {
+    text-align: center;
+    margin: 16mm 0 2mm;
+    font-size: 24pt;
+    font-weight: 800;
+    color: #0a1f44;
+    letter-spacing: 0.6pt;
+  }
+  .cover-sub {
+    text-align: center;
+    font-size: 12pt;
+    color: #d4af37;
+    text-transform: uppercase;
+    letter-spacing: 3pt;
+    margin-bottom: 14mm;
+  }
+  .cover-meta {
+    margin: 20mm auto 0;
+    width: 70%;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 4mm;
+    padding: 6mm 8mm;
+    font-size: 10.5pt;
+  }
+  .cover-meta .row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3mm;
+  }
+  .cover-meta .row:last-child { margin-bottom: 0; }
+  .cover-meta .label { color: #6b7280; }
+  .cover-meta .value { color: #111827; font-weight: 600; }
+  .page-break { page-break-after: always; }
+  /* Article body */
+  h2.article {
+    font-size: 12pt;
+    color: #0a1f44;
+    border-bottom: 2px solid #d4af37;
+    padding-bottom: 1.5mm;
+    margin: 8mm 0 3mm;
+  }
+  h3.clause {
+    font-size: 10.5pt;
+    color: #0a1f44;
+    margin: 4mm 0 2mm;
+  }
+  p { margin: 0 0 2.5mm; text-align: justify; }
+  ul.lettered, ol.lettered { margin: 0 0 3mm 6mm; padding: 0; }
+  ul.lettered li, ol.lettered li { margin-bottom: 1.5mm; }
+  .recitals { margin-left: 4mm; }
+  .definition {
+    margin: 0 0 2mm 4mm;
+    padding-left: 3mm;
+    border-left: 2px solid #e5e7eb;
+  }
+  .definition .term { font-weight: 700; color: #0a1f44; }
+  /* Parties block */
+  .parties {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 3mm;
+    padding: 5mm 6mm;
+    margin: 5mm 0;
+  }
+  .parties .role {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #0a1f44;
+    margin-top: 2mm;
+  }
+  /* Tables */
+  table.schedule {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 3mm 0 6mm;
+    font-size: 9.5pt;
+  }
+  table.schedule th, table.schedule td {
+    border: 1px solid #d1d5db;
+    padding: 2mm 2.5mm;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.schedule th {
+    background: #0a1f44;
+    color: #fff;
+    font-weight: 600;
+  }
+  table.schedule tr:nth-child(even) td { background: #f9fafb; }
+  /* Acknowledgment quoted block */
+  blockquote.ack {
+    background: #fef3c7;
+    border-left: 4px solid #d4af37;
+    margin: 4mm 0;
+    padding: 4mm 5mm;
+    font-style: italic;
+    color: #1f2937;
+  }
+  /* Signature section */
+  .signature-block {
+    margin-top: 8mm;
+    padding-top: 4mm;
+    border-top: 1px solid #d1d5db;
+    page-break-inside: avoid;
+  }
+  .signature-block .label {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0a1f44;
+    margin-bottom: 3mm;
+  }
+  .signature-text {
+    font-family: 'DejaVu Serif', 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 16pt;
+    color: #0a1f44;
+    border-bottom: 1px solid #6b7280;
+    padding-bottom: 1mm;
+    width: 70mm;
+    margin-bottom: 2mm;
+  }
+  .signature-meta { font-size: 9pt; color: #4b5563; }
+  .sig-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12mm;
+    margin-top: 5mm;
+  }
+  .sig-row .col { flex: 1; }
+  .sig-line {
+    border-bottom: 1px solid #6b7280;
+    height: 14mm;
+    margin-bottom: 1mm;
+  }
+  .verify-card {
+    margin-top: 6mm;
+    background: #f1f5f9;
+    border: 1px dashed #94a3b8;
+    border-radius: 3mm;
+    padding: 4mm 5mm;
+    font-size: 9pt;
+    color: #334155;
+  }
+  .verify-card .label { font-weight: 700; color: #0a1f44; display: block; margin-bottom: 1mm; }
+  .verify-card code { font-family: 'DejaVu Sans Mono', monospace; word-break: break-all; }
+</style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo-text">NOVA DIGITAL FINANCE</div>
-    </div>
 
-    <h1>Trilateral Financing Contract</h1>
-    <p style="text-align: center; font-size: 12px; color: #666;">Document: {{ document_number }} | Date: {{ date|date:"F d, Y" }}</p>
+<!-- =========================== COVER PAGE =========================== -->
+<header class="brand">
+  <img src="{{ logo_path }}" alt="Nova Digital Finance">
+  <div>
+    <div class="name">NOVA DIGITAL FINANCE</div>
+    <div class="tag">Digital Financing Platform &middot; United Kingdom</div>
+  </div>
+</header>
 
-    <div class="parties">
-        <h2>Parties</h2>
-        <div class="party">
-            <strong>First Party (Financier):</strong> Nova Digital Finance<br>
-            Operating in Pronova (PRN) cryptocurrency financing services
+<h1 class="cover-title">MASTER FACILITY AGREEMENT</h1>
+<div class="cover-sub">Digital Financing Facility</div>
+
+<div class="cover-meta">
+  <div class="row"><span class="label">Agreement Reference:</span><span class="value">{{ mfa_reference }}</span></div>
+  <div class="row"><span class="label">Execution Date:</span><span class="value">{{ today|date:"d M Y" }}</span></div>
+  <div class="row"><span class="label">Facility Amount:</span><span class="value">{{ financing.bronova_amount }} PRN ({{ financing.usd_equivalent }} USD)</span></div>
+  <div class="row"><span class="label">Term:</span><span class="value">{{ financing.repayment_period_months }} Months</span></div>
+  <div class="row"><span class="label">Borrower:</span><span class="value">{{ user.get_full_name|default:user.email }}</span></div>
+  <div class="row"><span class="label">Client ID:</span><span class="value">{{ user.client_id|default:"--" }}</span></div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- =========================== PARTIES =========================== -->
+<h2 class="article">BETWEEN</h2>
+<div class="parties">
+  <div class="role">(1) NOVA DIGITAL FINANCE LIMITED</div>
+  <p>
+    Company Registration Number: 16483755<br>
+    Registered Office: 128 City Road, London, United Kingdom EC1V 2NX<br>
+    (&ldquo;<strong>Lender</strong>&rdquo; or &ldquo;<strong>Platform</strong>&rdquo;)
+  </p>
+
+  <div class="role">AND</div>
+
+  <div class="role">(2) {{ user.get_full_name|default:user.email|upper }}</div>
+  <p>
+    Identification Number / Passport: {{ id_or_passport|default:"--" }}<br>
+    Residential Address: {{ residential_address|default:"--" }}<br>
+    Phone Number: {{ user.profile.phone|default:"--" }}<br>
+    Email: {{ user.email }}<br>
+    (&ldquo;<strong>Borrower</strong>&rdquo; or &ldquo;<strong>Client</strong>&rdquo;)
+  </p>
+
+  <p style="margin-top: 4mm;"><em>(Each a &ldquo;Party&rdquo; and together the &ldquo;Parties&rdquo;)</em></p>
+</div>
+
+<!-- =========================== RECITALS =========================== -->
+<h2 class="article">RECITALS</h2>
+<p><strong>WHEREAS:</strong></p>
+<div class="recitals">
+  <p>(A) The Lender operates a digital financial services platform providing financing facilities denominated in ProNova (PRN), a proprietary digital currency;</p>
+  <p>(B) The Borrower has applied for and the Lender has agreed to grant a digital financing facility exclusively for purchase, investment purposes on approved CapiMax platforms; and any platforms or companies we have approved;</p>
+  <p>(C) The Parties wish to document the terms and conditions governing such facility;</p>
+</div>
+<p><strong>NOW, THEREFORE,</strong> in consideration of the mutual covenants and agreements contained herein and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the Parties agree as follows:</p>
+
+<!-- =========================== ARTICLE 1 =========================== -->
+<h2 class="article">ARTICLE 1: DEFINITIONS AND INTERPRETATION</h2>
+
+<h3 class="clause">1.1 Definitions</h3>
+<p>In this Agreement, unless the context otherwise requires:</p>
+<div class="definition"><span class="term">&ldquo;Agreement&rdquo;</span> means this Master Facility Agreement including all Schedules and annexures;</div>
+<div class="definition"><span class="term">&ldquo;Business Day&rdquo;</span> means any day (other than Saturday or Sunday) on which commercial banks are open for general business in London, United Kingdom;</div>
+<div class="definition"><span class="term">&ldquo;CapiMax Platforms&rdquo;</span> means the designated investment platforms approved by the Lender where the Facility may be utilized;</div>
+<div class="definition"><span class="term">&ldquo;Default Interest&rdquo;</span> means interest charged on overdue amounts at the rate specified in Article 5.3;</div>
+<div class="definition"><span class="term">&ldquo;Event of Default&rdquo;</span> has the meaning set out in Article 7.1;</div>
+<div class="definition"><span class="term">&ldquo;Facility&rdquo;</span> means the digital financing facility granted by the Lender to the Borrower pursuant to this Agreement;</div>
+<div class="definition"><span class="term">&ldquo;Facility Amount&rdquo;</span> means {{ financing.bronova_amount }} PRN or its USD Equivalent as specified in Schedule A;</div>
+<div class="definition"><span class="term">&ldquo;Financing Instrument&rdquo;</span> means the digital certificate or document evidencing the Facility granted to the Borrower;</div>
+<div class="definition"><span class="term">&ldquo;Investment&rdquo;</span> means any investment made by the Borrower using the Facility on CapiMax Platforms;</div>
+<div class="definition"><span class="term">&ldquo;PRN&rdquo;</span> means Pronova, the digital currency in which the Facility is denominated;</div>
+<div class="definition"><span class="term">&ldquo;Outstanding Balance&rdquo;</span> means at any time the principal amount of the Facility plus all accrued and unpaid Profit Share and fees, less all payments received;</div>
+<div class="definition"><span class="term">&ldquo;Payment Date&rdquo;</span> means each date specified in the Repayment Schedule for payment of installments;</div>
+<div class="definition"><span class="term">&ldquo;Pledge&rdquo;</span> means the security interest created over the Borrower&rsquo;s Investments pursuant to Article 4;</div>
+<div class="definition"><span class="term">&ldquo;Repayment Schedule&rdquo;</span> means the schedule of installment payments set out in Schedule A;</div>
+<div class="definition"><span class="term">&ldquo;Settlement Currency&rdquo;</span> means United States Dollars (USD);</div>
+<div class="definition"><span class="term">&ldquo;USD Equivalent&rdquo;</span> means the value in United States Dollars calculated at the Platform&rsquo;s prevailing exchange rate at the relevant time.</div>
+
+<h3 class="clause">1.2 Interpretation</h3>
+<p>In this Agreement:</p>
+<ul class="lettered">
+  <li>(a) References to Articles, Clauses and Schedules are references to articles, clauses and schedules of this Agreement;</li>
+  <li>(b) Headings are for convenience only and do not affect interpretation;</li>
+  <li>(c) The singular includes the plural and vice versa;</li>
+  <li>(d) References to persons include individuals, bodies corporate, partnerships, and unincorporated associations;</li>
+  <li>(e) References to any statute or statutory provision include any modification, consolidation, re-enactment or amendment thereof.</li>
+</ul>
+
+<!-- =========================== ARTICLE 2 =========================== -->
+<h2 class="article">ARTICLE 2: THE FACILITY</h2>
+
+<h3 class="clause">2.1 Grant of Facility</h3>
+<p>Subject to the terms and conditions of this Agreement, the Lender agrees to grant the Borrower a financing facility in the principal amount of {{ financing.bronova_amount }} PRN (the &ldquo;Facility Amount&rdquo;).</p>
+
+<h3 class="clause">2.2 Purpose</h3>
+<p>The Borrower shall use the Facility exclusively for investment purposes on CapiMax Platforms as approved by the Lender. The Borrower shall not:</p>
+<ul class="lettered">
+  <li>(a) Withdraw, cash out, or convert the Facility to fiat or other currencies except as expressly permitted;</li>
+  <li>(b) Transfer the Facility or any portion thereof to third parties;</li>
+  <li>(c) Use the Facility for any purpose other than investments on CapiMax Platforms;</li>
+  <li>(d) Engage in any speculative, illegal, or prohibited activities.</li>
+</ul>
+
+<h3 class="clause">2.3 Disbursement</h3>
+<p>Upon execution of this Agreement and fulfillment of all conditions precedent, the Lender shall credit the Facility Amount to the Borrower&rsquo;s platform account in the form of a Financing Instrument.</p>
+
+<h3 class="clause">2.4 Availability Period</h3>
+<p>The Facility shall be available for utilization for a period of {{ availability_days }} days from the Disbursement Date, unless otherwise agreed in writing.</p>
+
+<!-- =========================== ARTICLE 3 =========================== -->
+<h2 class="article">ARTICLE 3: FINANCING INSTRUMENT AND UTILIZATION</h2>
+
+<h3 class="clause">3.1 Issuance of Instrument</h3>
+<p>The Lender shall issue a Financing Instrument to the Borrower evidencing the Facility. The Financing Instrument shall be registered in the Borrower&rsquo;s platform account and shall constitute prima facie evidence of the Facility.</p>
+
+<h3 class="clause">3.2 Utilization Terms</h3>
+<p>The Borrower may utilize the Financing Instrument subject to the following conditions:</p>
+<ul class="lettered">
+  <li>(a) Utilization may be in full or in partial tranches;</li>
+  <li>(b) Multiple investments across different CapiMax Platforms are permitted provided the aggregate does not exceed the Facility Amount;</li>
+  <li>(c) Each utilization shall be verified and approved by the relevant platform;</li>
+  <li>(d) All Investments shall be automatically subject to the Pledge created under Article 4.</li>
+</ul>
+
+<h3 class="clause">3.3 Platform Integration</h3>
+<p>The Lender shall notify CapiMax Platforms of the Financing Instrument and the Pledge. The platforms shall acknowledge and record such notification in accordance with their operational procedures.</p>
+
+<!-- =========================== ARTICLE 4 =========================== -->
+<h2 class="article">ARTICLE 4: SECURITY AND PLEDGE</h2>
+
+<h3 class="clause">4.1 Creation of Pledge</h3>
+<p>As continuing security for the payment and discharge of all amounts owing under this Agreement, the Borrower hereby pledges, charges, and assigns to the Lender all right, title, and interest in and to:</p>
+<ul class="lettered">
+  <li>(a) All Investments made using the Facility on CapiMax Platforms;</li>
+  <li>(b) All returns, profits, dividends, and proceeds arising from such Investments;</li>
+  <li>(c) All rights to withdraw, transfer, or otherwise deal with such Investments.</li>
+</ul>
+
+<h3 class="clause">4.2 Priority and Perfection</h3>
+<p>The Pledge shall:</p>
+<ul class="lettered">
+  <li>(a) Constitute a first-ranking security interest in favor of the Lender;</li>
+  <li>(b) Be recorded and acknowledged by CapiMax Platforms;</li>
+  <li>(c) Remain in full force and effect until complete satisfaction of all obligations under this Agreement.</li>
+</ul>
+
+<h3 class="clause">4.3 Restrictions on Dealing</h3>
+<p>Until release of the Pledge pursuant to Article 4.5, the Borrower shall not, without prior written consent of the Lender:</p>
+<ul class="lettered">
+  <li>(a) Sell, transfer, assign, or otherwise dispose of any Investment;</li>
+  <li>(b) Create or permit to subsist any encumbrance over any Investment;</li>
+  <li>(c) Withdraw funds or proceeds from Investments except as expressly permitted.</li>
+</ul>
+
+<h3 class="clause">4.4 Rights of Lender</h3>
+<p>The Lender shall have the right, upon occurrence of an Event of Default, to:</p>
+<ul class="lettered">
+  <li>(a) Direct CapiMax Platforms to liquidate any or all Investments;</li>
+  <li>(b) Apply proceeds of liquidation toward satisfaction of the Outstanding Balance;</li>
+  <li>(c) Exercise any other rights available under applicable law or platform terms.</li>
+</ul>
+
+<h3 class="clause">4.5 Release of Pledge</h3>
+<p>The Pledge shall be released upon:</p>
+<ul class="lettered">
+  <li>(a) Full and final repayment of all amounts owing under this Agreement;</li>
+  <li>(b) Receipt of written confirmation from the Borrower acknowledging complete settlement;</li>
+  <li>(c) Issuance of a release certificate by the Lender.</li>
+</ul>
+
+<!-- =========================== ARTICLE 5 =========================== -->
+<h2 class="article">ARTICLE 5: REPAYMENT TERMS</h2>
+
+<h3 class="clause">5.1 Repayment Obligation</h3>
+<p>The Borrower shall repay the Facility Amount plus Profit Share in accordance with the Repayment Schedule attached as Schedule A.</p>
+
+<h3 class="clause">5.2 Payment Methods</h3>
+<p>The Borrower may make payments through any of the following methods:</p>
+<ul class="lettered">
+  <li>(a) Digital currencies including PRN or other cryptocurrencies accepted by the Lender;</li>
+  <li>(b) Bank transfer in Settlement Currency to the Lender&rsquo;s designated account;</li>
+  <li>(c) Platform wallet deduction from the Borrower&rsquo;s account balance;</li>
+  <li>(d) Payment link provided within the Platform interface.</li>
+</ul>
+
+<h3 class="clause">5.3 Default Interest</h3>
+<p>Any amount not paid when due shall bear interest at the rate of {{ default_interest_rate }}% per annum (or such other rate as may be agreed) from the due date until actual payment, calculated on a daily basis and compounded monthly.</p>
+
+<h3 class="clause">5.4 Application of Payments</h3>
+<p>All payments received shall be applied in the following order:</p>
+<ul class="lettered">
+  <li>(a) First, to costs and expenses incurred by the Lender;</li>
+  <li>(b) Second, to accrued and unpaid Default Interest;</li>
+  <li>(c) Third, to Profit Share;</li>
+  <li>(d) Fourth, to principal amount of the Facility.</li>
+</ul>
+
+<h3 class="clause">5.5 Payment in Settlement Currency</h3>
+<p>While the Facility is denominated in PRN, all repayment calculations and collection proceedings shall be based on the USD Equivalent, ensuring accurate valuation at the time of each payment or enforcement action.</p>
+
+<!-- =========================== ARTICLE 6 =========================== -->
+<h2 class="article">ARTICLE 6: REPRESENTATIONS AND WARRANTIES</h2>
+
+<h3 class="clause">6.1 Borrower&rsquo;s Representations</h3>
+<p>The Borrower represents and warrants to the Lender that:</p>
+<ul class="lettered">
+  <li>(a) <strong>Capacity:</strong> The Borrower has full legal capacity to enter into and perform this Agreement;</li>
+  <li>(b) <strong>No Conflict:</strong> The execution and performance of this Agreement does not conflict with any law, regulation, or contractual obligation binding on the Borrower;</li>
+  <li>(c) <strong>Accurate Information:</strong> All information provided to the Lender is true, accurate, and complete in all material respects;</li>
+  <li>(d) <strong>Understanding:</strong> The Borrower understands the nature and risks of digital currency financing and platform investments;</li>
+  <li>(e) <strong>Intended Use:</strong> The Facility will be used solely for the permitted purposes set out in Article 2.2;</li>
+  <li>(f) <strong>No Proceedings:</strong> There are no legal proceedings pending or threatened against the Borrower that would materially affect the ability to perform obligations hereunder.</li>
+</ul>
+
+<h3 class="clause">6.2 Continuing Representations</h3>
+<p>The representations and warranties in Article 6.1 shall be deemed repeated on each Payment Date and upon each utilization of the Facility.</p>
+
+<!-- =========================== ARTICLE 7 =========================== -->
+<h2 class="article">ARTICLE 7: EVENTS OF DEFAULT</h2>
+
+<h3 class="clause">7.1 Events of Default</h3>
+<p>Each of the following shall constitute an Event of Default:</p>
+<ul class="lettered">
+  <li>(a) <strong>Payment Default:</strong> Failure to pay any amount when due and such failure continues for more than seven (7) calendar days;</li>
+  <li>(b) <strong>Breach of Purpose:</strong> Use of the Facility for purposes other than those permitted under Article 2.2;</li>
+  <li>(c) <strong>Breach of Covenants:</strong> Breach of any material obligation under this Agreement and, where capable of remedy, failure to remedy within fourteen (14) days of notice;</li>
+  <li>(d) <strong>Misrepresentation:</strong> Any representation or warranty proves to have been materially incorrect when made;</li>
+  <li>(e) <strong>Cross-Default:</strong> Default under any other financing arrangement with the Lender or its affiliates;</li>
+  <li>(f) <strong>Insolvency:</strong> The Borrower becomes insolvent, enters bankruptcy, or enters into arrangements with creditors;</li>
+  <li>(g) <strong>Unauthorized Dealing:</strong> Any dealing with Investments in breach of Article 4.3;</li>
+  <li>(h) <strong>Consecutive Payment Failure:</strong> Failure to make two consecutive installment payments in full.</li>
+</ul>
+
+<h3 class="clause">7.2 Acceleration and Enforcement</h3>
+<p>Upon occurrence of an Event of Default, the Lender may, by written notice to the Borrower:</p>
+<ul class="lettered">
+  <li>(a) Declare the Outstanding Balance immediately due and payable;</li>
+  <li>(b) Cancel the Facility and prohibit further utilization;</li>
+  <li>(c) Direct CapiMax Platforms to:
+    <ul class="lettered">
+      <li>(i) Suspend accrual and payment of all returns and profits on Investments;</li>
+      <li>(ii) Freeze withdrawal rights;</li>
+      <li>(iii) Liquidate Investments as necessary;</li>
+    </ul>
+  </li>
+  <li>(d) Enforce the Pledge in accordance with Article 4.4;</li>
+  <li>(e) Refer the Borrower&rsquo;s account to collection agencies or default databases;</li>
+  <li>(f) Exercise any other rights available under this Agreement or applicable law.</li>
+</ul>
+
+<h3 class="clause">7.3 Calculation of Outstanding Amount</h3>
+<p>For purposes of enforcement and collection, the Outstanding Balance shall be calculated as:</p>
+<p style="text-align: center; font-weight: 700; background: #f3f4f6; padding: 3mm; border-radius: 2mm;">Outstanding Balance = (Facility Amount + Profit Share) &minus; Payments Received</p>
+<p>All calculations shall be based on USD Equivalent values at the time of enforcement.</p>
+
+<!-- =========================== ARTICLE 8 =========================== -->
+<h2 class="article">ARTICLE 8: ASSIGNMENT AND TRANSFER</h2>
+
+<h3 class="clause">8.1 Lender&rsquo;s Right to Assign</h3>
+<p>The Lender shall have the absolute right, without requirement for further consent from the Borrower, to:</p>
+<ul class="lettered">
+  <li>(a) Assign, transfer, novate, or otherwise dispose of all or any part of its rights and obligations under this Agreement;</li>
+  <li>(b) Securitize, participate, or syndicate the Facility;</li>
+  <li>(c) Sell or discount receivables arising under this Agreement to any third party including but not limited to:
+    <ul class="lettered">
+      <li>(i) Financial institutions and banks;</li>
+      <li>(ii) Debt collection agencies;</li>
+      <li>(iii) Investment funds and asset managers;</li>
+      <li>(iv) Special purpose vehicles.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 class="clause">8.2 Effect of Assignment</h3>
+<p>Upon any assignment or transfer:</p>
+<ul class="lettered">
+  <li>(a) The assignee shall acquire all rights of the Lender under this Agreement;</li>
+  <li>(b) The assignee may exercise all enforcement rights including collection, litigation, and enforcement of security;</li>
+  <li>(c) The Borrower shall treat the assignee as the new creditor and make all payments to or as directed by the assignee;</li>
+  <li>(d) The Lender shall be released from obligations to the extent assumed by the assignee.</li>
+</ul>
+
+<h3 class="clause">8.3 Borrower&rsquo;s Restriction</h3>
+<p>The Borrower may not assign, transfer, or otherwise dispose of any rights or obligations under this Agreement without prior written consent of the Lender.</p>
+
+<!-- =========================== ARTICLE 9 =========================== -->
+<h2 class="article">ARTICLE 9: EARLY SETTLEMENT</h2>
+
+<h3 class="clause">9.1 Right to Early Settlement</h3>
+<p>After a minimum period of six (6) months from the Disbursement Date, the Borrower may request early settlement of the Facility by giving not less than fifteen (15) Business Days&rsquo; written notice.</p>
+
+<h3 class="clause">9.2 Early Settlement Amount</h3>
+<p>The early settlement amount shall comprise:</p>
+<ul class="lettered">
+  <li>(a) The Outstanding Balance calculated at the USD Equivalent on the settlement date;</li>
+  <li>(b) All accrued Profit Share up to the settlement date;</li>
+  <li>(c) Any early settlement fees as may be specified in Schedule A;</li>
+  <li>(d) All other amounts owing under this Agreement.</li>
+</ul>
+
+<h3 class="clause">9.3 Release Upon Settlement</h3>
+<p>Upon receipt of the early settlement amount in full, the Lender shall:</p>
+<ul class="lettered">
+  <li>(a) Issue a settlement certificate;</li>
+  <li>(b) Release the Pledge pursuant to Article 4.5;</li>
+  <li>(c) Notify CapiMax Platforms of the release;</li>
+  <li>(d) Permit withdrawal of Investments subject to platform procedures.</li>
+</ul>
+
+<!-- =========================== ARTICLE 10 =========================== -->
+<h2 class="article">ARTICLE 10: COLLECTION AND ENFORCEMENT</h2>
+
+<h3 class="clause">10.1 Global Collection Rights</h3>
+<p>The Lender and any assignee shall have the right to:</p>
+<ul class="lettered">
+  <li>(a) Engage collection agencies, legal representatives, and enforcement agents in any jurisdiction worldwide;</li>
+  <li>(b) Delegate authority to any office, subsidiary, affiliate, or third-party service provider to collect Outstanding Balances;</li>
+  <li>(c) Report defaults to credit reference agencies and financial databases globally;</li>
+  <li>(d) Institute legal proceedings in any competent jurisdiction.</li>
+</ul>
+
+<h3 class="clause">10.2 Cross-Border Recognition</h3>
+<p>The Borrower acknowledges and agrees that:</p>
+<ul class="lettered">
+  <li>(a) This Agreement may be enforced in the Borrower&rsquo;s jurisdiction of residence or any other relevant jurisdiction;</li>
+  <li>(b) Local collection entities may be engaged to recover debts under applicable local laws while preserving the Lender&rsquo;s right to calculate amounts due in USD Equivalent;</li>
+  <li>(c) The Borrower waives any objection to jurisdiction or venue in enforcement proceedings.</li>
+</ul>
+
+<h3 class="clause">10.3 Costs of Collection</h3>
+<p>The Borrower shall be liable for all reasonable costs and expenses incurred in connection with collection and enforcement, including but not limited to:</p>
+<ul class="lettered">
+  <li>(a) Legal fees on a solicitor-client basis;</li>
+  <li>(b) Collection agency fees and commissions;</li>
+  <li>(c) Court fees and administrative charges;</li>
+  <li>(d) Currency conversion costs.</li>
+</ul>
+
+<!-- =========================== ARTICLE 11 =========================== -->
+<h2 class="article">ARTICLE 11: PLATFORM COORDINATION</h2>
+
+<h3 class="clause">11.1 Platform Communication</h3>
+<p>The Lender shall maintain communication protocols with CapiMax Platforms to:</p>
+<ul class="lettered">
+  <li>(a) Record and verify Financing Instruments;</li>
+  <li>(b) Monitor Investment activities;</li>
+  <li>(c) Suspend returns upon payment default;</li>
+  <li>(d) Facilitate enforcement of security.</li>
+</ul>
+
+<h3 class="clause">11.2 Borrower&rsquo;s Authorization</h3>
+<p>The Borrower hereby irrevocably authorizes:</p>
+<ul class="lettered">
+  <li>(a) CapiMax Platforms to disclose Investment information to the Lender;</li>
+  <li>(b) The Lender to communicate directly with CapiMax Platforms regarding the Borrower&rsquo;s account;</li>
+  <li>(c) Implementation of restrictions on Investments upon occurrence of Event of Default.</li>
+</ul>
+
+<!-- =========================== ARTICLE 12 =========================== -->
+<h2 class="article">ARTICLE 12: GOVERNING LAW AND DISPUTE RESOLUTION</h2>
+
+<h3 class="clause">12.1 Governing Law</h3>
+<p>This Agreement shall be governed by and construed in accordance with the laws of England and Wales.</p>
+
+<h3 class="clause">12.2 Jurisdiction</h3>
+<p>The Parties irrevocably submit to the exclusive jurisdiction of the courts of England and Wales and United Arab Emirates (UAE) and United States of America (USA) or any country in the world or the Borrower&rsquo;s country of residence for resolution of any dispute arising out of or in connection with this Agreement.</p>
+
+<h3 class="clause">12.3 Alternative Enforcement</h3>
+<p>Notwithstanding Article 12.2, the Lender may initiate proceedings in any other jurisdiction where:</p>
+<ul class="lettered">
+  <li>(a) The Borrower resides or has assets;</li>
+  <li>(b) Enforcement would be more effective or efficient;</li>
+  <li>(c) Local laws provide additional remedies.</li>
+</ul>
+
+<!-- =========================== ARTICLE 13 =========================== -->
+<h2 class="article">ARTICLE 13: NOTICES</h2>
+
+<h3 class="clause">13.1 Method of Notice</h3>
+<p>Any notice or communication required or permitted under this Agreement shall be:</p>
+<ul class="lettered">
+  <li>(a) In writing in English language;</li>
+  <li>(b) Delivered by email, platform messaging system, registered post, or courier;</li>
+  <li>(c) Sent to the addresses set out in this Agreement or as subsequently notified.</li>
+</ul>
+
+<h3 class="clause">13.2 Deemed Receipt</h3>
+<p>Notices shall be deemed received:</p>
+<ul class="lettered">
+  <li>(a) If by email: upon transmission;</li>
+  <li>(b) If by platform message: upon sending;</li>
+  <li>(c) If by post: three (3) Business Days after posting;</li>
+  <li>(d) If by courier: upon delivery.</li>
+</ul>
+
+<!-- =========================== ARTICLE 14 =========================== -->
+<h2 class="article">ARTICLE 14: DISBURSEMENT, ACTIVATION, AND DEBT CRYSTALLIZATION</h2>
+
+<h3 class="clause">14.1 Disbursement and Activation</h3>
+<p>Upon execution of this Agreement and issuance of the Nova Finance Instrument, Nova Digital Finance shall, directly or indirectly, transfer the value of the instrument, or any portion thereof as utilized by the Borrower, to the designated Capimax Platforms for investment purposes.</p>
+
+<h3 class="clause">14.2 Deemed Utilization and Disbursement</h3>
+<p>The Borrower expressly acknowledges and agrees that the issuance of the Nova Finance Instrument, and/or any use thereof on Capimax Platforms, shall constitute a final and irrevocable disbursement of the financing. The instrument shall be deemed fully activated and effective immediately upon issuance and availability in the Borrower&rsquo;s platform account.</p>
+
+<h3 class="clause">14.3 Crystallization of Indebtedness</h3>
+<p>From the moment the instrument is issued and/or utilized, the Borrower&rsquo;s indebtedness shall be deemed fully established, binding, and due, and repayment obligations shall commence immediately from the issuance date of the instrument, regardless of the timing or performance of investments on Capimax Platforms.</p>
+
+<h3 class="clause">14.4 Debt Valuation in USD</h3>
+<p>The Borrower irrevocably agrees that the financing received in ProNova (PRN) shall be valued and recorded in its USD equivalent at the time of issuance of the instrument, and that all repayment obligations, debt enforcement actions, and recovery proceedings shall be calculated and claimed based on such USD value, after deducting any amounts already paid.</p>
+
+<h3 class="clause">14.5 Payment to Investment Platforms</h3>
+<p>The Borrower acknowledges that any transfer of the instrument&rsquo;s value to Capimax Platforms shall be deemed a payment made on the Borrower&rsquo;s behalf, for investment purposes, and shall not affect, defer, or suspend the Borrower&rsquo;s repayment obligations toward Nova Digital Finance.</p>
+
+<h3 class="clause">14.6 Binding Effect on Capimax Platforms</h3>
+<p>Upon activation and use of the instrument, Capimax Platforms shall recognize the instrument&rsquo;s value as valid and authorized financing for investment purposes, subject to their internal verification procedures, and the Borrower&rsquo;s investments shall be deemed pledged and linked to this financing until full repayment or settlement.</p>
+
+<h3 class="clause">14.7 No Conditionality</h3>
+<p>The Borrower expressly waives any right to claim that repayment obligations are conditional upon profits, returns, or performance of investments on Capimax Platforms. The debt shall remain payable in full in accordance with the agreed schedule and terms.</p>
+
+<!-- =========================== ARTICLE 15 =========================== -->
+<h2 class="article">ARTICLE 15: GENERAL PROVISIONS</h2>
+
+<h3 class="clause">15.1 Entire Agreement</h3>
+<p>This Agreement constitutes the entire agreement between the Parties and supersedes all prior negotiations, representations, and agreements.</p>
+
+<h3 class="clause">15.2 Amendment</h3>
+<p>No amendment or modification of this Agreement shall be valid unless made in writing and signed by authorized representatives of both Parties.</p>
+
+<h3 class="clause">15.3 Waiver</h3>
+<p>No waiver of any provision shall be effective unless in writing. No single or partial exercise of any right shall preclude further exercise.</p>
+
+<h3 class="clause">15.4 Severability</h3>
+<p>If any provision is held invalid or unenforceable, such provision shall be severed and the remaining provisions shall continue in full force and effect.</p>
+
+<h3 class="clause">15.5 Counterparts</h3>
+<p>This Agreement may be executed in counterparts, each of which shall constitute an original and all of which together shall constitute one agreement.</p>
+
+<h3 class="clause">15.6 Electronic Execution</h3>
+<p>The Parties agree that electronic or digital signatures shall have the same legal effect as original signatures.</p>
+
+<!-- =========================== ARTICLE 16 =========================== -->
+<h2 class="article">ARTICLE 16: DEBT ACKNOWLEDGMENT</h2>
+<p>The Borrower hereby acknowledges and confirms:</p>
+<blockquote class="ack">
+  &ldquo;I, <strong>{{ user.get_full_name|default:user.email|upper }}</strong>, acknowledge receipt of a digital financing facility from Nova Digital Finance Limited in the amount of <strong>{{ financing.bronova_amount }} PRN</strong> with a USD Equivalent value of <strong>{{ financing.usd_equivalent }} USD</strong>.
+  <br><br>
+  I understand and accept all terms and conditions of this Master Facility Agreement. I commit to repay all amounts owing in accordance with the Repayment Schedule.
+  <br><br>
+  I authorize Nova Digital Finance Limited, its affiliates, successors, and assigns to:
+  <ul style="margin: 2mm 0 2mm 4mm; padding: 0;">
+    <li>Monitor my Investment activities on CapiMax Platforms;</li>
+    <li>Enforce the Pledge over my Investments upon occurrence of any Event of Default;</li>
+    <li>Engage collection agents and legal representatives in any jurisdiction worldwide to recover Outstanding Balances;</li>
+    <li>Calculate and demand repayment based on USD Equivalent values.</li>
+  </ul>
+  I confirm that I will use the Financing Instrument exclusively for investments on approved CapiMax Platforms and will not engage in any prohibited activities.
+  <br><br>
+  I acknowledge that failure to comply with payment obligations will result in enforcement actions including but not limited to suspension of Investment returns, liquidation of Investments, and referral to collection agencies and credit bureaus.&rdquo;
+</blockquote>
+
+<!-- =========================== SIGNATURES =========================== -->
+<p style="margin-top: 6mm; font-weight: 700; text-align: center;">
+  IN WITNESS WHEREOF, the Parties have executed this Agreement as of the date first written above.
+</p>
+
+<div class="signature-block">
+  <div class="sig-row">
+    <div class="col">
+      <div class="label">SIGNED by the Borrower</div>
+      {% if signature %}
+        <div class="signature-text">{{ signature.signature_text }}</div>
+        <div class="signature-meta">
+          {{ user.get_full_name|default:user.email }}<br>
+          Date: {{ signature.created_at|date:"d M Y H:i" }} UTC<br>
+          IP: {{ signature.ip_address|default:"--" }}
         </div>
-        <div class="party">
-            <strong>Second Party (Client):</strong> {{ user.get_full_name }}<br>
-            Client ID: {{ user.client_id }} | Email: {{ user.email }}
-            {% if profile %}
-            <br>Address: {{ profile.address_line_1 }}{% if profile.city %}, {{ profile.city }}{% endif %}{% if profile.country %}, {{ profile.country }}{% endif %}
-            {% endif %}
+      {% else %}
+        <div class="sig-line"></div>
+        <div class="signature-meta">
+          {{ user.get_full_name|default:user.email }}<br>
+          Date: ____________________<br>
+          Digital Signature: ____________________
         </div>
-        <div class="party">
-            <strong>Third Party (Investment Platform):</strong> CapiMax Investment<br>
-            Investment management platform (panel.capimaxinvestment.com)
+      {% endif %}
+    </div>
+
+    <div class="col">
+      <div class="label">SIGNED for and on behalf of<br>NOVA DIGITAL FINANCE LIMITED</div>
+      <div class="sig-line"></div>
+      <div class="signature-meta">
+        Authorized Signatory<br>
+        Name: ____________________<br>
+        Title: ____________________<br>
+        Date: ____________________
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================== SCHEDULE A =========================== -->
+<div class="page-break"></div>
+
+<h2 class="article" style="text-align: center; border-bottom: 3px solid #d4af37;">SCHEDULE A</h2>
+<p style="text-align: center; font-weight: 700; font-size: 11pt; color: #0a1f44;">
+  SIMPLIFIED &amp; CLEAR REPAYMENT SCHEDULE (USD BASED)
+</p>
+<p style="text-align: center; font-style: italic; color: #6b7280;">
+  This Schedule forms an integral and binding part of the Master Facility Agreement and the Nova Finance Instrument (Digital).
+</p>
+
+<h3 class="clause">A. Facility &amp; Instrument Details</h3>
+<table class="schedule">
+  <tr><th style="width: 45%;">Item</th><th>Description</th></tr>
+  <tr><td>Facility Agreement Reference</td><td>{{ mfa_reference }}</td></tr>
+  <tr><td>Nova Finance Instrument ID</td><td>{{ instrument_id|default:document_number }}</td></tr>
+  <tr><td>Lender</td><td>Nova Digital Finance Ltd (UK)</td></tr>
+  <tr><td>Borrower</td><td>{{ user.get_full_name|default:user.email }}</td></tr>
+  <tr><td>Financing Currency</td><td>ProNova (PRN)</td></tr>
+  <tr><td>Financing Amount (PRN)</td><td>{{ financing.bronova_amount }} PRN</td></tr>
+  <tr><td>USD Equivalent at Issuance</td><td>USD {{ financing.usd_equivalent }}</td></tr>
+  <tr><td>Financing Start Date</td><td>{{ today|date:"d M Y" }}</td></tr>
+  <tr><td>Financing End Date</td><td>{{ maturity_date|date:"d M Y" }}</td></tr>
+  <tr><td>Financing Term</td><td>{{ financing.repayment_period_months }} Months</td></tr>
+  <tr><td>Repayment Basis</td><td>USD (United States Dollar)</td></tr>
+  <tr><td>Total Amount Payable (USD)</td><td>USD {{ total_payable }}</td></tr>
+</table>
+
+<h3 class="clause">B. Repayment Structure Summary</h3>
+<table class="schedule">
+  <tr><th style="width: 45%;">Item</th><th>Details</th></tr>
+  <tr><td>Number of Monthly Installments</td><td>{{ financing.repayment_period_months }} Installments</td></tr>
+  <tr><td>Installment Frequency</td><td>Monthly</td></tr>
+  <tr><td>Monthly Installment Amount (USD)</td><td>USD {{ financing.monthly_installment }}</td></tr>
+  <tr><td>Profit / Financing Charge</td><td>Included in monthly installment</td></tr>
+  <tr><td>Early Settlement Option</td><td>Permitted after 6 months</td></tr>
+</table>
+
+<h3 class="clause">C. Monthly Installment Table (USD only)</h3>
+<table class="schedule">
+  <tr>
+    <th>Installment No.</th>
+    <th>Payment Due Date</th>
+    <th>Monthly Installment (USD)</th>
+    <th>Outstanding Balance After Payment (USD)</th>
+    <th>Status</th>
+  </tr>
+  {% for row in installments_table %}
+  <tr>
+    <td>{{ row.number }}</td>
+    <td>{{ row.due_date|date:"d M Y" }}</td>
+    <td>USD {{ row.amount }}</td>
+    <td>USD {{ row.outstanding_after }}</td>
+    <td>{{ row.status }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="5" style="text-align: center; color: #6b7280;">Installment schedule will be generated upon facility activation.</td></tr>
+  {% endfor %}
+</table>
+
+<h3 class="clause">D. Key Legal &amp; Financial Conditions</h3>
+<ul class="lettered">
+  <li>All repayment obligations are fixed and enforceable in USD, regardless of PRN market fluctuations.</li>
+  <li>Late payments are subject to Default Interest at {{ default_interest_rate }}% per annum, calculated on the outstanding balance.</li>
+  <li>Failure to pay two consecutive installments or two months constitutes an Event of Default.</li>
+  <li>Upon default, Nova reserves the right to:
+    <ul class="lettered">
+      <li>Cancel the financing immediately;</li>
+      <li>Notify Capimax platforms to suspend returns and profits;</li>
+      <li>Claim the remaining outstanding balance only, not the full original amount.</li>
+    </ul>
+  </li>
+  <li>Partial payments are accepted but do not suspend default interest on unpaid balances.</li>
+  <li>Early settlement is permitted after 6 months, subject to platform settlement quotation.</li>
+  <li>All payments are credited on the date funds are received and cleared.</li>
+</ul>
+
+<h3 class="clause">E. Acknowledgment &amp; Digital Signatures</h3>
+<p>By signing below, the Parties confirm that this Schedule A is accurate, binding, and inseparable from the Facility Agreement and the Nova Finance Instrument.</p>
+
+<div class="signature-block">
+  <div class="sig-row">
+    <div class="col">
+      <div class="label">Borrower (Digital Signature)</div>
+      {% if signature %}
+        <div class="signature-text">{{ signature.signature_text }}</div>
+        <div class="signature-meta">
+          Date: {{ signature.created_at|date:"d M Y H:i" }} UTC
         </div>
+      {% else %}
+        <div class="sig-line"></div>
+        <div class="signature-meta">Date: ____________________</div>
+      {% endif %}
     </div>
-
-    <h2>Article 1: Financing Details</h2>
-    <div class="clause">
-        <p>The First Party agrees to provide the Second Party with Pronova (PRN) tokens as follows:</p>
-        <ul>
-            <li>Application Number: <strong>{{ financing.application_number }}</strong></li>
-            <li>Pronova Amount: <strong>{{ financing.bronova_amount }} PRN</strong></li>
-            <li>USD Equivalent: <strong>${{ financing.usd_equivalent }}</strong></li>
-            <li>Processing Fee: <strong>{{ financing.fee_percentage }}% (${{ financing.fee_amount }})</strong></li>
-            <li>Repayment Period: <strong>{{ financing.repayment_period_months }} months</strong></li>
-            <li>Monthly Installment: <strong>{{ financing.monthly_installment }} PRN</strong></li>
-        </ul>
+    <div class="col">
+      <div class="label">Nova Digital Finance (Digital Signature)</div>
+      <div class="sig-line"></div>
+      <div class="signature-meta">Date: ____________________</div>
     </div>
+  </div>
+</div>
 
-    <h2>Article 2: Terms and Conditions</h2>
-    <div class="clause">
-        <ol>
-            <li>This financing is interest-free. The only charge is the processing fee stated above.</li>
-            <li>The processing fee is non-refundable once paid.</li>
-            <li>The Second Party shall repay the total Pronova amount in equal monthly installments.</li>
-            <li>Late payments may incur additional review and may affect future financing eligibility.</li>
-            <li>The Second Party may invest their Pronova tokens through CapiMax Investment platform.</li>
-            <li>Investment returns are separate from repayment obligations.</li>
-        </ol>
-    </div>
+<div class="verify-card">
+  <span class="label">Document Verification</span>
+  This agreement can be verified at <strong>novadf.com/verify</strong> using the code:<br>
+  <code>{{ verification_code }}</code>
+</div>
 
-    <h2>Article 3: Repayment Schedule</h2>
-    {% if installments %}
-    <table class="schedule-table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Due Date</th>
-                <th>Amount (PRN)</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for inst in installments %}
-            <tr>
-                <td>{{ inst.installment_number }}</td>
-                <td>{{ inst.due_date|date:"M d, Y" }}</td>
-                <td>{{ inst.amount }}</td>
-                <td>{{ inst.get_status_display }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-
-    <h2>Article 4: Signatures</h2>
-    <p>By signing this contract, all parties agree to the terms and conditions stated herein.</p>
-
-    <div style="margin-top: 40px;">
-        <div style="margin-bottom: 30px;">
-            <div style="border-top: 1px solid #333; width: 250px; padding-top: 5px;">
-                Nova Digital Finance (First Party)<br>
-                <span style="font-size: 11px; color: #666;">Date: {{ date|date:"F d, Y" }}</span>
-            </div>
-        </div>
-        <div style="margin-bottom: 30px;">
-            <div style="border-top: 1px solid #333; width: 250px; padding-top: 5px;">
-                {{ user.get_full_name }} (Second Party)<br>
-                <span style="font-size: 11px; color: #666;">Date: _______________</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer">
-        <p>Nova Digital Finance | Trilateral Financing Contract</p>
-        <p>This document is electronically generated. Verification: {{ document_number }}</p>
-    </div>
 </body>
 </html>
