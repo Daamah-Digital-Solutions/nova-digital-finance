@@ -185,15 +185,20 @@ class DocumentService:
 
     @staticmethod
     def _logo_path() -> str:
-        """Absolute path to the brand logo embedded in PDFs.
+        """`file://` URI to the brand logo embedded in PDFs.
 
-        WeasyPrint needs a `file://` URL or an absolute filesystem path for
-        local images. The logo lives at backend/templates/pdfs/assets/logo.png.
+        WeasyPrint resolves <img src=...> as a URI relative to the base
+        URL; an absolute filesystem path like "/app/templates/.../logo.png"
+        triggers "Relative URI reference without a base URI" and the
+        image is silently dropped. Prefix with file:// so the resolver
+        treats it as an absolute URI.
         """
         import os
-        return os.path.join(
+        from pathlib import Path
+        abs_path = os.path.join(
             settings.BASE_DIR, "templates", "pdfs", "assets", "logo.png"
         )
+        return Path(abs_path).resolve().as_uri()
 
     @staticmethod
     def _residential_address(user) -> str:
