@@ -10,8 +10,26 @@ class AccountAdapter(DefaultAccountAdapter):
     """Custom account adapter for allauth."""
 
     def get_login_redirect_url(self, request):
-        """Redirect to frontend after login."""
-        return getattr(settings, 'FRONTEND_URL', 'http://localhost:3001') + '/dashboard'
+        """Hand the SPA its JWT tokens after an allauth login (e.g. Google OAuth).
+
+        allauth only calls the *account* adapter's ``get_login_redirect_url`` —
+        never the socialaccount adapter's — so the token minting has to happen
+        here. If it doesn't, social logins land on the frontend unauthenticated
+        (no tokens in the URL) and every ``/users/me/`` call 401s, bouncing the
+        user back to /login.
+        """
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3001')
+        user = getattr(request, 'user', None)
+
+        if user is not None and user.is_authenticated:
+            refresh = RefreshToken.for_user(user)
+            params = urllib.parse.urlencode({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            })
+            return f"{frontend_url}/auth/callback?{params}"
+
+        return f"{frontend_url}/login?error=oauth_failed"
 
     def get_email_confirmation_url(self, request, emailconfirmation):
         """
@@ -35,34 +53,12 @@ class AccountAdapter(DefaultAccountAdapter):
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
-    """Custom social account adapter for OAuth login."""
+    """Custom social account adapter for OAuth login.
 
-    def get_login_redirect_url(self, request):
-        """
-        After social login, redirect to frontend with JWT tokens.
-        """
-        user = request.user
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3001')
-
-        if user.is_authenticated:
-            # Generate JWT tokens
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-            refresh_token = str(refresh)
-
-            # Mark user as coming from social auth
-            user.auth_provider = 'google'
-            user.is_email_verified = True
-            user.save(update_fields=['auth_provider', 'is_email_verified'])
-
-            # Redirect to frontend with tokens
-            params = urllib.parse.urlencode({
-                'access': access_token,
-                'refresh': refresh_token,
-            })
-            return f"{frontend_url}/auth/callback?{params}"
-
-        return f"{frontend_url}/login?error=oauth_failed"
+    Note: the post-login redirect (and JWT minting) lives in
+    ``AccountAdapter.get_login_redirect_url`` — allauth calls the account
+    adapter's hook for social logins too, so defining it here has no effect.
+    """
 
     def pre_social_login(self, request, sociallogin):
         """
