@@ -93,6 +93,11 @@ class UserProfile(models.Model):
     postal_code = models.CharField(max_length=20, blank=True)
     country = models.CharField(max_length=100, blank=True)
     nationality = models.CharField(max_length=100, blank=True)
+    id_number = models.CharField(
+        max_length=64,
+        blank=True,
+        help_text="National ID or Passport number. Used on the Master Facility Agreement and Nova Finance Instrument.",
+    )
     occupation = models.CharField(max_length=100, blank=True)
     employer = models.CharField(max_length=200, blank=True)
     income_source = models.CharField(

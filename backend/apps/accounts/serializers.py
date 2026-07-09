@@ -11,6 +11,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             "phone", "date_of_birth", "address_line_1", "address_line_2",
             "city", "state", "postal_code", "country", "nationality",
+            "id_number",
             "occupation", "employer", "income_source", "monthly_income",
             "investment_purpose", "profile_picture",
         ]
