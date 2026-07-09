@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -53,6 +52,42 @@ const partners = [
       "Hotel chain offering exclusive hospitality investment opportunities across the United States and United Kingdom.",
     website: "https://priminnhotels.com/",
     logo: "/partners/primeinn-hotels.png",
+  },
+  {
+    slug: "capimax-rt",
+    name: "Capimax RT",
+    countries: "Global",
+    description:
+      "Real-estate tokenization platform that converts property assets into digital tokens, opening fractional, blockchain-based property investment to a global audience.",
+    website: "https://capimaxrt.tech",
+    logo: "/partners/capimax-rt.svg",
+  },
+  {
+    slug: "capimax-asset",
+    name: "Capimax Asset",
+    countries: "UK · USA · UAE",
+    description:
+      "A global diversified asset-ownership group headquartered in London, with branches in the US and UAE, holding licensed companies across asset funds, financial markets, real estate, and general trading.",
+    website: "https://capimaxinvestment.com",
+    logo: "/partners/capimax-asset.svg",
+  },
+  {
+    slug: "capimax-brx",
+    name: "Capimax BRX",
+    countries: "Global",
+    description:
+      "Blockchain Real-Estate Exchange — a digital marketplace for issuing and trading tokenized real-estate assets with transparency and liquidity.",
+    website: "https://capimaxbrx.com",
+    logo: "/partners/capimax-brx.svg",
+  },
+  {
+    slug: "capimax-propshare",
+    name: "Capimax PropShare",
+    countries: "Global",
+    description:
+      "Fractional real-estate investment platform that lets investors own shares in premium properties instead of purchasing whole assets outright.",
+    website: "https://capimaxpropshare.com",
+    logo: "/partners/capimax-propshare.svg",
   },
 ];
 
@@ -112,15 +147,13 @@ export default function PartnersPage() {
               >
                 {/* Logo plate */}
                 <div className="flex h-32 items-center justify-center border-b bg-white p-6 dark:bg-white">
-                  <div className="relative h-full w-full">
-                    <Image
-                      src={partner.logo}
-                      alt={partner.name}
-                      fill
-                      sizes="(min-width: 1024px) 280px, (min-width: 640px) 45vw, 90vw"
-                      style={{ objectFit: "contain" }}
-                    />
-                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                  />
                 </div>
 
                 {/* Body */}

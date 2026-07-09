@@ -16,6 +16,8 @@ urlpatterns = [
     # KYC
     path("kyc/", kyc_views.AdminKYCListView.as_view(), name="admin-kyc-list"),
     path("kyc/<uuid:pk>/", kyc_views.AdminKYCDetailView.as_view(), name="admin-kyc-detail"),
+    path("kyc/<uuid:pk>/approve/", kyc_views.AdminKYCApproveView.as_view(), name="admin-kyc-approve"),
+    path("kyc/<uuid:pk>/reject/", kyc_views.AdminKYCRejectView.as_view(), name="admin-kyc-reject"),
     # Financing
     path("applications/", financing_views.AdminFinancingListView.as_view(), name="admin-applications"),
     path("applications/<uuid:pk>/", financing_views.AdminFinancingDetailView.as_view(), name="admin-application-detail"),

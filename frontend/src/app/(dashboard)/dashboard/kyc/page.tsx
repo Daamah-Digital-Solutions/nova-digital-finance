@@ -394,7 +394,7 @@ export default function KYCPage() {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
       onDrop,
       accept: {
-        "image/*": [".png", ".jpg", ".jpeg"],
+        "image/*": [".png", ".jpg", ".jpeg", ".webp"],
         "application/pdf": [".pdf"],
       },
       maxFiles: 1,

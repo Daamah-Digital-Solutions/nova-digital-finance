@@ -70,7 +70,11 @@ class KYCSubmitView(APIView):
 
         kyc_application.status = KYCApplication.Status.SUBMITTED
         kyc_application.submitted_at = timezone.now()
-        kyc_application.save(update_fields=["status", "submitted_at", "updated_at"])
+        # Clear any prior rejection reason so a resubmission starts clean.
+        kyc_application.rejection_reason = ""
+        kyc_application.save(
+            update_fields=["status", "submitted_at", "rejection_reason", "updated_at"]
+        )
 
         # Send notification and email
         NotificationService.notify_kyc_submitted(kyc_application)
@@ -95,9 +99,30 @@ class KYCDocumentListCreateView(generics.ListCreateAPIView):
         return KYCDocument.objects.filter(kyc_application__user=self.request.user)
 
     def perform_create(self, serializer):
+        from rest_framework.exceptions import PermissionDenied
+
         kyc_application, _created = KYCApplication.objects.get_or_create(
             user=self.request.user,
         )
+
+        # Documents may only be (re)uploaded while the application is still open —
+        # i.e. a fresh draft or one that was rejected and is being corrected.
+        if kyc_application.status not in (
+            KYCApplication.Status.DRAFT,
+            KYCApplication.Status.REJECTED,
+        ):
+            raise PermissionDenied(
+                "Documents cannot be changed after the KYC application has been submitted."
+            )
+
+        document_type = serializer.validated_data.get("document_type")
+        # Keep at most one document per type: replace any existing upload of the
+        # same type so retries / resubmissions don't pile up duplicates.
+        existing = kyc_application.documents.filter(document_type=document_type)
+        for doc in existing:
+            doc.file.delete(save=False)
+            doc.delete()
+
         uploaded_file = self.request.FILES.get("file")
         serializer.save(
             kyc_application=kyc_application,
@@ -120,7 +145,10 @@ class KYCDocumentDeleteView(generics.DestroyAPIView):
         return KYCDocument.objects.filter(kyc_application__user=self.request.user)
 
     def perform_destroy(self, instance):
-        if instance.kyc_application.status != KYCApplication.Status.DRAFT:
+        if instance.kyc_application.status not in (
+            KYCApplication.Status.DRAFT,
+            KYCApplication.Status.REJECTED,
+        ):
             from rest_framework.exceptions import PermissionDenied
 
             raise PermissionDenied(
@@ -185,3 +213,110 @@ class AdminKYCDetailView(generics.RetrieveUpdateAPIView):
 
             # Send notification and email
             NotificationService.notify_kyc_status_change(instance, new_status)
+
+
+# These reviewable states cover both a direct submission and one an admin has
+# opened for review — approve/reject act on either.
+REVIEWABLE_KYC_STATUSES = (
+    KYCApplication.Status.SUBMITTED,
+    KYCApplication.Status.UNDER_REVIEW,
+)
+
+
+class AdminKYCApproveView(APIView):
+    """
+    POST /api/v1/admin/kyc/<id>/approve/ - Approve a submitted KYC application.
+
+    Sets the application to 'approved', stamps the reviewer, and notifies the
+    applicant. Mirrors the financing approve/reject endpoints.
+    """
+
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, pk):
+        try:
+            kyc_application = KYCApplication.objects.get(pk=pk)
+        except KYCApplication.DoesNotExist:
+            return Response(
+                {"error": "KYC application not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if kyc_application.status not in REVIEWABLE_KYC_STATUSES:
+            return Response(
+                {"error": f"KYC cannot be approved in current status: {kyc_application.status}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        kyc_application.status = KYCApplication.Status.APPROVED
+        kyc_application.rejection_reason = ""
+        kyc_application.reviewed_by = request.user
+        kyc_application.reviewed_at = timezone.now()
+        kyc_application.save(
+            update_fields=[
+                "status",
+                "rejection_reason",
+                "reviewed_by",
+                "reviewed_at",
+                "updated_at",
+            ]
+        )
+
+        NotificationService.notify_kyc_status_change(
+            kyc_application, KYCApplication.Status.APPROVED
+        )
+
+        return Response(AdminKYCSerializer(kyc_application).data)
+
+
+class AdminKYCRejectView(APIView):
+    """
+    POST /api/v1/admin/kyc/<id>/reject/ - Reject a submitted KYC application.
+
+    Requires a `reason`. Stamps the reviewer and notifies the applicant, who may
+    then correct their documents and resubmit.
+    """
+
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, pk):
+        reason = (request.data.get("reason") or "").strip()
+        if not reason:
+            return Response(
+                {"error": "A rejection reason is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            kyc_application = KYCApplication.objects.get(pk=pk)
+        except KYCApplication.DoesNotExist:
+            return Response(
+                {"error": "KYC application not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if kyc_application.status not in REVIEWABLE_KYC_STATUSES:
+            return Response(
+                {"error": f"KYC cannot be rejected in current status: {kyc_application.status}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        kyc_application.status = KYCApplication.Status.REJECTED
+        kyc_application.rejection_reason = reason
+        kyc_application.reviewed_by = request.user
+        kyc_application.reviewed_at = timezone.now()
+        kyc_application.save(
+            update_fields=[
+                "status",
+                "rejection_reason",
+                "reviewed_by",
+                "reviewed_at",
+                "updated_at",
+            ]
+        )
+
+        NotificationService.notify_kyc_status_change(
+            kyc_application, KYCApplication.Status.REJECTED
+        )
+
+        return Response(AdminKYCSerializer(kyc_application).data)

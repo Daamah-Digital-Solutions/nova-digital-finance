@@ -31,11 +31,20 @@ class KYCDocumentSerializer(serializers.ModelSerializer):
             "image/png",
             "image/webp",
         ]
-        if value.content_type not in allowed_types:
-            raise serializers.ValidationError(
-                "Unsupported file type. Allowed: PDF, JPEG, PNG, WebP."
-            )
-        return value
+        allowed_extensions = (".pdf", ".jpg", ".jpeg", ".png", ".webp")
+        content_type = (getattr(value, "content_type", "") or "").lower()
+        name = (getattr(value, "name", "") or "").lower()
+
+        if content_type in allowed_types:
+            return value
+        # Many valid files (mobile photos, scanner output, some PDFs) arrive with
+        # a missing or generic MIME type. Rather than reject them outright, fall
+        # back to trusting the file extension in that case.
+        if content_type in ("", "application/octet-stream") and name.endswith(allowed_extensions):
+            return value
+        raise serializers.ValidationError(
+            "Unsupported file type. Allowed: PDF, JPEG, PNG, WebP."
+        )
 
 
 class KYCApplicationSerializer(serializers.ModelSerializer):
@@ -113,7 +122,12 @@ class KYCSubmitSerializer(serializers.Serializer):
         if not kyc_application:
             raise serializers.ValidationError("KYC application not found.")
 
-        if kyc_application.status != KYCApplication.Status.DRAFT:
+        # A fresh draft or a previously rejected application may be (re)submitted.
+        # Rejected applicants must be able to fix their documents and try again.
+        if kyc_application.status not in (
+            KYCApplication.Status.DRAFT,
+            KYCApplication.Status.REJECTED,
+        ):
             raise serializers.ValidationError(
                 f"KYC application cannot be submitted. Current status: {kyc_application.status}."
             )
