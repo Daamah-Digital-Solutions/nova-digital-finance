@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
+import { NovaChatbot } from "@/components/chat/nova-chatbot";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -32,6 +33,7 @@ export default function Providers({ children }: ProvidersProps) {
     >
       <QueryClientProvider client={queryClient}>
         {children}
+        <NovaChatbot />
         <Toaster
           position="top-right"
           richColors
