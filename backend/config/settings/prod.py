@@ -68,6 +68,10 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
+            # Floor at INFO so no third-party DEBUG (WeasyPrint's font/image
+            # stack is especially noisy) ever reaches the container logs,
+            # regardless of how a library configures its own loggers.
+            "level": "INFO",
         },
     },
     "root": {
