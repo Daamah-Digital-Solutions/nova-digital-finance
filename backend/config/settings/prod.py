@@ -85,5 +85,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        # WeasyPrint + its font/image stack log a flood of DEBUG lines on every
+        # PDF render. Pin them to WARNING so document generation doesn't spam
+        # the container logs.
+        "weasyprint": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        "fontTools": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        "PIL": {"handlers": ["console"], "level": "WARNING", "propagate": False},
     },
 }
