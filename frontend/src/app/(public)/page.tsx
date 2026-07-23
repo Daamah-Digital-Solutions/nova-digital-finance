@@ -21,7 +21,6 @@ import {
   PieChart,
   Network,
   Briefcase,
-  Smartphone,
   HeartHandshake,
 } from "lucide-react";
 
@@ -478,6 +477,37 @@ export default function HomePage() {
             </p>
           </div>
 
+          {/* Capimax Ecosystem banner */}
+          <div className="mx-auto mb-12 max-w-4xl overflow-hidden rounded-2xl border bg-card shadow-sm">
+            <div className="flex flex-col items-center gap-5 p-6 sm:flex-row sm:gap-7 sm:p-8">
+              <div className="flex h-20 w-40 shrink-0 items-center justify-center rounded-xl bg-white p-3 dark:bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/capimax-group-logo.png"
+                  alt="Capimax Ecosystem"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="mb-1.5 text-xl font-bold">Capimax Ecosystem</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  The main digital gateway that brings together all of the group&apos;s
+                  platforms, partnerships, services, news, and updates in one
+                  integrated ecosystem — where your Nova Sukuk goes to work.
+                </p>
+              </div>
+              <a
+                href="https://www.capimax.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-6 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition-all hover:shadow-xl"
+              >
+                Explore Ecosystem
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </a>
+            </div>
+          </div>
+
           {/* Sectors grid */}
           <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -672,31 +702,38 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
-                icon: Briefcase,
-                title: "Capimax ASSET",
-                tagline: "Investment platform",
-                href: "https://panel.capimaxinvestment.com/",
+                icon: Network,
+                title: "Capimax Ecosystem",
+                tagline: "The digital gateway to the group",
+                href: "https://www.capimax.io",
                 external: true,
               },
               {
-                icon: Smartphone,
-                title: "Capimax ASSET Application",
-                tagline: "Mobile & web app",
-                href: "https://panel.capimaxinvestment.com/",
+                icon: Building2,
+                title: "Capimax BRX",
+                tagline: "Blockchain real-estate exchange",
+                href: "https://capimaxbrx.com",
+                external: true,
+              },
+              {
+                icon: PieChart,
+                title: "Capimax PropShare",
+                tagline: "Fractional property ownership",
+                href: "https://capimaxpropshare.com",
                 external: true,
               },
               {
                 icon: Globe,
-                title: "Capimaxrt.tech",
-                tagline: "Real-time technology",
+                title: "Capimax RT",
+                tagline: "Real-estate tokenization",
                 href: "https://capimaxrt.tech",
                 external: true,
               },
               {
-                icon: Network,
-                title: "CapimaxGroup.com",
-                tagline: "Group directory",
-                href: "https://capimaxgroup.com",
+                icon: Briefcase,
+                title: "Capimax Asset",
+                tagline: "Diversified asset ownership",
+                href: "https://capimaxinvestment.com",
                 external: true,
               },
               {

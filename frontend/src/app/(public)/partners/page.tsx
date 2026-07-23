@@ -89,6 +89,51 @@ const partners = [
     website: "https://capimaxpropshare.com",
     logo: "/partners/capimax-propshare.svg",
   },
+  {
+    slug: "westoria-capital",
+    name: "Westoria Capital",
+    countries: "USA",
+    description:
+      "Institutional developer of luxury residential, hospitality, and mixed-use destinations across the United States, with fractional-ownership and tokenization access.",
+    website: "https://westoriacapital.com",
+    logo: "/partners/westoria-capital.png",
+  },
+  {
+    slug: "crestmark-global",
+    name: "Crestmark Global",
+    countries: "UK",
+    description:
+      "London-based real-estate development and investment company acquiring, designing, and managing luxury residential, commercial, and hospitality properties across the UK.",
+    website: "https://crestmarkglobal.com",
+    logo: "/partners/crestmark-global.png",
+  },
+  {
+    slug: "valora-estates",
+    name: "Valora Estates",
+    countries: "Spain",
+    description:
+      "Spanish institutional developer and investor originating, developing, and operating residential, commercial, and hospitality assets across Spain's major cities since 2001.",
+    website: "https://valoraestatesglobal.com",
+    logo: "/partners/valora-estates.png",
+  },
+  {
+    slug: "aethera-development",
+    name: "Aethera Development",
+    countries: "Greece",
+    description:
+      "Greece-based luxury real-estate developer specializing in residential, hospitality, and investment properties across Athens, Mykonos, and Santorini since 1998.",
+    website: "https://aetheradevelopment.com",
+    logo: "/partners/aethera-development.png",
+  },
+  {
+    slug: "verdea-estates",
+    name: "Verdea Estates",
+    countries: "Georgia",
+    description:
+      "Georgian real-estate developer building luxury residential, hospitality, and commercial properties, with institutional investment through tokenized, blockchain-enabled ownership.",
+    website: "https://verdeaestates.com",
+    logo: "/partners/verdea-estates.png",
+  },
 ];
 
 export default function PartnersPage() {

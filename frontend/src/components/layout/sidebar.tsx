@@ -94,14 +94,14 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
 
       <div className="border-t p-2">
         <Link
-          href={process.env.NEXT_PUBLIC_CAPIMAX_URL || "https://panel.capimaxinvestment.com/"}
+          href={process.env.NEXT_PUBLIC_CAPIMAX_URL || "https://www.capimax.io"}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          title={collapsed ? "CapiMax Investment" : undefined}
+          title={collapsed ? "Capimax Ecosystem" : undefined}
         >
           <ExternalLink className={cn("h-4 w-4", !collapsed && "mr-3")} />
-          {!collapsed && "CapiMax Investment"}
+          {!collapsed && "Capimax Ecosystem"}
         </Link>
       </div>
     </aside>

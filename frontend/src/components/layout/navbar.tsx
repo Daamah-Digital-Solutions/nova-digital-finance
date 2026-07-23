@@ -23,8 +23,8 @@ const navLinks = [
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
   {
-    href: process.env.NEXT_PUBLIC_CAPIMAX_URL || "https://panel.capimaxinvestment.com/",
-    label: "CapiMax",
+    href: process.env.NEXT_PUBLIC_CAPIMAX_URL || "https://www.capimax.io",
+    label: "Capimax Ecosystem",
     external: true,
   },
 ];

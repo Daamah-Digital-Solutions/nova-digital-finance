@@ -21,8 +21,8 @@ const footerLinks = {
   ],
   Invest: [
     {
-      href: process.env.NEXT_PUBLIC_CAPIMAX_URL || "https://panel.capimaxinvestment.com/",
-      label: "CapiMax Investment",
+      href: process.env.NEXT_PUBLIC_CAPIMAX_URL || "https://www.capimax.io",
+      label: "Capimax Ecosystem",
       external: true,
     },
   ],
