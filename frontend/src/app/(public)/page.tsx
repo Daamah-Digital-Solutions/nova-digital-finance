@@ -480,10 +480,10 @@ export default function HomePage() {
           {/* Capimax Ecosystem banner */}
           <div className="mx-auto mb-12 max-w-4xl overflow-hidden rounded-2xl border bg-card shadow-sm">
             <div className="flex flex-col items-center gap-5 p-6 sm:flex-row sm:gap-7 sm:p-8">
-              <div className="flex h-20 w-40 shrink-0 items-center justify-center rounded-xl bg-white p-3 dark:bg-white">
+              <div className="flex h-20 w-52 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#0b1526]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/capimax-group-logo.png"
+                  src="/partners/capimax-ecosystem.png"
                   alt="Capimax Ecosystem"
                   className="h-full w-full object-contain"
                 />
