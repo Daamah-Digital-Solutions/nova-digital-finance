@@ -36,7 +36,7 @@ export default function TermsPage() {
               financing services through the Pronova (PRN) token. Our platform
               enables qualified individuals to apply for financing ranging from
               500 to 100,000 PRN, with repayment periods of 6 to 36 months. A
-              one-time processing fee of 3-5% applies to all financing
+              one-time processing fee of 2% applies to all financing
               agreements. Financing is subject to approval based on completion
               of KYC verification and application review.
             </p>
@@ -70,7 +70,7 @@ export default function TermsPage() {
             <ul className="mb-6 space-y-2 text-muted-foreground">
               <li>
                 <strong>Processing Fee:</strong> A one-time, non-refundable
-                fee of 3-5% of the financing amount, payable before the
+                fee of 2% of the financing amount, payable before the
                 disbursement of funds
               </li>
               <li>

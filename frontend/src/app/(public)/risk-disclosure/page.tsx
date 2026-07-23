@@ -151,7 +151,7 @@ export default function RiskDisclosurePage() {
 
             <h2 className="text-2xl font-bold">5. Processing Fee</h2>
             <p className="mb-6 text-muted-foreground leading-relaxed">
-              The processing fee of 3-5% is non-refundable once paid, regardless
+              The processing fee of 2% is non-refundable once paid, regardless
               of whether the financing is subsequently cancelled, defaulted
               upon, or if investment returns are negative. This fee is a cost
               of the financing service and is not recoverable.

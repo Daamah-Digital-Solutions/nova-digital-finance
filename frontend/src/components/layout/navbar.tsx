@@ -9,12 +9,14 @@ import {
   X,
   ChevronDown,
   ExternalLink,
+  Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const navLinks = [
+  { href: "/", label: "Home", icon: Home },
   { href: "/about", label: "About" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/features", label: "Features" },
@@ -59,6 +61,7 @@ export function Navbar() {
                   : "text-muted-foreground"
               )}
             >
+              {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
               {link.label}
               {link.external && <ExternalLink className="ml-1 h-3 w-3" />}
             </Link>
@@ -98,6 +101,7 @@ export function Navbar() {
                 className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent"
                 onClick={() => setMobileOpen(false)}
               >
+                {link.icon && <link.icon className="mr-1.5 h-4 w-4" />}
                 {link.label}
                 {link.external && <ExternalLink className="ml-1 h-3 w-3" />}
               </Link>

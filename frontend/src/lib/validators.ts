@@ -105,8 +105,8 @@ export const financingSchema = z.object({
     .max(36, "Maximum repayment period is 36 months"),
   feePercentage: z
     .number({ required_error: "Fee percentage is required" })
-    .min(3, "Minimum fee is 3%")
-    .max(5, "Maximum fee is 5%"),
+    .min(2, "Minimum fee is 2%")
+    .max(2, "Maximum fee is 2%"),
   ackTerms: z
     .literal(true, {
       errorMap: () => ({ message: "You must accept the terms and conditions" }),

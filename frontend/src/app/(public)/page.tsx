@@ -16,7 +16,6 @@ import {
   Wallet,
   Star,
   Sparkles,
-  Gem,
   Bitcoin,
   Banknote,
   PieChart,
@@ -44,9 +43,14 @@ export default function HomePage() {
               <span className="text-primary">Pronova (PRN)</span>
             </h1>
             <p className="mb-8 text-lg text-muted-foreground lg:text-xl">
-              Acquire Pronova (PRN) tokens at a fixed rate of 1 PRN = 1 USD with
-              only a 3-5% processing fee. Receive a Certificate of PRN Ownership,
-              repay monthly, and invest through CapiMax.
+              Receive Pronova (PRN) financing at a fixed value of 1 PRN = 1 USD
+              with only a 2% processing fee. Your financed PRN is immediately
+              usable across the Capimax Ecosystem to acquire tokenized real
+              estate, real-world digital assets, investment portfolios,
+              completed and under-construction properties, and other global
+              investment opportunities. Start investing from day one with
+              flexible ownership, growth potential, and multiple exit options
+              through an integrated institutional ecosystem.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -470,22 +474,17 @@ export default function HomePage() {
               Your Nova-financed PRN tokens are accepted across the{" "}
               <strong className="text-foreground">Capimax Group</strong>{" "}
               ecosystem — a global platform spanning fractional ownership, real
-              estate, precious metals, digital assets, and fintech solutions.
+              estate, digital assets, and fintech solutions.
             </p>
           </div>
 
           {/* Sectors grid */}
-          <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
                 icon: Building2,
                 title: "Real Estate",
                 description: "Institutional property portfolios.",
-              },
-              {
-                icon: Gem,
-                title: "Precious Metals",
-                description: "Gold and metals-backed holdings.",
               },
               {
                 icon: Bitcoin,
@@ -582,7 +581,7 @@ export default function HomePage() {
                 icon: Shield,
                 title: "Interest-Free",
                 description:
-                  "Zero interest on your financing. Only a small 3-5% processing fee applies.",
+                  "Zero interest on your financing. Only a small 2% processing fee applies.",
               },
               {
                 icon: Zap,
@@ -594,7 +593,7 @@ export default function HomePage() {
                 icon: TrendingUp,
                 title: "Invest via CapiMax",
                 description:
-                  "Receive a Certificate of PRN Ownership and use it to invest through the CapiMax investment platform.",
+                  "Receive a Nova Sukuk and use it to invest through the CapiMax investment platform.",
               },
               {
                 icon: Clock,
@@ -631,7 +630,7 @@ export default function HomePage() {
               { step: "1", title: "Register & KYC", desc: "Create your account and complete identity verification." },
               { step: "2", title: "Choose Your PRN", desc: "Select how many PRN you need (500-100,000). 1 PRN = 1 USD." },
               { step: "3", title: "Pay Fee & Sign", desc: "Pay the USD amount plus processing fee and sign the contract." },
-              { step: "4", title: "Get Certificate & Invest", desc: "Receive your Certificate of PRN Ownership and invest through CapiMax." },
+              { step: "4", title: "Get Your Nova Sukuk & Invest", desc: "Receive your Nova Sukuk and invest through the Capimax Ecosystem." },
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
@@ -660,10 +659,10 @@ export default function HomePage() {
             </div>
             <h2 className="mb-4 text-3xl font-bold tracking-tight lg:text-4xl">
               Spend your{" "}
-              <span className="text-primary">Nova certificates</span> here
+              <span className="text-primary">Nova Sukuk</span> here
             </h2>
             <p className="mx-auto max-w-2xl text-base text-muted-foreground lg:text-lg">
-              Your Nova Digital Finance (PRN) certificates are accepted as a
+              Your Nova Sukuk are accepted as a
               means of payment across these platforms in the Capimax Group
               ecosystem.
             </p>

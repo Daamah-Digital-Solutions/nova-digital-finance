@@ -112,10 +112,10 @@ export default function PartnersPage() {
             </div>
             <h1 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
               Where you can use your{" "}
-              <span className="text-primary">Nova certificates</span>
+              <span className="text-primary">Nova Sukuk</span>
             </h1>
             <p className="mx-auto max-w-2xl text-base text-muted-foreground lg:text-lg">
-              Your Nova Digital Finance (PRN) certificates are accepted as a
+              Your Nova Sukuk are accepted as a
               means of payment across our real-estate partner network — a
               curated group of developers, property managers, and hospitality
               operators within the Capimax Group ecosystem.

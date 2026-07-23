@@ -305,7 +305,7 @@ export default function DashboardPage() {
             <CardTitle className="text-lg">Use Nova</CardTitle>
           </div>
           <CardDescription>
-            Spend your Nova Digital Finance (PRN) certificates across these
+            Spend your Nova Sukuk across these
             platforms in the Capimax Group ecosystem.
           </CardDescription>
         </CardHeader>

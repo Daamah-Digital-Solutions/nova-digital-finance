@@ -36,50 +36,50 @@ const faqCategories: FAQCategory[] = [
           "The investor submits a digital financing request using ProNova (PRN), which is fixed at 1 USD per unit. Immediately after submission, the investor undergoes KYC/AML procedures to verify identity and financial eligibility. After approval, the investor signs the digital contracts and acknowledges that they have reviewed all terms and conditions, privacy policies, risk disclosures, and financing agreements.",
       },
       {
-        question: "When is the digital certificate issued to the investor, and what does it include?",
+        question: "When is the Nova Sukuk issued to the investor, and what does it include?",
         answer:
-          "After approval and digital signing, the platform issues a digital certificate representing the financing value in PRN. The certificate includes:\n• The financing value in PRN.\n• The equivalent value in US dollars.\n• The issuance date and financing end date.\n• The monthly installment schedule and total financing value.\n• The collateral status of the certificate until the financing is fully repaid.\n\nThe certificate is deposited into the investor's profile and dashboard, with clear notice that it cannot be sold, transferred, or assigned until full settlement is completed through the Nova platform.",
+          "After approval and digital signing, the platform issues a Nova Sukuk representing the financing value in PRN. The Sukuk includes:\n• The financing value in PRN.\n• The equivalent value in US dollars.\n• The issuance date and financing end date.\n• The monthly installment schedule and total financing value.\n• The collateral status of the Sukuk until the financing is fully repaid.\n\nThe Sukuk is deposited into the investor's profile and dashboard, with clear notice that it cannot be sold, transferred, or assigned until full settlement is completed through the Nova platform.",
       },
       {
-        question: "Can the digital certificate be used as a payment method on CapiMax platforms?",
+        question: "Can the Nova Sukuk be used as a payment method on CapiMax platforms?",
         answer:
-          'Yes, the investor can use the certificate as a payment method on CapiMax platforms or partner companies listed on the "Partners" page. The certificate is linked to the platform database and partners to ensure transaction validity. When the certificate is used, it remains pledged to the Nova platform until full repayment is completed. It may be used in full or in part across one or more platforms, provided that the total usage does not exceed the certificate’s total value.',
+          'Yes, the investor can use the Sukuk as a payment method on CapiMax platforms or partner companies listed on the "Partners" page. The Sukuk is linked to the platform database and partners to ensure transaction validity. When the Sukuk is used, it remains pledged to the Nova platform until full repayment is completed. It may be used in full or in part across one or more platforms, provided that the total usage does not exceed the Sukuk’s total value.',
       },
       {
-        question: "Which platforms can the certificate be used on?",
+        question: "Which platforms can the Sukuk be used on?",
         answer:
           "• Capimax Investment: An asset investment platform using an SPV structure for each asset.\n• Capimax ASSET and Capimax ASSET Application: Platforms for managing financial investments.\n• Capimax RT.com: A platform specialized in real estate tokenization.\n\nThe full ecosystem includes 12 companies under Capimax Group, in addition to 13 global partner companies.\n\nYou can review the companies and partners through CapimaxGroup.com or the platform’s Partners dashboard.",
       },
       {
-        question: "Can the certificate be sold or assigned before the financing is repaid?",
+        question: "Can the Sukuk be sold or assigned before the financing is repaid?",
         answer:
-          "No. The certificate remains pledged to the Nova platform until all payments are completed. The investor may not sell, assign, or transfer the certificate to any third party. After full repayment, financing termination, or settlement, the pledge is lifted and the certificate becomes the investor’s full property.",
+          "No. The Sukuk remains pledged to the Nova platform until all payments are completed. The investor may not sell, assign, or transfer the Sukuk to any third party. After full repayment, financing termination, or settlement, the pledge is lifted and the Sukuk becomes the investor’s full property.",
       },
       {
         question: "How does the platform ensure legal and regulatory compliance?",
         answer:
-          "All financial and digital transactions are documented and linked to platform and partner records to ensure compliance with UK laws and GDPR 2018. The investor retains the right to monitor investments and verify PRN and USD values. In the event of default or non-compliance, default policies are applied, returns may be suspended, and pledged certificates may be recalled in accordance with the financing agreements.",
+          "All financial and digital transactions are documented and linked to platform and partner records to ensure compliance with UK laws and GDPR 2018. The investor retains the right to monitor investments and verify PRN and USD values. In the event of default or non-compliance, default policies are applied, returns may be suspended, and pledged Sukuks may be recalled in accordance with the financing agreements.",
       },
       {
         question: "Can the investor dispose of investments or profits before repaying the financing?",
         answer:
-          "• Investments can be purchased using the digital certificate, but they cannot be sold or otherwise disposed of until the full debt is repaid or the financing is terminated and the pledge is settled.\n• The investor is entitled to receive periodic returns and profits and transfer them to their personal account within the platform.\n• If the borrower stops paying for two consecutive installments, the distribution of profits and returns is automatically suspended.\n• The investor may complete an early settlement or exit through the Nova platform dashboard, which restores control over the certificate and investments immediately after settlement.\n• If the borrower ignores repayment obligations, Nova has the right to send 3 warnings by email, and if there is no response, pursue legal action to recover the full financing amount.",
+          "• Investments can be purchased using the Nova Sukuk, but they cannot be sold or otherwise disposed of until the full debt is repaid or the financing is terminated and the pledge is settled.\n• The investor is entitled to receive periodic returns and profits and transfer them to their personal account within the platform.\n• If the borrower stops paying for two consecutive installments, the distribution of profits and returns is automatically suspended.\n• The investor may complete an early settlement or exit through the Nova platform dashboard, which restores control over the Sukuk and investments immediately after settlement.\n• If the borrower ignores repayment obligations, Nova has the right to send 3 warnings by email, and if there is no response, pursue legal action to recover the full financing amount.",
       },
       {
         question: "What rights does the borrower have after the financing ends or is settled?",
         answer:
-          "• Nova issues a final summary showing the financing status, installments paid, and the final outstanding balance.\n• The summary is sent to the platform or platforms where the borrower invested within the Capimax Group ecosystem.\n• The capital represented by the certificate becomes the investor’s full property.\n• The investor has the right to withdraw the capital or profits, or reinvest them in any form or on any platform they consider appropriate.\n• Upon final settlement or the end of the financing term, the pledge is lifted and the asset and investments are fully unencumbered.",
+          "• Nova issues a final summary showing the financing status, installments paid, and the final outstanding balance.\n• The summary is sent to the platform or platforms where the borrower invested within the Capimax Group ecosystem.\n• The capital represented by the Sukuk becomes the investor’s full property.\n• The investor has the right to withdraw the capital or profits, or reinvest them in any form or on any platform they consider appropriate.\n• Upon final settlement or the end of the financing term, the pledge is lifted and the asset and investments are fully unencumbered.",
       },
       {
         question: "Are the investor’s funds insured on Capimax platforms?",
         answer:
-          "• All investor funds and assets are guaranteed and insured against technical and operational risks or any platform malfunction.\n• If any failure affects the borrower’s investments, the financing is immediately canceled without imposing additional obligations on the borrower.\n• Installments and future payments are automatically suspended until the situation is resolved.\n• The borrower is protected by two parties:\n  – Capimax and its partners through investment insurance.\n  – Nova through financing protection and suspension of installments and payments.\n• This protection remains in effect throughout the financing period or until final settlement and release of the pledge on certificates and investments.",
+          "• All investor funds and assets are guaranteed and insured against technical and operational risks or any platform malfunction.\n• If any failure affects the borrower’s investments, the financing is immediately canceled without imposing additional obligations on the borrower.\n• Installments and future payments are automatically suspended until the situation is resolved.\n• The borrower is protected by two parties:\n  – Capimax and its partners through investment insurance.\n  – Nova through financing protection and suspension of installments and payments.\n• This protection remains in effect throughout the financing period or until final settlement and release of the pledge on Sukuks and investments.",
       },
       {
         question:
           "What benefits does the investor receive when borrowing in Pronova (PRN) and using it on Capimax platforms?",
         answer:
-          "• Interest-free borrowing: The investor receives a loan in Pronova without paying any interest.\n• Asset acquisition: The borrowed Pronova can be used to purchase assets on Capimax platforms.\n• Repayment through returns: The investor may use returns or profits generated by these assets to repay the loan partially or fully.\n• Access through capital growth: The investor can access assets or investments that generate income or appreciate in value without needing initial capital, relying on returns or capital growth to cover part of the financing value.\n• Stable USD value: The financing is not tied to Pronova market volatility, because the currently fixed value is 1 PRN = 1 USD. The certificate value, repayment installments, and investment returns are all calculated in US dollars regardless of market fluctuations in Pronova.\n• Returns in USD: All profits or returns generated from investments on Capimax platforms are received in US dollars, without any linkage to the market price of Pronova.",
+          "• Interest-free borrowing: The investor receives a loan in Pronova without paying any interest.\n• Asset acquisition: The borrowed Pronova can be used to purchase assets on Capimax platforms.\n• Repayment through returns: The investor may use returns or profits generated by these assets to repay the loan partially or fully.\n• Access through capital growth: The investor can access assets or investments that generate income or appreciate in value without needing initial capital, relying on returns or capital growth to cover part of the financing value.\n• Stable USD value: The financing is not tied to Pronova market volatility, because the currently fixed value is 1 PRN = 1 USD. The Sukuk value, repayment installments, and investment returns are all calculated in US dollars regardless of market fluctuations in Pronova.\n• Returns in USD: All profits or returns generated from investments on Capimax platforms are received in US dollars, without any linkage to the market price of Pronova.",
       },
     ],
   },
@@ -116,7 +116,7 @@ const faqCategories: FAQCategory[] = [
       {
         question: "How does the financing process work?",
         answer:
-          "The financing process is straightforward: First, you submit a financing application specifying the amount you need (between 500 and 100,000 PRN). After submitting, you sign the financing contract electronically. Then you pay a one-time processing fee (3-5% of the financing amount). Once the fee is confirmed, your financing becomes active and Pronova tokens are disbursed to your account. You then repay the principal in equal monthly installments over your chosen term.",
+          "The financing process is straightforward: First, you submit a financing application specifying the amount you need (between 500 and 100,000 PRN). After submitting, you sign the financing contract electronically. Then you pay a one-time processing fee (2% of the financing amount). Once the fee is confirmed, your financing becomes active and Pronova tokens are disbursed to your account. You then repay the principal in equal monthly installments over your chosen term.",
       },
       {
         question: "What financing amounts are available?",
@@ -131,12 +131,12 @@ const faqCategories: FAQCategory[] = [
       {
         question: "Is the financing really interest-free?",
         answer:
-          "Yes, our financing is completely interest-free. You only pay back the principal amount you received, divided into equal monthly installments over your chosen repayment period. The only additional cost is the one-time processing fee (3-5%) paid at the start of the financing, which covers administrative and operational costs.",
+          "Yes, our financing is completely interest-free. You only pay back the principal amount you received, divided into equal monthly installments over your chosen repayment period. The only additional cost is the one-time processing fee (2%) paid at the start of the financing, which covers administrative and operational costs.",
       },
       {
         question: "What is the processing fee?",
         answer:
-          "The processing fee is a one-time charge of 3% to 5% of the total financing amount, depending on the term length and amount. This fee is paid upfront after you sign the financing contract and before the tokens are disbursed. It covers administrative costs, KYC verification, contract processing, and platform maintenance. There are no hidden fees or recurring charges beyond this.",
+          "The processing fee is a one-time charge of 2% of the total financing amount, depending on the term length and amount. This fee is paid upfront after you sign the financing contract and before the tokens are disbursed. It covers administrative costs, KYC verification, contract processing, and platform maintenance. There are no hidden fees or recurring charges beyond this.",
       },
     ],
   },
@@ -256,7 +256,7 @@ const faqCategories: FAQCategory[] = [
       {
         question: "What documents will I receive?",
         answer:
-          "After completing the financing process, you will receive two key documents: a Financing Certificate confirming the details of your financing (amount, term, repayment schedule), and a Financing Contract which is the legally binding agreement outlining all terms and conditions. Both documents are available for download from your dashboard at any time.",
+          "After completing the financing process, you will receive two key documents: a Nova Sukuk confirming the details of your financing (amount, term, repayment schedule), and a Financing Contract which is the legally binding agreement outlining all terms and conditions. Both documents are available for download from your dashboard at any time.",
       },
       {
         question: "Can I review the contract before signing?",

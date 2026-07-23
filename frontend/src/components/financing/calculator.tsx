@@ -52,12 +52,12 @@ export function FinancingCalculator({
       setResult(response.data);
     } catch {
       // Calculate locally as fallback
-      const feeAmount = (amount * 4) / 100;
+      const feeAmount = (amount * 2) / 100;
       const monthly = amount / parseInt(period);
       setResult({
         bronova_amount: amount.toString(),
         usd_equivalent: amount.toString(),
-        fee_percentage: "4.00",
+        fee_percentage: "2.00",
         fee_amount: feeAmount.toFixed(2),
         repayment_period_months: parseInt(period),
         monthly_installment: monthly.toFixed(2),
@@ -168,7 +168,7 @@ export function FinancingCalculator({
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 * Interest-free. 1 PRN = 1 USD. You pay the PRN amount in USD plus the one-time processing fee.
-                Upon approval, you receive a Certificate of PRN Ownership for investment with CapiMax.
+                Upon approval, you receive a Nova Sukuk for investment with CapiMax.
               </p>
             </div>
 

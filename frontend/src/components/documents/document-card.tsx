@@ -21,7 +21,7 @@ interface DocumentCardProps {
 }
 
 const typeLabels: Record<string, string> = {
-  certificate: "Certificate (Sak)",
+  certificate: "Nova Sukuk",
   contract: "Contract",
   receipt: "Receipt",
   kyc_summary: "KYC Summary",

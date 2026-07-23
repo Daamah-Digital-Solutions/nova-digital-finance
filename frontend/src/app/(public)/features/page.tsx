@@ -10,6 +10,13 @@ import {
   Wallet,
   TrendingUp,
   ArrowRight,
+  Building2,
+  LineChart,
+  CalendarClock,
+  Boxes,
+  ArrowUpRight,
+  BadgePercent,
+  Landmark,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
@@ -34,8 +41,8 @@ const features = [
     icon: Receipt,
     title: "Small Processing Fee",
     description:
-      "A one-time, non-refundable processing fee of 3-5% is the only cost associated with your financing. This transparent fee structure ensures you always know exactly what you are paying.",
-    highlight: "3-5% One-Time",
+      "A one-time, non-refundable processing fee of 2% is the only cost associated with your financing. This transparent fee structure ensures you always know exactly what you are paying.",
+    highlight: "2% One-Time",
   },
   {
     icon: UserCheck,
@@ -69,8 +76,55 @@ const features = [
     icon: TrendingUp,
     title: "Investment through CapiMax",
     description:
-      "Through our strategic partnership with CapiMax Investment, you can deploy your Pronova tokens into investment opportunities. The trilateral relationship ensures a seamless experience.",
+      "Through our strategic partnership with the Capimax Ecosystem, you can deploy your Pronova tokens into investment opportunities. The trilateral relationship ensures a seamless experience.",
     highlight: "Grow Your Tokens",
+  },
+];
+
+// What a holder can actually DO with their Nova Sukuk — the real benefit,
+// not just the usage steps.
+const sukukBenefits = [
+  {
+    icon: Building2,
+    title: "Income-Generating Real Estate",
+    description:
+      "Acquire ready, income-producing real-estate assets that pay you periodic returns.",
+  },
+  {
+    icon: LineChart,
+    title: "Capital-Growth Assets",
+    description:
+      "Invest in assets specifically selected to target long-term capital appreciation.",
+  },
+  {
+    icon: CalendarClock,
+    title: "Buy in Installments",
+    description:
+      "Acquire real-estate and investment assets through flexible installment plans.",
+  },
+  {
+    icon: Boxes,
+    title: "Tokenized & Digital Assets",
+    description:
+      "Invest in tokenized or digital assets that represent genuine, real-world holdings.",
+  },
+  {
+    icon: ArrowUpRight,
+    title: "Benefit from Appreciation",
+    description:
+      "Capture the rising value of your assets as they grow over time.",
+  },
+  {
+    icon: BadgePercent,
+    title: "Returns Without Interest",
+    description:
+      "Achieve real investment returns with no usurious (riba) interest — ethical by design.",
+  },
+  {
+    icon: Landmark,
+    title: "Digital Real-Estate Financing",
+    description:
+      "Leverage the fully digital real-estate financing model offered by Nova Digital Finance.",
   },
 ];
 
@@ -124,6 +178,49 @@ export default function FeaturesPage() {
         </div>
       </section>
 
+      {/* What you can do with Nova Sukuk */}
+      <section className="border-t bg-muted/30 py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border bg-background/70 px-3.5 py-1 text-xs font-semibold uppercase tracking-wide text-primary backdrop-blur">
+              <Wallet className="h-3 w-3" />
+              The Real Benefit
+            </div>
+            <h2 className="mb-4 text-3xl font-bold tracking-tight lg:text-4xl">
+              What you can do with your Nova Sukuk
+            </h2>
+            <p className="text-base text-muted-foreground lg:text-lg">
+              Nova Sukuk are more than a financing instrument — they are your key
+              to real ownership across the Capimax Ecosystem. With your Nova
+              Sukuk you can:
+            </p>
+          </div>
+
+          <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {sukukBenefits.map((benefit) => (
+              <Card
+                key={benefit.title}
+                className="group transition-shadow hover:shadow-lg"
+              >
+                <CardContent className="flex gap-4 p-6">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
+                    <benefit.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="mb-1.5 text-base font-semibold">
+                      {benefit.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {benefit.description}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Summary Section */}
       <section className="bg-muted/50 py-20">
         <div className="container mx-auto px-4">
@@ -148,7 +245,7 @@ export default function FeaturesPage() {
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-primary">3-5%</p>
+                <p className="text-3xl font-bold text-primary">2%</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Processing Fee
                 </p>

@@ -25,7 +25,7 @@ export default function AuthLayout({
             Interest-Free Financing in Pronova (PRN)
           </h2>
           <p className="text-lg text-white/70">
-            Access cryptocurrency financing with only 3-5% processing fee.
+            Access cryptocurrency financing with only 2% processing fee.
             No interest. Flexible repayment. Invest through CapiMax.
           </p>
         </div>

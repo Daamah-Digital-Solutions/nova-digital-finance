@@ -32,7 +32,7 @@ const benefits = [
   {
     title: "Transparent Fee Structure",
     description:
-      "Clear and upfront costs with no hidden fees. The only financing cost is the one-time 3-5% processing fee.",
+      "Clear and upfront costs with no hidden fees. The only financing cost is the one-time 2% processing fee.",
   },
   {
     title: "Secure Digital Contracts",

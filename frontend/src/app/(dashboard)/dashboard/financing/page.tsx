@@ -91,8 +91,8 @@ const PERIOD_OPTIONS = [
   { value: "36", label: "36 months" },
 ];
 
-// Fee is a one-time processing fee of 3-5% (uses ~4% as default estimate)
-const DEFAULT_FEE_PERCENTAGE = 4;
+// Fee is a flat one-time processing fee of 2%.
+const DEFAULT_FEE_PERCENTAGE = 2;
 
 const STATUS_STEPS = [
   { key: "submitted", label: "Apply" },
@@ -163,7 +163,7 @@ export default function FinancingPage() {
   const [showCongratsDialog, setShowCongratsDialog] = useState(false);
   const [congratsApp, setCongratsApp] = useState<FinancingApplication | null>(null);
 
-  // Calculator computations: 1 PRN = 1 USD, one-time 3-5% processing fee
+  // Calculator computations: 1 PRN = 1 USD, one-time 2% processing fee
   const calcResults = useMemo(() => {
     const prnAmount = calcAmount; // PRN amount = USD equivalent
     const months = parseInt(calcPeriod);
@@ -463,7 +463,7 @@ export default function FinancingPage() {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Percent className="h-4 w-4" />
                     <span>
-                      Processing Fee: <strong>3-5%</strong> (one-time, non-refundable)
+                      Processing Fee: <strong>2%</strong> (one-time, non-refundable)
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground pl-6">
@@ -538,7 +538,7 @@ export default function FinancingPage() {
                 </div>
 
                 <p className="text-xs text-muted-foreground text-center">
-                  Interest-free. 1 PRN = 1 USD. Upon approval, you receive a Certificate of PRN Ownership for investment with CapiMax.
+                  Interest-free. 1 PRN = 1 USD. Upon approval, you receive a Nova Sukuk for investment with CapiMax.
                 </p>
 
                 <Button
